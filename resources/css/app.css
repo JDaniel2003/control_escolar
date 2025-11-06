@@ -1,0 +1,192 @@
+
+body {
+    margin: 0;
+    font-family: 'Roboto', sans-serif;
+    background-color: #f0f0f0; /* Color de fondo general */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.container {
+    display: flex;
+    width: 100%;
+    max-width: 1200px; /* Ajusta el ancho máximo según necesites */
+    height: 700px; /* Altura fija para el contenedor, ajusta si es necesario */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+    border-radius: 10px;
+    overflow: hidden; /* Para que las esquinas redondeadas funcionen bien con los paneles */
+}
+
+.left-panel {
+    flex: 1;
+    background-color: #7b0e14; /* Rojo oscuro similar al de la imagen */
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.left-panel::before {
+    content: '';
+    position: absolute;
+    top: -100px; /* Posición para la forma circular */
+    right: -200px;
+    width: 400px;
+    height: 400px;
+    background-color: #a72f2f; /* Un rojo más claro para la forma */
+    border-radius: 50%;
+    transform: rotate(45deg); /* Rotar para darle la forma deseada */
+    z-index: 0;
+}
+
+.left-panel::after {
+    content: '';
+    position: absolute;
+    bottom: -150px; /* Otra forma circular */
+    left: -150px;
+    width: 300px;
+    height: 300px;
+    background-color: #a72f2f; /* Un rojo más claro para la forma */
+    border-radius: 50%;
+    transform: rotate(45deg);
+    z-index: 0;
+}
+
+.logo-placeholder {
+    width: 150px; /* Tamaño del espacio para el logo */
+    height: 150px;
+    background-color: #ffffff; /* Color de fondo para ver el placeholder */
+    border-radius: 50%; /* Si quieres que el placeholder sea circular */
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1; /* Asegura que esté por encima de las formas */
+}
+
+.logo-placeholder img {
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: 50%;
+}
+
+.university-info {
+    text-align: center;
+    margin-top: 20px;
+    z-index: 1;
+}
+
+.university-info h1 {
+    font-size: 3em;
+    margin: 0;
+    line-height: 1;
+}
+
+.university-info p {
+    font-size: 1.1em;
+    margin: 5px 0;
+}
+
+.right-panel {
+    flex: 1;
+    background-color: #a72f2f; /* Rojo más claro para el panel derecho */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.login-card {
+    background-color: #7b0e14; /* Rojo oscuro para la tarjeta de login */
+    padding: 40px;
+    border-radius: 10px;
+    text-align: center;
+    color: #fff;
+    width: 350px; /* Ancho fijo para la tarjeta de login */
+}
+
+.login-card h2 {
+    margin-bottom: 30px;
+    font-size: 1.5em;
+}
+
+.input-group {
+    display: flex;
+    align-items: center;
+    background-color: #fff;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    padding: 10px 15px;
+}
+
+.input-group i {
+    color: #7b0e14; /* Color de los iconos */
+    margin-right: 10px;
+    font-size: 1.2em;
+}
+
+.input-group input {
+    border: none;
+    outline: none;
+    flex-grow: 1;
+    font-size: 1em;
+    padding: 5px 0;
+    color: #333; /* Color del texto del input */
+}
+
+.login-button {
+    background-color: #5a8d2c; /* Verde para el botón */
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    padding: 12px 20px;
+    font-size: 1.1em;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    width: 100%;
+    margin-top: 10px;
+}
+
+.login-button:hover {
+    background-color: #4a7d1c;
+}
+
+.forgot-password {
+    color: #fff;
+    text-decoration: none;
+    font-size: 0.9em;
+    margin-top: 20px;
+    display: block;
+    transition: color 0.3s ease;
+}
+
+.forgot-password:hover {
+    color: #ddd;
+}
+
+/* Responsividad básica */
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column;
+        height: auto;
+    }
+
+    .left-panel, .right-panel {
+        flex: none;
+        width: 100%;
+        min-height: 400px; /* Ajusta la altura si es necesario */
+    }
+
+    .left-panel::before,
+    .left-panel::after {
+        display: none; /* Oculta las formas en móviles si no se adaptan bien */
+    }
+}
