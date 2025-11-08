@@ -31,4 +31,8 @@ public function datosAcademicos()
     {
         return $this->belongsTo(DatosAcademicos::class, 'id_datos_academicos');
     }
+    public function grupos()
+    {
+        return $this->hasMany(Grupo::class, 'id_carrera', 'id_carrera');
+    }
 }

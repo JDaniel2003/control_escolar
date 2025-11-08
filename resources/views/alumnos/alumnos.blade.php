@@ -281,326 +281,423 @@
                                                     </td>
                                                 </tr>
                                                 <!-- Modal Ver Alumno - Diseño Formal Mejorado -->
-<div class="modal fade" id="verAlumnoModal{{ $alumno->id_alumno }}" tabindex="-1" role="dialog"
-    aria-labelledby="verAlumnoModalLabel{{ $alumno->id_alumno }}" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-        <div class="modal-content border-0 shadow-lg">
+                                                <div class="modal fade" id="verAlumnoModal{{ $alumno->id_alumno }}"
+                                                    tabindex="-1" role="dialog"
+                                                    aria-labelledby="verAlumnoModalLabel{{ $alumno->id_alumno }}"
+                                                    aria-hidden="true">
+                                                    <div class="modal-dialog modal-lg modal-dialog-centered"
+                                                        role="document">
+                                                        <div class="modal-content">
 
-            {{-- Header --}}
-            <div class="modal-header modal-header-custom border-0 py-3">
-                <div class="w-100 text-center">
-                    <h5 class="m-0 font-weight-bold text-white">
-                        <i class="fas fa-user-graduate mr-2"></i>Información del Alumno
-                    </h5>
-                    <p class="m-0 mt-1 mb-0 small text-white opacity-90">
-                        Detalles completos del registro estudiantil
-                    </p>
-                </div>
-                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Cerrar"
-                    style="position: absolute; right: 1.5rem; top: 1.5rem; font-size: 1.8rem; opacity: 0.9;">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
+                                                            {{-- Header --}}
+                                                            <div class="modal-header bg-white border-bottom"
+                                                                style="border-bottom: 3px solid #1e40af !important;">
+                                                                <div class="w-100">
+                                                                    <h5 class="modal-title font-weight-bold text-uppercase"
+                                                                        style="color: #1e3a8a; letter-spacing: 0.5px;">
+                                                                        <i class="fas fa-id-card mr-2"></i>Expediente
+                                                                        del Estudiante
+                                                                    </h5>
+                                                                    <small class="text-muted">Información académica y
+                                                                        personal</small>
+                                                                </div>
+                                                                <button type="button" class="close"
+                                                                    data-dismiss="modal" aria-label="Cerrar">
+                                                                    <span aria-hidden="true">&times;</span>
+                                                                </button>
+                                                            </div>
 
-            {{-- Body --}}
-            <div class="modal-body p-4" style="background-color: #f8f9fc;">
+                                                            {{-- Body --}}
+                                                            <div class="modal-body p-0"
+                                                                style="background-color: #f8fafc;">
 
-                {{-- Tarjeta de Información Principal --}}
-                <div class="card profile-card mb-4 border-0 shadow-sm">
-                    <div class="card-body p-4">
-                        <div class="row align-items-center">
-                            <div class="col-md-8">
-                                <div class="d-flex align-items-center">
-                                    <div class="avatar-circle bg-primary text-white mr-3">
-                                        <i class="fas fa-user"></i>
-                                    </div>
-                                    <div>
-                                        <h4 class="mb-1 font-weight-bold text-dark">
-                                            {{ $alumno->datosPersonales?->nombres ?? 'N/A' }}
-                                            {{ $alumno->datosPersonales?->primer_apellido ?? '' }}
-                                            {{ $alumno->datosPersonales?->segundo_apellido ?? '' }}
-                                        </h4>
-                                        <div class="d-flex flex-wrap gap-3">
-                                            <span class="badge badge-info badge-pill">
-                                                <i class="fas fa-id-card mr-1"></i>
-                                                {{ $alumno->datosAcademicos?->matricula ?? 'Sin Matrícula' }}
-                                            </span>
-                                            <span class="badge badge-secondary badge-pill">
-                                                <i class="fas fa-fingerprint mr-1"></i>
-                                                {{ $alumno->datosPersonales?->curp ?? 'Sin CURP' }}
-                                            </span>
-                                            <span class="badge status-badge badge-{{ $alumno->statusAcademico?->color ?? 'secondary' }}">
-                                                {{ $alumno->statusAcademico?->nombre ?? 'Sin Estatus' }}
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-4 text-right">
-                                <div class="info-box">
-                                    <p class="mb-1"><strong>Carrera:</strong></p>
-                                    <p class="text-primary font-weight-bold">{{ $alumno->datosAcademicos?->carrera?->nombre ?? 'No Asignada' }}</p>
-                                    
-                                    <p class="mb-1 mt-2"><strong>Generación:</strong></p>
-                                    <p class="text-dark">{{ $alumno->generaciones?->nombre ?? 'N/A' }}</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                                                                {{-- Sección de Identificación --}}
+                                                                <div class="bg-white border-bottom py-3 px-4">
+                                                                    <div class="row align-items-center">
+                                                                        <div class="col-md-2 text-center">
+                                                                            <div class="rounded-circle bg-light d-inline-flex align-items-center justify-content-center"
+                                                                                style="width: 80px; height: 80px; border: 3px solid #1e40af;">
+                                                                                <i class="fas fa-user-graduate"
+                                                                                    style="font-size: 2rem; color: #1e40af;"></i>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="col-md-10">
+                                                                            <h4 class="mb-2 font-weight-bold"
+                                                                                style="color: #1e3a8a;">
+                                                                                {{ $alumno->datosPersonales?->nombres ?? 'N/A' }}
+                                                                                {{ $alumno->datosPersonales?->primer_apellido ?? '' }}
+                                                                                {{ $alumno->datosPersonales?->segundo_apellido ?? '' }}
+                                                                            </h4>
+                                                                            <div class="row">
+                                                                                <div class="col-md-4">
+                                                                                    <small
+                                                                                        class="text-muted d-block">Matrícula</small>
+                                                                                    <strong
+                                                                                        style="color: #1e40af;">{{ $alumno->datosAcademicos?->matricula ?? 'Sin Matrícula' }}</strong>
+                                                                                </div>
+                                                                                <div class="col-md-4">
+                                                                                    <small
+                                                                                        class="text-muted d-block">CURP</small>
+                                                                                    <strong>{{ $alumno->datosPersonales?->curp ?? 'Sin CURP' }}</strong>
+                                                                                </div>
+                                                                                <div class="col-md-4">
+                                                                                    <small
+                                                                                        class="text-muted d-block">Estatus</small>
+                                                                                    <span
+                                                                                        class="badge badge-{{ $alumno->statusAcademico?->color ?? 'secondary' }} px-3 py-1">
+                                                                                        {{ $alumno->statusAcademico?->nombre ?? 'Sin Estatus' }}
+                                                                                    </span>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
 
-                {{-- Grid de Información --}}
-                <div class="row">
+                                                                {{-- Contenido Principal --}}
+                                                                <div class="p-4">
 
-                    {{-- Columna Izquierda --}}
-                    <div class="col-md-6">
+                                                                    {{-- Información Académica --}}
+                                                                    <div class="mb-4">
+                                                                        <div class="bg-white border rounded">
+                                                                            <div class="px-4 py-3 border-bottom"
+                                                                                style="background-color: #f1f5f9;">
+                                                                                <h6 class="mb-0 font-weight-bold text-uppercase"
+                                                                                    style="color: #1e3a8a; font-size: 0.875rem; letter-spacing: 0.5px;">
+                                                                                    <i
+                                                                                        class="fas fa-graduation-cap mr-2"></i>Datos
+                                                                                    Académicos
+                                                                                </h6>
+                                                                            </div>
+                                                                            <div class="p-4">
+                                                                                <div class="row">
+                                                                                    <div class="col-md-6 mb-3">
+                                                                                        <label
+                                                                                            class="text-muted small mb-1">Carrera</label>
+                                                                                        <div class="font-weight-bold">
+                                                                                            {{ $alumno->datosAcademicos?->carrera?->nombre ?? 'No Asignada' }}
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <div class="col-md-6 mb-3">
+                                                                                        <label
+                                                                                            class="text-muted small mb-1">Generación</label>
+                                                                                        <div class="font-weight-bold">
+                                                                                            {{ $alumno->generaciones?->nombre ?? 'N/A' }}
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    @if ($alumno->id_status_academico && in_array($alumno->id_status_academico, [2, 3, 4]))
+                                                                                        <div class="col-md-4 mb-3">
+                                                                                            <label
+                                                                                                class="text-muted small mb-1">Plan
+                                                                                                de Estudios</label>
+                                                                                            <div
+                                                                                                class="font-weight-bold">
+                                                                                                {{ $alumno->datosAcademicos?->planEstudio?->nombre ?? 'No asignado' }}
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div class="col-md-4 mb-3">
+                                                                                            <label
+                                                                                                class="text-muted small mb-1">Semestre
+                                                                                                Actual</label>
+                                                                                            <div
+                                                                                                class="font-weight-bold">
+                                                                                                {{ $alumno->datosAcademicos?->semestre ?? 'N/A' }}
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div class="col-md-4 mb-3">
+                                                                                            <label
+                                                                                                class="text-muted small mb-1">Servicio
+                                                                                                Social</label>
+                                                                                            <div
+                                                                                                class="font-weight-bold {{ $alumno->servicios_social ? 'text-success' : 'text-warning' }}">
+                                                                                                <i
+                                                                                                    class="fas {{ $alumno->servicios_social ? 'fa-check-circle' : 'fa-clock' }} mr-1"></i>
+                                                                                                {{ $alumno->servicios_social ? 'Completado' : 'Pendiente' }}
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    @endif
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
 
-                        {{-- Datos Personales --}}
-                        <div class="card info-card mb-3 border-0 shadow-sm">
-                            <div class="card-header bg-white py-3 border-bottom">
-                                <h6 class="mb-0 font-weight-bold text-primary">
-                                    <i class="fas fa-user-circle mr-2"></i>Datos Personales
-                                </h6>
-                            </div>
-                            <div class="card-body p-3">
-                                <div class="info-item">
-                                    <span class="info-label">Fecha de Nacimiento:</span>
-                                    <span class="info-value">{{ $alumno->datosPersonales?->fecha_nacimiento ? \Carbon\Carbon::parse($alumno->datosPersonales->fecha_nacimiento)->format('d/m/Y') : 'N/A' }}</span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">Edad:</span>
-                                    <span class="info-value">{{ $alumno->datosPersonales?->edad ?? 'N/A' }} años</span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">Género:</span>
-                                    <span class="info-value">{{ $alumno->datosPersonales?->genero?->nombre ?? 'N/A' }}</span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">Estado Civil:</span>
-                                    <span class="info-value">{{ $alumno->datosPersonales?->estadoCivil?->nombre ?? 'N/A' }}</span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">Tipo de Sangre:</span>
-                                    <span class="info-value">{{ $alumno->datosPersonales?->tipoSangre?->nombre ?? 'N/A' }}</span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">Lengua Indígena:</span>
-                                    <span class="info-value">{{ $alumno->datosPersonales?->lenguaIndigena?->nombre ?? 'No' }}</span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">Discapacidad:</span>
-                                    <span class="info-value">{{ $alumno->datosPersonales?->discapacidad?->nombre ?? 'Ninguna' }}</span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">Número de Hijos:</span>
-                                    <span class="info-value">{{ $alumno->datosPersonales?->hijos ?? 0 }}</span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">NSS:</span>
-                                    <span class="info-value">{{ $alumno->datosPersonales?->numero_seguridad_social ?? 'No registrado' }}</span>
-                                </div>
-                            </div>
-                        </div>
+                                                                    {{-- Datos Personales --}}
+                                                                    <div class="mb-4">
+                                                                        <div class="bg-white border rounded">
+                                                                            <div class="px-4 py-3 border-bottom"
+                                                                                style="background-color: #f1f5f9;">
+                                                                                <h6 class="mb-0 font-weight-bold text-uppercase"
+                                                                                    style="color: #1e3a8a; font-size: 0.875rem; letter-spacing: 0.5px;">
+                                                                                    <i
+                                                                                        class="fas fa-user mr-2"></i>Información
+                                                                                    Personal
+                                                                                </h6>
+                                                                            </div>
+                                                                            <div class="p-4">
+                                                                                <div class="row">
+                                                                                    <div class="col-md-4 mb-3">
+                                                                                        <label
+                                                                                            class="text-muted small mb-1">Fecha
+                                                                                            de Nacimiento</label>
+                                                                                        <div>
+                                                                                            {{ $alumno->datosPersonales?->fecha_nacimiento ? \Carbon\Carbon::parse($alumno->datosPersonales->fecha_nacimiento)->format('d/m/Y') : 'N/A' }}
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <div class="col-md-2 mb-3">
+                                                                                        <label
+                                                                                            class="text-muted small mb-1">Edad</label>
+                                                                                        <div>
+                                                                                            {{ $alumno->datosPersonales?->edad ?? 'N/A' }}
+                                                                                            años</div>
+                                                                                    </div>
+                                                                                    <div class="col-md-3 mb-3">
+                                                                                        <label
+                                                                                            class="text-muted small mb-1">Género</label>
+                                                                                        <div>
+                                                                                            {{ $alumno->datosPersonales?->genero?->nombre ?? 'N/A' }}
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <div class="col-md-3 mb-3">
+                                                                                        <label
+                                                                                            class="text-muted small mb-1">Estado
+                                                                                            Civil</label>
+                                                                                        <div>
+                                                                                            {{ $alumno->datosPersonales?->estadoCivil?->nombre ?? 'N/A' }}
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <div class="col-md-3 mb-3">
+                                                                                        <label
+                                                                                            class="text-muted small mb-1">Tipo
+                                                                                            de Sangre</label>
+                                                                                        <div>
+                                                                                            {{ $alumno->datosPersonales?->tipoSangre?->nombre ?? 'N/A' }}
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <div class="col-md-3 mb-3">
+                                                                                        <label
+                                                                                            class="text-muted small mb-1">NSS</label>
+                                                                                        <div>
+                                                                                            {{ $alumno->datosPersonales?->numero_seguridad_social ?? 'No registrado' }}
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <div class="col-md-3 mb-3">
+                                                                                        <label
+                                                                                            class="text-muted small mb-1">Lengua
+                                                                                            Indígena</label>
+                                                                                        <div>
+                                                                                            {{ $alumno->datosPersonales?->lenguaIndigena?->nombre ?? 'No' }}
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <div class="col-md-3 mb-3">
+                                                                                        <label
+                                                                                            class="text-muted small mb-1">Discapacidad</label>
+                                                                                        <div>
+                                                                                            {{ $alumno->datosPersonales?->discapacidad?->nombre ?? 'Ninguna' }}
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
 
-                        {{-- Información de Contacto --}}
-                        <div class="card info-card mb-3 border-0 shadow-sm">
-                            <div class="card-header bg-white py-3 border-bottom">
-                                <h6 class="mb-0 font-weight-bold text-primary">
-                                    <i class="fas fa-address-card mr-2"></i>Información de Contacto
-                                </h6>
-                            </div>
-                            <div class="card-body p-3">
-                                <div class="info-item">
-                                    <span class="info-label">Correo Electrónico:</span>
-                                    <span class="info-value">{{ $alumno->datosPersonales?->correo ?? 'No registrado' }}</span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">Teléfono:</span>
-                                    <span class="info-value">{{ $alumno->datosPersonales?->telefono ?? 'No registrado' }}</span>
-                                </div>
-                            </div>
-                        </div>
+                                                                    {{-- Contacto y Domicilio --}}
+                                                                    <div class="row mb-4">
+                                                                        <div class="col-md-6">
+                                                                            <div class="bg-white border rounded h-100">
+                                                                                <div class="px-4 py-3 border-bottom"
+                                                                                    style="background-color: #f1f5f9;">
+                                                                                    <h6 class="mb-0 font-weight-bold text-uppercase"
+                                                                                        style="color: #1e3a8a; font-size: 0.875rem; letter-spacing: 0.5px;">
+                                                                                        <i
+                                                                                            class="fas fa-phone mr-2"></i>Contacto
+                                                                                    </h6>
+                                                                                </div>
+                                                                                <div class="p-4">
+                                                                                    <div class="mb-3">
+                                                                                        <label
+                                                                                            class="text-muted small mb-1">Correo
+                                                                                            Electrónico</label>
+                                                                                        <div>
+                                                                                            {{ $alumno->datosPersonales?->correo ?? 'No registrado' }}
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <div>
+                                                                                        <label
+                                                                                            class="text-muted small mb-1">Teléfono</label>
+                                                                                        <div>
+                                                                                            {{ $alumno->datosPersonales?->telefono ?? 'No registrado' }}
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <div class="bg-white border rounded h-100">
+                                                                                <div class="px-4 py-3 border-bottom"
+                                                                                    style="background-color: #f1f5f9;">
+                                                                                    <h6 class="mb-0 font-weight-bold text-uppercase"
+                                                                                        style="color: #1e3a8a; font-size: 0.875rem; letter-spacing: 0.5px;">
+                                                                                        <i
+                                                                                            class="fas fa-map-marker-alt mr-2"></i>Domicilio
+                                                                                    </h6>
+                                                                                </div>
+                                                                                <div class="p-4">
+                                                                                    <div class="mb-2">
+                                                                                        <strong>{{ $alumno->datosPersonales?->domicilioAlumno?->calle ?? 'No registrada' }}</strong>
+                                                                                        #{{ $alumno->datosPersonales?->domicilioAlumno?->numero_exterior ?? 'S/N' }}
+                                                                                        @if ($alumno->datosPersonales?->domicilioAlumno?->numero_interior)
+                                                                                            Int.
+                                                                                            {{ $alumno->datosPersonales?->domicilioAlumno?->numero_interior }}
+                                                                                        @endif
+                                                                                    </div>
+                                                                                    <div>
+                                                                                        {{ $alumno->datosPersonales?->domicilioAlumno?->colonia ?? '' }}<br>
+                                                                                        {{ $alumno->datosPersonales?->domicilioAlumno?->municipio ?? '' }},
+                                                                                        {{ $alumno->datosPersonales?->domicilioAlumno?->estado?->nombre ?? '' }}<br>
+                                                                                        C.P.
+                                                                                        {{ $alumno->datosPersonales?->domicilioAlumno?->codigo_postal ?? '' }}
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
 
-                    </div>
+                                                                    {{-- Escuela de Procedencia --}}
+                                                                    <div class="mb-4">
+                                                                        <div class="bg-white border rounded">
+                                                                            <div class="px-4 py-3 border-bottom"
+                                                                                style="background-color: #f1f5f9;">
+                                                                                <h6 class="mb-0 font-weight-bold text-uppercase"
+                                                                                    style="color: #1e3a8a; font-size: 0.875rem; letter-spacing: 0.5px;">
+                                                                                    <i
+                                                                                        class="fas fa-school mr-2"></i>Escuela
+                                                                                    de Procedencia
+                                                                                </h6>
+                                                                            </div>
+                                                                            <div class="p-4">
+                                                                                <div class="row">
+                                                                                    <div class="col-md-4 mb-3">
+                                                                                        <label
+                                                                                            class="text-muted small mb-1">Subsistema</label>
+                                                                                        <div>
+                                                                                            {{ $alumno->escuelaProcedencia?->subsistema?->nombre ?? 'No especificado' }}
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <div class="col-md-4 mb-3">
+                                                                                        <label
+                                                                                            class="text-muted small mb-1">Tipo
+                                                                                            de Escuela</label>
+                                                                                        <div>
+                                                                                            {{ $alumno->escuelaProcedencia?->tipoEscuela?->nombre ?? 'No especificado' }}
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <div class="col-md-4 mb-3">
+                                                                                        <label
+                                                                                            class="text-muted small mb-1">Área
+                                                                                            de Especialización</label>
+                                                                                        <div>
+                                                                                            {{ $alumno->escuelaProcedencia?->areaEspecializacion?->nombre ?? 'No especificada' }}
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <div class="col-md-4 mb-3">
+                                                                                        <label
+                                                                                            class="text-muted small mb-1">Localidad</label>
+                                                                                        <div>
+                                                                                            {{ $alumno->escuelaProcedencia?->localidad ?? 'No registrada' }}
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <div class="col-md-4 mb-3">
+                                                                                        <label
+                                                                                            class="text-muted small mb-1">Estado</label>
+                                                                                        <div>
+                                                                                            {{ $alumno->escuelaProcedencia?->estado?->nombre ?? 'No registrado' }}
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <div class="col-md-2 mb-3">
+                                                                                        <label
+                                                                                            class="text-muted small mb-1">Promedio</label>
+                                                                                        <div
+                                                                                            class="font-weight-bold text-primary">
+                                                                                            {{ $alumno->escuelaProcedencia?->promedio_egreso ?? 'N/A' }}
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <div class="col-md-2 mb-3">
+                                                                                        <label
+                                                                                            class="text-muted small mb-1">Beca</label>
+                                                                                        <div>
+                                                                                            {{ $alumno->escuelaProcedencia?->beca?->nombre ?? 'No' }}
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
 
-                    {{-- Columna Derecha --}}
-                    <div class="col-md-6">
+                                                                    {{-- Datos del Tutor --}}
+                                                                    <div class="bg-white border rounded">
+                                                                        <div class="px-4 py-3 border-bottom"
+                                                                            style="background-color: #f1f5f9;">
+                                                                            <h6 class="mb-0 font-weight-bold text-uppercase"
+                                                                                style="color: #1e3a8a; font-size: 0.875rem; letter-spacing: 0.5px;">
+                                                                                <i
+                                                                                    class="fas fa-user-tie mr-2"></i>Tutor
+                                                                                o Responsable Legal
+                                                                            </h6>
+                                                                        </div>
+                                                                        <div class="p-4">
+                                                                            <div class="row">
+                                                                                <div class="col-md-4 mb-3">
+                                                                                    <label
+                                                                                        class="text-muted small mb-1">Nombre
+                                                                                        Completo</label>
+                                                                                    <div class="font-weight-bold">
+                                                                                        {{ $alumno->tutor?->nombres ?? 'No registrado' }}
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="col-md-3 mb-3">
+                                                                                    <label
+                                                                                        class="text-muted small mb-1">Parentesco</label>
+                                                                                    <div>
+                                                                                        {{ $alumno->tutor?->parentesco?->nombre ?? 'No especificado' }}
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="col-md-3 mb-3">
+                                                                                    <label
+                                                                                        class="text-muted small mb-1">Teléfono</label>
+                                                                                    <div>
+                                                                                        {{ $alumno->tutor?->telefono ?? 'No registrado' }}
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="col-12">
+                                                                                    <label
+                                                                                        class="text-muted small mb-1">Domicilio</label>
+                                                                                    <div>
+                                                                                        {{ $alumno->tutor?->domiciliosTutor?->calle ?? 'No registrada' }}
+                                                                                        #{{ $alumno->tutor?->domiciliosTutor?->numero_exterior ?? '' }}
+                                                                                        {{ $alumno->tutor?->domiciliosTutor?->numero_interior ? 'Int. ' . $alumno->tutor?->domiciliosTutor?->numero_interior : '' }},
+                                                                                        {{ $alumno->tutor?->domiciliosTutor?->colonia ?? '' }},
+                                                                                        {{ $alumno->tutor?->domiciliosTutor?->municipio ?? '' }},
+                                                                                        {{ $alumno->tutor?->domiciliosTutor?->estado?->nombre ?? '' }}
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
 
-                        {{-- Domicilio del Alumno --}}
-                        <div class="card info-card mb-3 border-0 shadow-sm">
-                            <div class="card-header bg-white py-3 border-bottom">
-                                <h6 class="mb-0 font-weight-bold text-primary">
-                                    <i class="fas fa-map-marker-alt mr-2"></i>Domicilio Particular
-                                </h6>
-                            </div>
-                            <div class="card-body p-3">
-                                <div class="address-info">
-                                    <div class="info-item">
-                                        <span class="info-label">Calle:</span>
-                                        <span class="info-value">{{ $alumno->datosPersonales?->domicilioAlumno?->calle ?? 'No registrada' }}</span>
-                                    </div>
-                                    <div class="info-item">
-                                        <span class="info-label">Número Exterior:</span>
-                                        <span class="info-value">{{ $alumno->datosPersonales?->domicilioAlumno?->numero_exterior ?? 'S/N' }}</span>
-                                    </div>
-                                    @if($alumno->datosPersonales?->domicilioAlumno?->numero_interior)
-                                    <div class="info-item">
-                                        <span class="info-label">Número Interior:</span>
-                                        <span class="info-value">{{ $alumno->datosPersonales?->domicilioAlumno?->numero_interior }}</span>
-                                    </div>
-                                    @endif
-                                    <div class="info-item">
-                                        <span class="info-label">Colonia:</span>
-                                        <span class="info-value">{{ $alumno->datosPersonales?->domicilioAlumno?->colonia ?? 'No registrada' }}</span>
-                                    </div>
-                                    <div class="info-item">
-                                        <span class="info-label">Municipio:</span>
-                                        <span class="info-value">{{ $alumno->datosPersonales?->domicilioAlumno?->municipio ?? 'No registrado' }}</span>
-                                    </div>
-                                    <div class="info-item">
-                                        <span class="info-label">Estado:</span>
-                                        <span class="info-value">{{ $alumno->datosPersonales?->domicilioAlumno?->estado?->nombre ?? 'No registrado' }}</span>
-                                    </div>
-                                    <div class="info-item">
-                                        <span class="info-label">Código Postal:</span>
-                                        <span class="info-value">{{ $alumno->datosPersonales?->domicilioAlumno?->codigo_postal ?? 'No registrado' }}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                                                                </div>
 
-                        {{-- Escuela de Procedencia --}}
-                        <div class="card info-card mb-3 border-0 shadow-sm">
-                            <div class="card-header bg-white py-3 border-bottom">
-                                <h6 class="mb-0 font-weight-bold text-primary">
-                                    <i class="fas fa-university mr-2"></i>Escuela de Procedencia
-                                </h6>
-                            </div>
-                            <div class="card-body p-3">
-                                <div class="info-item">
-                                    <span class="info-label">Subsistema:</span>
-                                    <span class="info-value">{{ $alumno->escuelaProcedencia?->subsistema?->nombre ?? 'No especificado' }}</span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">Tipo de Escuela:</span>
-                                    <span class="info-value">{{ $alumno->escuelaProcedencia?->tipoEscuela?->nombre ?? 'No especificado' }}</span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">Área de Especialización:</span>
-                                    <span class="info-value">{{ $alumno->escuelaProcedencia?->areaEspecializacion?->nombre ?? 'No especificada' }}</span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">Localidad:</span>
-                                    <span class="info-value">{{ $alumno->escuelaProcedencia?->localidad ?? 'No registrada' }}</span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">Estado:</span>
-                                    <span class="info-value">{{ $alumno->escuelaProcedencia?->estado?->nombre ?? 'No registrado' }}</span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">Beca:</span>
-                                    <span class="info-value">{{ $alumno->escuelaProcedencia?->beca?->nombre ?? 'No' }}</span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">Promedio de Egreso:</span>
-                                    <span class="info-value">{{ $alumno->escuelaProcedencia?->promedio_egreso ?? 'N/A' }}</span>
-                                </div>
-                            </div>
-                        </div>
+                                                            </div>
 
-                    </div>
-                </div>
+                                                            {{-- Footer --}}
+                                                            <div class="modal-footer bg-white border-top">
+                                                                <button type="button" class="btn btn-secondary"
+                                                                    data-dismiss="modal">
+                                                                    <i class="fas fa-times mr-2"></i>Cerrar
+                                                                </button>
+                                                            </div>
 
-                {{-- Información del Tutor --}}
-                <div class="card info-card mb-3 border-0 shadow-sm">
-                    <div class="card-header bg-white py-3 border-bottom">
-                        <h6 class="mb-0 font-weight-bold text-primary">
-                            <i class="fas fa-user-tie mr-2"></i>Datos del Tutor/Responsable
-                        </h6>
-                    </div>
-                    <div class="card-body p-3">
-                        <div class="row">
-                            <div class="col-md-4">
-                                <div class="info-item">
-                                    <span class="info-label">Nombre Completo:</span>
-                                    <span class="info-value">{{ $alumno->tutor?->nombres ?? 'No registrado' }}</span>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="info-item">
-                                    <span class="info-label">Parentesco:</span>
-                                    <span class="info-value">{{ $alumno->tutor?->parentesco?->nombre ?? 'No especificado' }}</span>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="info-item">
-                                    <span class="info-label">Teléfono:</span>
-                                    <span class="info-value">{{ $alumno->tutor?->telefono ?? 'No registrado' }}</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="info-item mt-2">
-                            <span class="info-label">Domicilio:</span>
-                            <span class="info-value">
-                                {{ $alumno->tutor?->domiciliosTutor?->calle ?? 'No registrada' }}
-                                #{{ $alumno->tutor?->domiciliosTutor?->numero_exterior ?? '' }}
-                                {{ $alumno->tutor?->domiciliosTutor?->numero_interior ? 'Int. ' . $alumno->tutor?->domiciliosTutor?->numero_interior : '' }},
-                                {{ $alumno->tutor?->domiciliosTutor?->colonia ?? '' }},
-                                {{ $alumno->tutor?->domiciliosTutor?->municipio ?? '' }},
-                                {{ $alumno->tutor?->domiciliosTutor?->estado?->nombre ?? '' }}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
-                {{-- Datos Académicos (Condicional) --}}
-                @if ($alumno->id_status_academico && in_array($alumno->id_status_academico, [2, 3, 4]))
-                <div class="card info-card border-0 shadow-sm">
-                    <div class="card-header bg-white py-3 border-bottom">
-                        <h6 class="mb-0 font-weight-bold text-primary">
-                            <i class="fas fa-graduation-cap mr-2"></i>Información Académica
-                        </h6>
-                    </div>
-                    <div class="card-body p-3">
-                        <div class="row">
-                            <div class="col-md-4">
-                                <div class="info-item">
-                                    <span class="info-label">Plan de Estudios:</span>
-                                    <span class="info-value">{{ $alumno->datosAcademicos?->planEstudio?->nombre ?? 'No asignado' }}</span>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="info-item">
-                                    <span class="info-label">Semestre:</span>
-                                    <span class="info-value">{{ $alumno->datosAcademicos?->semestre ?? 'N/A' }}</span>
-                                </div>
-                            </div>
-                            <div class="col-md-5">
-                                <div class="info-item">
-                                    <span class="info-label">Servicio Social:</span>
-                                    <span class="info-value {{ $alumno->servicios_social ? 'text-success' : 'text-warning' }}">
-                                        <i class="fas {{ $alumno->servicios_social ? 'fa-check-circle' : 'fa-clock' }} mr-1"></i>
-                                        {{ $alumno->servicios_social ? 'Completado' : 'Pendiente' }}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                @endif
-
-            </div>
-
-            {{-- Footer --}}
-            <div class="modal-footer bg-light border-top py-3">
-                <button type="button" class="btn btn-outline-secondary px-4" data-dismiss="modal">
-                    <i class="fas fa-times mr-2"></i>Cerrar
-                </button>
-            </div>
-
-        </div>
-    </div>
-</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
 
 
 
@@ -1602,7 +1699,7 @@
     </div>
     <!-- End Page Wrapper -->
 
-    <!-- Modal Nuevo Alumno - Diseño Compacto -->
+    <!-- Modal Nuevo Alumno-->
     <div class="modal fade" id="nuevoAlumnoModal" tabindex="-1" role="dialog" aria-labelledby="nuevoAlumnoLabel"
         aria-hidden="true">
         <div class="modal-dialog modal-xl modal-dialog-scrollable" role="document">
@@ -1910,7 +2007,8 @@
                                             <div class="row">
                                                 <div class="col-md-4 mb-2">
                                                     <label class="form-label-custom small mb-1">Subsistema</label>
-                                                    <select name="id_subsistema" class="form-control form-control-sm">
+                                                    <select name="id_subsistema"
+                                                        class="form-control form-control-sm">
                                                         <option value="">-- Selecciona --</option>
                                                         @foreach ($subsistemas as $subsistema)
                                                             <option value="{{ $subsistema->id_subsistema }}">

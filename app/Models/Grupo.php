@@ -142,4 +142,9 @@ class Grupo extends Model
             $query->where('incorporacion', false);
         });
     }
+
+    public function numeroPeriodo()
+{
+    return $this->belongsTo(NumeroPeriodo::class, 'id_numero_periodo');
+}
 }

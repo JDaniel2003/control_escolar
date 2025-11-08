@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('numero_periodos', function (Blueprint $table) {
             $table->integer('id_numero_periodo', true);
             $table->integer('numero');
-            $table->integer('id_tipo_periodo')->index('id_tipo_periodo');
+            $table->integer('id_tipo_periodo')->nullable()->index('id_tipo_periodo');
         });
     }
 
