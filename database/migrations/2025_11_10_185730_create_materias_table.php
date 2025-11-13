@@ -13,11 +13,11 @@ return new class extends Migration
     {
         Schema::create('materias', function (Blueprint $table) {
             $table->integer('id_materia', true);
-            $table->string('clave', 10)->nullable();
+            $table->string('clave', 10);
             $table->string('nombre', 150);
             $table->integer('id_tipo_competencia')->nullable()->index('id_tipo_competencia');
             $table->integer('id_modalidad')->nullable()->index('id_modalidad');
-            $table->decimal('creditos', 5)->nullable();
+            $table->integer('creditos')->nullable();
             $table->integer('horas')->nullable();
             $table->integer('id_espacio_formativo')->nullable()->index('id_espacio_formativo');
             $table->integer('id_plan_estudio')->nullable()->index('id_plan_estudio');

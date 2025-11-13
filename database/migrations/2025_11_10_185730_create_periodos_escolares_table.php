@@ -18,6 +18,7 @@ return new class extends Migration
             $table->date('fecha_inicio')->nullable();
             $table->date('fecha_fin')->nullable();
             $table->enum('estado', ['Cerrado', 'Abierto'])->nullable();
+            $table->integer('id_ciclo')->nullable()->index('fk_periodo_ciclo');
             $table->json('datos')->nullable();
         });
     }

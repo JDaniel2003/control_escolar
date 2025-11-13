@@ -20,6 +20,7 @@ use App\Models\DomicilioAlumno;
 use App\Models\DomicilioTutor;
 use App\Models\Estado;
 use App\Models\Generacion;
+use App\Models\HistorialStatus;
 use App\Models\Parentesco;
 use App\Models\PlanEstudio;
 use App\Models\Subsistema;
@@ -60,8 +61,8 @@ if ($request->filled('busqueda')) {
     }
 
     // 🔹 Filtro por estatus académico
-    if ($request->filled('id_status_academico')) {
-        $query->where('id_status_academico', $request->id_status_academico);
+    if ($request->filled('id_historial_status')) {
+        $query->where('id_historial_status', $request->id_historial_status);
     }
 
     // 🔹 Orden descendente por ID
@@ -76,7 +77,7 @@ if ($request->filled('busqueda')) {
     }
 
     // 🔹 Datos complementarios
-    $estatus = StatusAcademico::all();
+    $estatus = HistorialStatus::all();
     $generaciones = Generacion::all();
     $carreras = Carrera::all();
     $planes = PlanEstudio::all();
@@ -127,7 +128,7 @@ if ($request->filled('busqueda')) {
     public function create()
 {
     $alumnos = \App\Models\Alumno::all();
-    $estatus = \App\Models\StatusAcademico::all();
+    $estatus = \App\Models\HistorialStatus::all();
     return view('alumnos.create', compact('alumnos', 'estatus'));
 }
 
@@ -187,6 +188,7 @@ public function store(Request $request)
         'fecha_nacimiento' => $request->fecha_nacimiento ?? null,
         'edad' => $request->edad ?? null,
         'lugar_nacimiento' => $request->lugar_nacimiento ?? null,
+        'estado_nacimiento' => $request->estado_nacimiento ?? null,
         'id_estado_civil' => $request->id_estado_civil ?? null,
         'id_tipo_sangre' => $request->id_tipo_sangre ?? null,
         'id_lengua_indigena' => $request->id_lengua_indigena ?? null,
@@ -214,7 +216,7 @@ public function store(Request $request)
     $alumno = \App\Models\Alumno::create([
         'id_datos_personales' => $datosPersonales->id_datos_personales,
         'id_datos_academicos' => $datosAcademicos?->id_datos_academicos,
-        'id_status_academico' => $request->id_status_academico ?? null,
+        'estatus' => $request->id_historial_status ?? null,
         'id_generacion' => $request->id_generacion ?? null,
         'id_datos_tutor' => $tutor->id_datos_tutor,
         'servicios_social' => $request->servicios_social ?? null,
@@ -236,18 +238,21 @@ public function store(Request $request)
         'datosPersonales.genero',
         'datosPersonales.lenguaIndigena',
         'datosPersonales.discapacidad',
+        'datosPersonales.estadoNacimiento',
         'datosPersonales.domicilioAlumno.distritos',
         'datosPersonales.domicilioAlumno.estados',
         'datosAcademicos.carrera',
+        'datosAcademicos.planEstudio',
         'statusAcademico',
         'generaciones',
         'tutor',
         'tutor.parentescos',
         'tutor.domiciliosTutor.distritos',
         'tutor.domiciliosTutor.estados',
-        'escuelaProcedencia.estado',
-        'escuelaProcedencia.tipoEscuela',
-        'escuelaProcedencia.subsistema'
+        'escuelaProcedencia.estados',
+        'escuelaProcedencia.tiposEscuela',
+        'escuelaProcedencia.becas',
+        'escuelaProcedencia.subsistemas'
     ])->findOrFail($id);
 
     return view('alumnos.show', compact('alumno'));
@@ -307,6 +312,7 @@ public function update(Request $request, $id)
             'fecha_nacimiento' => $request->fecha_nacimiento ?? null,
             'edad' => $request->edad ?? null,
             'lugar_nacimiento' => $request->lugar_nacimiento ?? null,
+            'estado_nacimiento' => $request->estado_nacimiento ?? null,
             'id_estado_civil' => $request->id_estado_civil ?? null,
             'id_tipo_sangre' => $request->id_tipo_sangre ?? null,
             'id_lengua_indigena' => $request->id_lengua_indigena ?? null,
@@ -402,7 +408,7 @@ public function update(Request $request, $id)
 
     // 🔹 Actualizar datos del alumno principal
     $alumno->update([
-        'id_status_academico' => $request->id_status_academico ?? $alumno->id_status_academico,
+        'estatus' => $request->id_historial_status ?? $alumno->estatus,
         'id_generacion' => $request->id_generacion ?? $alumno->id_generacion,
         'servicios_social' => $request->servicios_social ?? $alumno->servicios_social,
     ]);

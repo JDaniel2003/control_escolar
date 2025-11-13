@@ -14,7 +14,7 @@ class Alumno extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'id_status_academico',
+        'estatus',
         'id_datos_personales',
         'id_datos_academicos',
         'id_generacion',
@@ -42,7 +42,7 @@ class Alumno extends Model
     // 🔹 STATUS ACADÉMICO
     public function statusAcademico()
     {
-        return $this->belongsTo(StatusAcademico::class, 'id_status_academico', 'id_status_academico');
+        return $this->belongsTo(HistorialStatus::class, 'estatus', 'id_historial_status');
     }
     public function generaciones()
     {

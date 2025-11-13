@@ -17,19 +17,18 @@ class AsignacionDocente extends Model
         'id_docente',
         'id_materia',
         'id_grupo',
-        'id_periodo_escolar',
-        'datos'
+        'id_periodo_escolar'
     ];
-
-    protected $casts = [
-        'datos' => 'array'
-    ];
-
-    // Relación con Docente (Usuario con rol docente)
+    /*/ Relación con Docente (Usuario con rol docente)
     public function docente()
     {
         return $this->belongsTo(Usuario::class, 'id_docente', 'id_usuario');
-    }
+    }*/
+    // En el modelo AsignacionDocente
+public function docente()
+{
+    return $this->belongsTo(Docente::class, 'id_docente');
+}
 
     // Relación con Materia
     public function materia()

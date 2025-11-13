@@ -7,6 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="">
     <meta name="author" content="">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>Asignaciones Docentes</title>
 
@@ -119,9 +120,11 @@
 
                             <!-- Botón para nueva asignación -->
                             <div class="mb-3 text-right">
-                                <a href="{{ route('asignaciones.masiva.index') }}" class="btn btn-info mr-2">
+                                <!-- Botón para asignación masiva (ahora abre modal) -->
+                                <button type="button" class="btn btn-success" data-toggle="modal"
+                                    data-target="#asignacionMasivaModal">
                                     <i class="fas fa-layer-group"></i> Asignación Masiva
-                                </a>
+                                </button>
                                 <button type="button" class="btn btn-success" data-toggle="modal"
                                     data-target="#nuevaAsignacionModal">
                                     <i class="fas fa-plus"></i> Nueva Asignación
@@ -130,48 +133,36 @@
 
                             <!-- Filtros -->
                             <div class="container mb-4 d-flex justify-content-center">
-                                <div class="p-3 border rounded bg-light d-inline-block shadow-sm">
+                                <div class="p-3 border rounded bg-light shadow-sm d-inline-block">
                                     <form id="filtrosForm" method="GET" action="{{ route('asignaciones.index') }}"
-                                        class="d-flex flex-wrap gap-2 align-items-center">
+                                        class="d-flex flex-nowrap align-items-center gap-2">
 
                                         <!-- Búsqueda por nombre -->
-                                        <div class="flex-grow-1" style="width: 300px;">
+                                        <div class="flex-grow-1" style="width: 350px;">
                                             <input type="text" name="buscar" class="form-control form-control-sm"
                                                 placeholder="🔍 Buscar docente" value="{{ request('buscar') }}">
                                         </div>
-
-                                        <!-- Filtro Docente -->
-                                        <select name="id_docente" class="form-control form-control-sm w-auto">
-                                            <option value="">Todos los docentes</option>
-                                            @foreach ($docentes as $docente)
-                                                <option value="{{ $docente->id_usuario }}"
-                                                    {{ request('id_docente') == $docente->id_usuario ? 'selected' : '' }}>
-                                                    {{ $docente->username }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-
                                         <!-- Filtro Materia -->
-                                        <select name="id_materia" class="form-control form-control-sm w-auto">
-                                            <option value="">Todas las materias</option>
-                                            @foreach ($materias as $materia)
-                                                <option value="{{ $materia->id_materia }}"
-                                                    {{ request('id_materia') == $materia->id_materia ? 'selected' : '' }}>
-                                                    {{ $materia->nombre }}
-                                                </option>
-                                            @endforeach
-                                        </select>
+                                        <div class="flex-grow-1" style="width: 300px;">
+                                            <input type="text" name="buscar_materia"
+                                                class="form-control form-control-sm"
+                                                placeholder="🔍 Buscar materia (Clave o Nombre)"
+                                                value="{{ request('buscar_materia') }}">
+                                        </div>
 
-                                        <!-- Filtro Período -->
-                                        <select name="id_periodo_escolar" class="form-control form-control-sm w-auto">
-                                            <option value="">Todos los períodos</option>
-                                            @foreach ($periodos as $periodo)
-                                                <option value="{{ $periodo->id_periodo_escolar }}"
-                                                    {{ request('id_periodo_escolar') == $periodo->id_periodo_escolar ? 'selected' : '' }}>
-                                                    {{ $periodo->nombre }}
-                                                </option>
-                                            @endforeach
-                                        </select>
+                                        <!-- Filtro Grupo -->
+                                        <div class="flex-grow-1" style="width: 250px;">
+                                            <input type="text" name="buscar_grupo"
+                                                class="form-control form-control-sm" placeholder="🔍 Buscar grupo"
+                                                value="{{ request('buscar_grupo') }}">
+                                        </div>
+                                        <!-- Filtro periodo -->
+                                        <div class="flex-grow-1" style="width: 250px;">
+                                            <input type="text" name="buscar_periodo"
+                                                class="form-control form-control-sm"
+                                                placeholder="🔍 Buscar Período Escolar"
+                                                value="{{ request('buscar_periodo') }}">
+                                        </div>
 
                                         <!-- Mostrar -->
                                         <select name="mostrar" onchange="this.form.submit()"
@@ -184,7 +175,8 @@
                                             </option>
                                             <option value="50" {{ request('mostrar') == 50 ? 'selected' : '' }}>50
                                             </option>
-                                            <option value="todo" {{ request('mostrar') == 'todo' ? 'selected' : '' }}>
+                                            <option value="todo"
+                                                {{ request('mostrar') == 'todo' ? 'selected' : '' }}>
                                                 Todo</option>
                                         </select>
 
@@ -198,24 +190,34 @@
                             </div>
 
                             <script>
+                                // scrip para buscar en filtro automaticamente
                                 document.addEventListener("DOMContentLoaded", function() {
                                     let form = document.getElementById("filtrosForm");
-                                    form.querySelectorAll("input, select").forEach(el => {
+
+                                    form.querySelectorAll("select").forEach(el => {
                                         el.addEventListener("change", function() {
                                             form.submit();
                                         });
                                     });
-
                                     let typingTimer;
-                                    let buscarInput = form.querySelector("input[name='buscar']");
-                                    if (buscarInput) {
-                                        buscarInput.addEventListener("keyup", function() {
-                                            clearTimeout(typingTimer);
-                                            typingTimer = setTimeout(() => {
-                                                form.submit();
-                                            }, 500);
-                                        });
-                                    }
+                                    const inputNames = [
+                                        "buscar",
+                                        "buscar_materia",
+                                        "buscar_grupo",
+                                        "buscar_periodo"
+                                    ];
+
+                                    inputNames.forEach(name => {
+                                        let inputElement = form.querySelector(`input[name='${name}']`);
+                                        if (inputElement) {
+                                            inputElement.addEventListener("keyup", function() {
+                                                clearTimeout(typingTimer);
+                                                typingTimer = setTimeout(() => {
+                                                    form.submit();
+                                                }, 500);
+                                            });
+                                        }
+                                    });
                                 });
                             </script>
 
@@ -228,6 +230,16 @@
                                 @if ($errors->has('error'))
                                     <div class="alert alert-danger">{{ $errors->first('error') }}</div>
                                 @endif
+
+                                <!-- TEMPORAL: Obtener carreras directamente si no vienen del controlador -->
+                                @php
+                                    if (!isset($carreras)) {
+                                        $carreras = \App\Models\Carrera::all();
+                                    }
+                                    if (!isset($numeroPeriodos)) {
+                                        $numeroPeriodos = \App\Models\NumeroPeriodo::with('tipoPeriodo')->get();
+                                    }
+                                @endphp
 
                                 <div class="table-responsive">
                                     <table class="table table-bordered table-hover">
@@ -243,11 +255,18 @@
                                         <tbody>
                                             @forelse ($asignaciones as $asignacion)
                                                 <tr class="text-center">
-                                                    <td>{{ $asignacion->docente->username ?? 'N/A' }}</td>
+                                                    <td>
+                                                        {{ $asignacion->docente->nombre_completo ?? 'N/A' }}
+                                                    </td>
                                                     <td>{{ $asignacion->materia->nombre ?? 'N/A' }}</td>
                                                     <td>{{ $asignacion->grupo->nombre ?? 'N/A' }}</td>
                                                     <td>{{ $asignacion->periodoEscolar->nombre ?? 'N/A' }}</td>
                                                     <td>
+                                                        <button type="button" class="btn btn-info btn-sm"
+                                                            data-toggle="modal"
+                                                            data-target="#detalleModal{{ $asignacion->id_asignacion }}">
+                                                            <i class="fas fa-eye"></i> Ver Detalles
+                                                        </button>
                                                         <!-- Botón Editar -->
                                                         <button type="button" class="btn btn-warning btn-sm"
                                                             data-toggle="modal"
@@ -255,219 +274,18 @@
                                                             <i class="fas fa-edit"></i> Editar
                                                         </button>
 
-                                                        <!-- Modal Editar -->
-                                                        <div class="modal fade"
-                                                            id="editarModal{{ $asignacion->id_asignacion }}"
-                                                            tabindex="-1" role="dialog"
-                                                            aria-labelledby="editarModalLabel{{ $asignacion->id_asignacion }}"
-                                                            aria-hidden="true">
-                                                            <div class="modal-dialog modal-lg" role="document">
-                                                                <div class="modal-content border-0 shadow-lg">
-                                                                    <div
-                                                                        class="modal-header modal-header-custom border-0">
-                                                                        <div class="w-100">
-                                                                            <div class="text-center">
-                                                                                <h5 class="m-0 font-weight-bold">
-                                                                                    ✏️ Editar Asignación Docente
-                                                                                </h5>
-                                                                                <p class="text-center m-0 mt-2"
-                                                                                    style="font-size: 0.9rem; opacity: 0.95;">
-                                                                                    Modifique la información de la
-                                                                                    asignación
-                                                                                </p>
-                                                                            </div>
-                                                                        </div>
-                                                                        <button type="button" class="close text-white"
-                                                                            data-dismiss="modal" aria-label="Cerrar"
-                                                                            style="position: absolute; right: 1.5rem; top: 1.5rem; font-size: 1.8rem; opacity: 0.9;">
-                                                                            <span aria-hidden="true">&times;</span>
-                                                                        </button>
-                                                                    </div>
-
-                                                                    <form
-                                                                        action="{{ route('asignaciones.update', $asignacion->id_asignacion) }}"
-                                                                        method="POST">
-                                                                        @csrf
-                                                                        @method('PUT')
-                                                                        <div class="modal-body modal-body-custom p-4">
-                                                                            <div
-                                                                                class="form-container p-4 bg-white rounded shadow-sm border">
-
-                                                                                <div class="form-group mb-3">
-                                                                                    <label
-                                                                                        style="text-align: left; display: block;">
-                                                                                        👨‍🏫 Docente <span
-                                                                                            class="required-asterisk">*</span>
-                                                                                    </label>
-                                                                                    <select name="id_docente"
-                                                                                        class="form-control form-control-custom @error('id_docente') is-invalid @enderror"
-                                                                                        required>
-                                                                                        <option value="">-- Seleccione
-                                                                                            un docente --</option>
-                                                                                        @foreach ($docentes as $docente)
-                                                                                            <option
-                                                                                                value="{{ $docente->id_usuario }}"
-                                                                                                {{ $asignacion->id_docente == $docente->id_usuario ? 'selected' : '' }}>
-                                                                                                {{ $docente->username }}
-                                                                                            </option>
-                                                                                        @endforeach
-                                                                                    </select>
-                                                                                    @error('id_docente')
-                                                                                        <div class="invalid-feedback">
-                                                                                            {{ $message }}</div>
-                                                                                    @enderror
-                                                                                </div>
-
-                                                                                <div class="form-group mb-3">
-                                                                                    <label
-                                                                                        style="text-align: left; display: block;">
-                                                                                        📚 Materia <span
-                                                                                            class="required-asterisk">*</span>
-                                                                                    </label>
-                                                                                    <select name="id_materia"
-                                                                                        class="form-control form-control-custom @error('id_materia') is-invalid @enderror"
-                                                                                        required>
-                                                                                        <option value="">-- Seleccione
-                                                                                            una materia --</option>
-                                                                                        @foreach ($materias as $materia)
-                                                                                            <option
-                                                                                                value="{{ $materia->id_materia }}"
-                                                                                                {{ $asignacion->id_materia == $materia->id_materia ? 'selected' : '' }}>
-                                                                                                {{ $materia->nombre }}
-                                                                                            </option>
-                                                                                        @endforeach
-                                                                                    </select>
-                                                                                    @error('id_materia')
-                                                                                        <div class="invalid-feedback">
-                                                                                            {{ $message }}</div>
-                                                                                    @enderror
-                                                                                </div>
-
-                                                                                <div class="form-group mb-3">
-                                                                                    <label
-                                                                                        style="text-align: left; display: block;">
-                                                                                        👥 Grupo <span
-                                                                                            class="required-asterisk">*</span>
-                                                                                    </label>
-                                                                                    <select name="id_grupo"
-                                                                                        class="form-control form-control-custom @error('id_grupo') is-invalid @enderror"
-                                                                                        required>
-                                                                                        <option value="">-- Seleccione
-                                                                                            un grupo --</option>
-                                                                                        @foreach ($grupos as $grupo)
-                                                                                            <option
-                                                                                                value="{{ $grupo->id_grupo }}"
-                                                                                                {{ $asignacion->id_grupo == $grupo->id_grupo ? 'selected' : '' }}>
-                                                                                                {{ $grupo->nombre }}
-                                                                                            </option>
-                                                                                        @endforeach
-                                                                                    </select>
-                                                                                    @error('id_grupo')
-                                                                                        <div class="invalid-feedback">
-                                                                                            {{ $message }}</div>
-                                                                                    @enderror
-                                                                                </div>
-
-                                                                                <div class="form-group mb-0">
-                                                                                    <label
-                                                                                        style="text-align: left; display: block;">
-                                                                                        📅 Período Escolar <span
-                                                                                            class="required-asterisk">*</span>
-                                                                                    </label>
-                                                                                    <select name="id_periodo_escolar"
-                                                                                        class="form-control form-control-custom @error('id_periodo_escolar') is-invalid @enderror"
-                                                                                        required>
-                                                                                        <option value="">-- Seleccione
-                                                                                            un período --</option>
-                                                                                        @foreach ($periodos as $periodo)
-                                                                                            <option
-                                                                                                value="{{ $periodo->id_periodo_escolar }}"
-                                                                                                {{ $asignacion->id_periodo_escolar == $periodo->id_periodo_escolar ? 'selected' : '' }}>
-                                                                                                {{ $periodo->nombre }}
-                                                                                            </option>
-                                                                                        @endforeach
-                                                                                    </select>
-                                                                                    @error('id_periodo_escolar')
-                                                                                        <div class="invalid-feedback">
-                                                                                            {{ $message }}</div>
-                                                                                    @enderror
-                                                                                </div>
-
-                                                                            </div>
-                                                                        </div>
-
-                                                                        <div class="modal-footer modal-footer-custom">
-                                                                            <button type="button"
-                                                                                class="btn btn-secondary"
-                                                                                data-dismiss="modal">
-                                                                                Cancelar
-                                                                            </button>
-                                                                            <button type="submit"
-                                                                                class="btn btn-success">
-                                                                                ✓ Actualizar Asignación
-                                                                            </button>
-                                                                        </div>
-                                                                    </form>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-
                                                         <!-- Botón Eliminar -->
                                                         <button type="button" class="btn btn-danger btn-sm"
                                                             data-toggle="modal"
                                                             data-target="#eliminarModal{{ $asignacion->id_asignacion }}">
                                                             <i class="fas fa-trash-alt"></i> Eliminar
                                                         </button>
-
-                                                        <!-- Modal Eliminar -->
-                                                        <div class="modal fade"
-                                                            id="eliminarModal{{ $asignacion->id_asignacion }}"
-                                                            tabindex="-1" role="dialog" aria-hidden="true">
-                                                            <div class="modal-dialog" role="document">
-                                                                <div class="modal-content">
-                                                                    <div
-                                                                        class="modal-header1 modal-header-custom border-0">
-                                                                        <div class="w-100">
-                                                                            <div class="text-center">
-                                                                                <h5 class="m-0 font-weight-bold">
-                                                                                    🗑️ Eliminar Asignación
-                                                                                </h5>
-                                                                            </div>
-                                                                        </div>
-                                                                        <button type="button" class="close"
-                                                                            data-dismiss="modal" aria-label="Cerrar">
-                                                                            <span aria-hidden="true">&times;</span>
-                                                                        </button>
-                                                                    </div>
-                                                                    <div class="modal-body">
-                                                                        ¿Seguro que deseas eliminar la asignación del
-                                                                        docente
-                                                                        <strong>{{ $asignacion->docente->username ?? 'N/A' }}</strong>
-                                                                        para la materia
-                                                                        <strong>{{ $asignacion->materia->nombre ?? 'N/A' }}</strong>?
-                                                                    </div>
-                                                                    <div class="modal-footer">
-                                                                        <button type="button"
-                                                                            class="btn btn-secondary"
-                                                                            data-dismiss="modal">Cancelar</button>
-                                                                        <form
-                                                                            action="{{ route('asignaciones.destroy', $asignacion->id_asignacion) }}"
-                                                                            method="POST"
-                                                                            style="display:inline-block;">
-                                                                            @csrf
-                                                                            @method('DELETE')
-                                                                            <button type="submit"
-                                                                                class="btn btn-danger">Eliminar</button>
-                                                                        </form>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
                                                     </td>
                                                 </tr>
                                             @empty
                                                 <tr>
-                                                    <td colspan="5" class="text-center text-muted">No hay asignaciones
+                                                    <td colspan="5" class="text-center text-muted">No hay
+                                                        asignaciones
                                                         registradas</td>
                                                 </tr>
                                             @endforelse
@@ -500,7 +318,7 @@
     </div>
     <!-- End Page Wrapper -->
 
-    <!-- Modal Nueva Asignación -->
+    <!-- ========== MODAL NUEVA ASIGNACIÓN INDIVIDUAL ========== -->
     <div class="modal fade" id="nuevaAsignacionModal" tabindex="-1" role="dialog"
         aria-labelledby="nuevaAsignacionLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
@@ -523,94 +341,125 @@
                     </button>
                 </div>
 
-                <form action="{{ route('asignaciones.store') }}" method="POST">
+                <form action="{{ route('asignaciones.store') }}" method="POST" id="formNuevaAsignacion">
                     @csrf
                     <div class="modal-body modal-body-custom p-4">
-
                         <div class="form-container p-4 bg-white rounded shadow-sm border">
+                            <div class="info-section mb-4">
+                                <div class="card shadow mb-4 border-0">
 
-                            <div class="form-group mb-3">
-                                <label class="form-label-custom d-flex">
-                                    👨‍🏫 Docente
-                                    <span class="required-asterisk ml-1">*</span>
-                                </label>
-                                <select name="id_docente"
-                                    class="form-control form-control-custom @error('id_docente') is-invalid @enderror"
-                                    required>
-                                    <option value="">-- Seleccione un docente --</option>
-                                    @foreach ($docentes as $docente)
-                                        <option value="{{ $docente->id_usuario }}"
-                                            {{ old('id_docente') == $docente->id_usuario ? 'selected' : '' }}>
-                                            {{ $docente->username }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                @error('id_docente')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                                    <div class="card-header py-3 text-white card-header-custom">
+                                        <h6 class="m-0 font-weight-bold">Seleccione Carrera, Grupo y Docente
+                                        </h6>
+                                    </div>
+                                    <div class="info-section p-4 mb-4">
+
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label class="form-label-custom d-flex">
+                                                        Carrera
+                                                        <span class="required-asterisk ml-1">*</span>
+                                                    </label>
+                                                    <select id="carrera_nueva"
+                                                        class="form-control form-control-custom" required>
+                                                        <option value="">-- Seleccione una carrera --</option>
+                                                        @foreach ($carreras as $carrera)
+                                                            <option value="{{ $carrera->id_carrera }}">
+                                                                {{ $carrera->nombre }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label class="form-label-custom d-flex">
+                                                        Grupo
+                                                        <span class="required-asterisk ml-1">*</span>
+                                                    </label>
+                                                    <select name="id_grupo" id="grupo_nueva"
+                                                        class="form-control form-control-custom" required>
+                                                        <option value="">-- Primero seleccione carrera --
+                                                        </option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label class="form-label-custom d-flex">
+                                                        Docente
+                                                        <span class="required-asterisk ml-1">*</span>
+                                                    </label>
+                                                    <select name="id_docente" class="form-control form-control-custom"
+                                                        required>
+                                                        <option value="">-- Seleccione un docente --</option>
+                                                        @foreach ($docentes as $docente)
+                                                            <option value="{{ $docente->id_docente }}">
+                                                                {{ $docente->nombre_completo }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label class="form-label-custom d-flex">
+                                                        Período Escolar
+                                                        <span class="text-muted ml-2">(Se llena automáticamente)</span>
+                                                    </label>
+                                                    <input type="text" id="periodo_escolar_nueva_display" 
+                                                        class="form-control form-control-custom" 
+                                                        readonly 
+                                                        placeholder="Seleccione un grupo">
+                                                    <input type="hidden" name="id_periodo_escolar" id="periodo_escolar_nueva">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label class="form-label-custom d-flex">
+                                                        Número de Período
+                                                        <span class="required-asterisk ml-1">*</span>
+                                                    </label>
+                                                    <select id="numero_periodo_nueva"
+                                                        class="form-control form-control-custom" required>
+                                                        <option value="">-- Seleccione número de período --
+                                                        </option>
+                                                        @foreach ($numeroPeriodos as $numeroPeriodo)
+                                                            <option value="{{ $numeroPeriodo->id_numero_periodo }}">
+                                                                {{ $numeroPeriodo->numero }}° Período
+                                                                @if ($numeroPeriodo->tipoPeriodo)
+                                                                    ({{ $numeroPeriodo->tipoPeriodo->nombre }})
+                                                                @endif
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="periodo-info mt-3">
+                                            <i class="fas fa-info-circle text-primary"></i>
+                                            <strong>Nota:</strong> Las materias se filtrarán según el número de período
+                                            seleccionado.
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
-                            <div class="form-group mb-3">
-                                <label class="form-label-custom d-flex">
-                                    📚 Materia
-                                    <span class="required-asterisk ml-1">*</span>
-                                </label>
-                                <select name="id_materia"
-                                    class="form-control form-control-custom @error('id_materia') is-invalid @enderror"
-                                    required>
-                                    <option value="">-- Seleccione una materia --</option>
-                                    @foreach ($materias as $materia)
-                                        <option value="{{ $materia->id_materia }}"
-                                            {{ old('id_materia') == $materia->id_materia ? 'selected' : '' }}>
-                                            {{ $materia->nombre }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                @error('id_materia')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-
-                            <div class="form-group mb-3">
-                                <label class="form-label-custom d-flex">
-                                    👥 Grupo
-                                    <span class="required-asterisk ml-1">*</span>
-                                </label>
-                                <select name="id_grupo"
-                                    class="form-control form-control-custom @error('id_grupo') is-invalid @enderror"
-                                    required>
-                                    <option value="">-- Seleccione un grupo --</option>
-                                    @foreach ($grupos as $grupo)
-                                        <option value="{{ $grupo->id_grupo }}"
-                                            {{ old('id_grupo') == $grupo->id_grupo ? 'selected' : '' }}>
-                                            {{ $grupo->nombre }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                @error('id_grupo')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-
-                            <div class="form-group mb-2">
-                                <label class="form-label-custom d-flex">
-                                    📅 Período Escolar
-                                    <span class="required-asterisk ml-1">*</span>
-                                </label>
-                                <select name="id_periodo_escolar"
-                                    class="form-control form-control-custom @error('id_periodo_escolar') is-invalid @enderror"
-                                    required>
-                                    <option value="">-- Seleccione un período --</option>
-                                    @foreach ($periodos as $periodo)
-                                        <option value="{{ $periodo->id_periodo_escolar }}"
-                                            {{ old('id_periodo_escolar') == $periodo->id_periodo_escolar ? 'selected' : '' }}>
-                                            {{ $periodo->nombre }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                @error('id_periodo_escolar')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                            <!-- Sección 2: Selección de Materia -->
+                            <div class="card shadow mb-4 border-0">
+                                <div class="card-header py-3 text-white card-header-custom">
+                                    <h6 class="m-0 font-weight-bold">Seleccione Materia</h6>
+                                </div>
+                                <div class="info-section mb-4">
+                                    <div id="materias-container-nueva">
+                                        <div class="alert alert-info">
+                                            <i class="fas fa-info-circle"></i> Seleccione primero una carrera y número
+                                            de período para ver las materias disponibles
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
                             <!-- Nota de campos obligatorios -->
@@ -621,7 +470,6 @@
                             </div>
 
                         </div>
-
                     </div>
 
                     <div class="modal-footer modal-footer-custom border-top">
@@ -639,6 +487,411 @@
         </div>
     </div>
 
+    <!-- ========== MODAL ASIGNACIÓN MASIVA ========== -->
+    <div class="modal fade" id="asignacionMasivaModal" tabindex="-1" role="dialog"
+        aria-labelledby="asignacionMasivaLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content border-0 shadow-lg">
+
+                <div class="modal-header modal-header-custom border-0">
+                    <div class="w-100">
+                        <div class="text-center">
+                            <h5 class="m-0 font-weight-bold" id="asignacionMasivaLabel">
+                                📚 Asignación Masiva de Docentes
+                            </h5>
+                            <p class="m-0 mt-2 mb-0" style="font-size: 0.9rem; opacity: 0.95;">
+                                Asigne múltiples materias con sus docentes a un grupo
+                            </p>
+                        </div>
+                    </div>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Cerrar"
+                        style="position: absolute; right: 1.5rem; top: 1.5rem; font-size: 1.8rem; opacity: 0.9;">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+
+                <form action="{{ route('asignaciones.masiva.store-materias') }}" method="POST"
+                    id="formAsignacionMasiva">
+                    @csrf
+                    <div class="modal-body modal-body-custom p-4">
+                        <div class="form-container p-4 bg-white rounded shadow-sm border">
+
+                            @if ($errors->any())
+                                <div class="alert alert-danger">
+                                    <ul class="mb-0">
+                                        @foreach ($errors->all() as $error)
+                                            <li>{{ $error }}</li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            @endif
+
+                            <!-- Sección 1: Selección de Grupo y Número de Período -->
+                            <div class="card shadow mb-4 border-0">
+                                <div class="card-header py-3  text-white card-header-custom">
+                                    <h6 class="m-0 font-weight-bold">
+                                        <i class="fas fa-users"></i> Seleccione Grupo y Número de Período
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label class="form-label-custom d-flex">
+                                                    Carrera
+                                                    <span class="required-asterisk ml-1">*</span>
+                                                </label>
+                                                <select id="carrera" class="form-control form-control-custom"
+                                                    required>
+                                                    <option value="">-- Seleccione una carrera --</option>
+                                                    @foreach ($carreras as $carrera)
+                                                        <option value="{{ $carrera->id_carrera }}">
+                                                            {{ $carrera->nombre }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label class="form-label-custom d-flex">
+                                                    Grupo
+                                                    <span class="required-asterisk ml-1">*</span>
+                                                </label>
+                                                <select name="id_grupo" id="grupo"
+                                                    class="form-control form-control-custom" required>
+                                                    <option value="">-- Primero seleccione carrera --</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label class="form-label-custom d-flex">
+                                                    Período Escolar
+                                                    <span class="text-muted ml-2">(Automático)</span>
+                                                </label>
+                                                <input type="text" id="periodo_escolar_display" 
+                                                    class="form-control form-control-custom" 
+                                                    readonly 
+                                                    placeholder="Seleccione un grupo">
+                                                <input type="hidden" name="id_periodo_escolar" id="periodo_escolar">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label class="form-label-custom d-flex">
+                                                    Número de Período
+                                                    <span class="required-asterisk ml-1">*</span>
+                                                </label>
+                                                <select name="id_numero_periodo" id="numero_periodo"
+                                                    class="form-control form-control-custom" required>
+                                                    <option value="">-- Seleccione número de período --</option>
+                                                    @foreach ($numeroPeriodos as $numeroPeriodo)
+                                                        <option value="{{ $numeroPeriodo->id_numero_periodo }}">
+                                                            {{ $numeroPeriodo->numero }}° Período
+                                                            @if ($numeroPeriodo->tipoPeriodo)
+                                                                ({{ $numeroPeriodo->tipoPeriodo->nombre }})
+                                                            @endif
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="periodo-info mt-3">
+                                        <i class="fas fa-info-circle text-primary"></i>
+                                        <strong>Nota:</strong> Al seleccionar el grupo, el período escolar se llenará automáticamente. 
+                                        Las materias se filtrarán según el número de período seleccionado.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Sección 2: Selección de Materias con Docentes -->
+                            <div class="card shadow mb-4 border-0">
+                                <div
+                                    class="card-header py-3  text-white card-header-custom d-flex justify-content-between align-items-center">
+                                    <h6 class="m-0 font-weight-bold">
+                                        <i class="fas fa-book"></i> Asigne Docentes a las Materias
+                                    </h6>
+                                    <button type="button" class="btn btn-sm btn-light select-all-btn"
+                                        id="selectAll">
+                                        <i class="fas fa-check-square"></i> Seleccionar Todas
+                                    </button>
+                                </div>
+                                <div class="card-body">
+                                    <div id="materias-container">
+                                        <div class="alert alert-info">
+                                            <i class="fas fa-info-circle"></i> Seleccione primero una carrera y número
+                                            de período para ver las materias disponibles
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Nota de campos obligatorios -->
+                            <div class="text-center mt-3">
+                                <small class="text-muted">
+                                    <span class="required-asterisk">*</span> Campos obligatorios
+                                </small>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="modal-footer modal-footer-custom border-top">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                            <i class="fas fa-times mr-2"></i>
+                            Cancelar
+                        </button>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-save mr-2"></i>
+                            Guardar Asignaciones
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modales de Detalle, Editar y Eliminar -->
+    @foreach ($asignaciones as $asignacion)
+        <!-- Modal Detalle -->
+        <div class="modal fade" id="detalleModal{{ $asignacion->id_asignacion }}"
+            tabindex="-1" role="dialog"
+            aria-labelledby="detalleModalLabel{{ $asignacion->id_asignacion }}"
+            aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title"
+                            id="detalleModalLabel{{ $asignacion->id_asignacion }}">
+                            Detalles de la Asignación</h5>
+                        <button type="button" class="close"
+                            data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p><strong>Docente:</strong>
+                            {{ $asignacion->docente->nombre_completo ?? 'N/A' }}
+                        </p>
+                        <p><strong>Materia:</strong>
+                            {{ $asignacion->materia->nombre ?? 'N/A' }}
+                        </p>
+                        <p><strong>Grupo:</strong>
+                            {{ $asignacion->grupo->nombre ?? 'N/A' }}
+                        </p>
+                        <p><strong>Período Escolar:</strong>
+                            {{ $asignacion->periodoEscolar->nombre ?? 'N/A' }}
+                        </p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button"
+                            class="btn btn-secondary"
+                            data-dismiss="modal">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Editar -->
+        <div class="modal fade" id="editarModal{{ $asignacion->id_asignacion }}" tabindex="-1" role="dialog"
+            aria-labelledby="editarModalLabel{{ $asignacion->id_asignacion }}" aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content border-0 shadow-lg">
+                    <div class="modal-header modal-header-custom border-0">
+                        <div class="w-100">
+                            <div class="text-center">
+                                <h5 class="m-0 font-weight-bold">
+                                    ✏️ Editar Asignación Docente
+                                </h5>
+                                <p class="text-center m-0 mt-2" style="font-size: 0.9rem; opacity: 0.95;">
+                                    Modifique la información de la asignación
+                                </p>
+                            </div>
+                        </div>
+                        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Cerrar"
+                            style="position: absolute; right: 1.5rem; top: 1.5rem; font-size: 1.8rem; opacity: 0.9;">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+
+                    <form action="{{ route('asignaciones.update', $asignacion->id_asignacion) }}" method="POST"
+                        id="formEditar{{ $asignacion->id_asignacion }}">
+                        @csrf
+                        @method('PUT')
+                        <div class="modal-body modal-body-custom p-4">
+                            <div class="form-container p-4 bg-white rounded shadow-sm border">
+
+                                <div class="card shadow mb-4 border-0">
+                                    <div class="card-header py-3 text-white card-header-custom">
+                                        <h6 class="m-0 font-weight-bold">
+                                            <i class="fas fa-users"></i> Seleccione Grupo y Docente
+                                        </h6>
+                                    </div>
+                                    <div class="info-section p-4 mb-4">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label class="form-label-custom d-flex">
+                                                        Carrera
+                                                        <span class="required-asterisk ml-1">*</span>
+                                                    </label>
+                                                    <select id="carrera_editar_{{ $asignacion->id_asignacion }}"
+                                                        class="form-control form-control-custom" required>
+                                                        <option value="">-- Seleccione una carrera --</option>
+                                                        @foreach ($carreras as $carrera)
+                                                            <option value="{{ $carrera->id_carrera }}"
+                                                                {{ $asignacion->grupo->carrera->id_carrera == $carrera->id_carrera ? 'selected' : '' }}>
+                                                                {{ $carrera->nombre }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label class="form-label-custom d-flex">
+                                                        Grupo
+                                                        <span class="required-asterisk ml-1">*</span>
+                                                    </label>
+                                                    <select name="id_grupo"
+                                                        id="grupo_editar_{{ $asignacion->id_asignacion }}"
+                                                        class="form-control form-control-custom" required>
+                                                        <option value="{{ $asignacion->id_grupo }}">
+                                                            {{ $asignacion->grupo->nombre }}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label class="form-label-custom d-flex">
+                                                        Docente
+                                                        <span class="required-asterisk ml-1">*</span>
+                                                    </label>
+                                                    <select name="id_docente" class="form-control form-control-custom"
+                                                        required>
+                                                        @foreach ($docentes as $docente)
+                                                            <option value="{{ $docente->id_docente }}"
+                                                                {{ $asignacion->id_docente == $docente->id_docente ? 'selected' : '' }}>
+                                                                {{ $docente->nombre_completo }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label class="form-label-custom d-flex">
+                                                        Período Escolar
+                                                        <span class="text-muted ml-2">(Automático)</span>
+                                                    </label>
+                                                    <input type="text" id="periodo_escolar_editar_{{ $asignacion->id_asignacion }}_display" 
+                                                        class="form-control form-control-custom" 
+                                                        readonly 
+                                                        value="{{ $asignacion->periodoEscolar->nombre ?? '' }}">
+                                                    <input type="hidden" name="id_periodo_escolar" 
+                                                        id="periodo_escolar_editar_{{ $asignacion->id_asignacion }}"
+                                                        value="{{ $asignacion->id_periodo_escolar }}">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label class="form-label-custom d-flex">
+                                                        Número de Período
+                                                        <span class="required-asterisk ml-1">*</span>
+                                                    </label>
+                                                    <select
+                                                        id="numero_periodo_editar_{{ $asignacion->id_asignacion }}"
+                                                        class="form-control form-control-custom" required>
+                                                        <option value="">-- Seleccione número de período --
+                                                        </option>
+                                                        @foreach ($numeroPeriodos as $numeroPeriodo)
+                                                            <option value="{{ $numeroPeriodo->id_numero_periodo }}"
+                                                                {{ $asignacion->materia->id_numero_periodo == $numeroPeriodo->id_numero_periodo ? 'selected' : '' }}>
+                                                                {{ $numeroPeriodo->numero }}° Período
+                                                                @if ($numeroPeriodo->tipoPeriodo)
+                                                                    ({{ $numeroPeriodo->tipoPeriodo->nombre }})
+                                                                @endif
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Sección 2: Selección de Materia -->
+                                <div class="card shadow mb-4 border-0">
+                                    <div class="card-header py-3 text-white card-header-custom">
+                                        <h6 class="m-0 font-weight-bold">
+                                            <i class="fas fa-book"></i> Seleccione Materia del Período
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="materias-container-editar-{{ $asignacion->id_asignacion }}">
+                                            <div class="alert alert-info">
+                                                <i class="fas fa-info-circle"></i> Cargando materias disponibles...
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <div class="modal-footer modal-footer-custom">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                                Cancelar
+                            </button>
+                            <button type="submit" class="btn btn-success">
+                                ✓ Actualizar Asignación
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Eliminar -->
+        <div class="modal fade" id="eliminarModal{{ $asignacion->id_asignacion }}" tabindex="-1" role="dialog"
+            aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header1 modal-header-custom border-0">
+                        <div class="w-100">
+                            <div class="text-center">
+                                <h5 class="m-0 font-weight-bold">
+                                    🗑️ Eliminar Asignación
+                                </h5>
+                            </div>
+                        </div>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        ¿Seguro que deseas eliminar la asignación del docente
+                        <strong>{{ $asignacion->docente->nombre_completo ?? 'N/A' }}</strong>
+                        para la materia
+                        <strong>{{ $asignacion->materia->nombre ?? 'N/A' }}</strong>?
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                        <form action="{{ route('asignaciones.destroy', $asignacion->id_asignacion) }}" method="POST"
+                            style="display:inline-block;">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-danger">Eliminar</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endforeach
+
     @if ($errors->any())
         <script>
             document.addEventListener("DOMContentLoaded", function() {
@@ -653,8 +906,503 @@
 
     <!-- Custom scripts for all pages-->
     <script src="{{ asset('libs/sbadmin/js/sb-admin-2.min.js') }}"></script>
+
+    <!-- JavaScript para la funcionalidad de asignaciones -->
     <script>
         $(document).ready(function() {
+            // Configuración inicial
+            const grupos = @json($grupos);
+            const docentes = @json($docentes);
+            const periodos = @json($periodos);
+
+            console.log('Grupos cargados:', grupos);
+            console.log('Docentes cargados:', docentes);
+            console.log('Períodos cargados:', periodos);
+
+            // ========== FUNCIONES COMPARTIDAS ==========
+
+            // Función para cargar grupos por carrera y autocompletar período
+            function cargarGrupos(carreraId, grupoSelectId, periodoDisplayId, periodoHiddenId, grupoSeleccionado = null) {
+                const grupoSelect = $(grupoSelectId);
+                grupoSelect.html('<option value="">-- Seleccione un grupo --</option>');
+
+                console.log('Carrera seleccionada:', carreraId);
+
+                if (carreraId) {
+                    const gruposFiltrados = grupos.filter(g => g.id_carrera == carreraId);
+                    console.log('Grupos filtrados:', gruposFiltrados);
+
+                    gruposFiltrados.forEach(grupo => {
+                        const selected = grupoSeleccionado && grupo.id_grupo == grupoSeleccionado ? 'selected' : '';
+                        grupoSelect.append(
+                            `<option value="${grupo.id_grupo}" data-periodo="${grupo.periodo}">${grupo.nombre}</option>`
+                        );
+                    });
+
+                    // Si hay un grupo seleccionado, cargar su período
+                    if (grupoSeleccionado) {
+                        const grupoData = gruposFiltrados.find(g => g.id_grupo == grupoSeleccionado);
+                        if (grupoData && grupoData.periodo) {
+                            cargarPeriodoGrupo(grupoData.periodo, periodoDisplayId, periodoHiddenId);
+                        }
+                    }
+                }
+
+                // Event listener para cuando cambie el grupo
+                grupoSelect.off('change').on('change', function() {
+                    const periodoId = $(this).find(':selected').data('periodo');
+                    cargarPeriodoGrupo(periodoId, periodoDisplayId, periodoHiddenId);
+                });
+            }
+
+            // Función para cargar y mostrar el período del grupo
+            function cargarPeriodoGrupo(periodoId, displayId, hiddenId) {
+                console.log('Cargando período:', periodoId);
+                
+                if (periodoId) {
+                    const periodo = periodos.find(p => p.id_periodo_escolar == periodoId);
+                    console.log('Período encontrado:', periodo);
+                    
+                    if (periodo) {
+                        $(displayId).val(periodo.nombre);
+                        $(hiddenId).val(periodo.id_periodo_escolar);
+                    } else {
+                        $(displayId).val('');
+                        $(hiddenId).val('');
+                    }
+                } else {
+                    $(displayId).val('');
+                    $(hiddenId).val('');
+                }
+            }
+
+            // Función para cargar materias individual (para modales individuales)
+            function cargarMateriasIndividual(carreraId, numeroPeriodoId, contenedorId, materiaSeleccionada = null) {
+                console.log('Cargando materias individual para carrera:', carreraId, 'período:', numeroPeriodoId);
+
+                $(contenedorId).html(
+                    '<div class="text-center"><i class="fas fa-spinner fa-spin fa-2x text-primary"></i><p class="mt-2">Cargando materias...</p></div>'
+                );
+
+                if (!carreraId || !numeroPeriodoId) {
+                    $(contenedorId).html(
+                        '<div class="alert alert-warning">Seleccione carrera y número de período</div>');
+                    return;
+                }
+
+                const url = `{{ url('asignaciones/masiva/materias-carrera-periodo') }}/${carreraId}/${numeroPeriodoId}`;
+                console.log('URL de petición:', url);
+
+                $.ajax({
+                    url: url,
+                    method: 'GET',
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                        'Accept': 'application/json'
+                    },
+                    success: function(response) {
+                        console.log('Respuesta recibida:', response);
+                        let html = '';
+
+                        if (response.length === 0) {
+                            html = `
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle"></i> 
+                                No hay materias para esta carrera y período seleccionados
+                            </div>`;
+                        } else {
+                            html += `
+                            <div class="alert alert-success mb-3">
+                                <i class="fas fa-check-circle"></i> 
+                                Seleccione una materia
+                            </div>
+                            <div class="materia-item">
+                                <div class="form-group mb-0">
+                                    <label class="form-label-custom d-flex">
+                                        📚 Materia
+                                        <span class="required-asterisk ml-1">*</span>
+                                    </label>
+                                    <select name="id_materia" class="form-control form-control-custom" required>`;
+
+                            response.forEach((materia) => {
+                                const selected = materiaSeleccionada && materia.id_materia == materiaSeleccionada ? 'selected' : '';
+                                html += `<option value="${materia.id_materia}" ${selected}>${materia.nombre} - ${materia.clave || 'Sin clave'}</option>`;
+                            });
+
+                            html += `</select>
+                                </div>
+                            </div>`;
+                        }
+
+                        $(contenedorId).html(html);
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error al cargar materias:', error);
+                        $(contenedorId).html(`
+                        <div class="alert alert-danger">
+                            <i class="fas fa-times-circle"></i> 
+                            Error al cargar las materias. Por favor, intente nuevamente.
+                        </div>
+                    `);
+                    }
+                });
+            }
+
+            // ========== MODAL NUEVA ASIGNACIÓN INDIVIDUAL ==========
+
+            // Filtrar grupos cuando cambia la carrera
+            $('#carrera_nueva').change(function() {
+                const carreraId = $(this).val();
+                cargarGrupos(carreraId, '#grupo_nueva', '#periodo_escolar_nueva_display', '#periodo_escolar_nueva');
+
+                // Cargar materias si ya hay número de período seleccionado
+                const numeroPeriodoId = $('#numero_periodo_nueva').val();
+                if (carreraId && numeroPeriodoId) {
+                    cargarMateriasIndividual(carreraId, numeroPeriodoId, '#materias-container-nueva');
+                } else {
+                    $('#materias-container-nueva').html(
+                        '<div class="alert alert-info">Seleccione carrera y número de período</div>');
+                }
+            });
+
+            // Cargar materias cuando cambia el número de período
+            $('#numero_periodo_nueva').change(function() {
+                const carreraId = $('#carrera_nueva').val();
+                const numeroPeriodoId = $(this).val();
+
+                if (carreraId && numeroPeriodoId) {
+                    cargarMateriasIndividual(carreraId, numeroPeriodoId, '#materias-container-nueva');
+                } else {
+                    $('#materias-container-nueva').html(
+                        '<div class="alert alert-info">Seleccione carrera y número de período</div>');
+                }
+            });
+
+            // ========== MODALES DE EDICIÓN ==========
+
+            @foreach ($asignaciones as $asignacion)
+                // Configurar modal de edición para {{ $asignacion->id_asignacion }}
+                $(document).ready(function() {
+                    // Cuando se abre el modal de edición
+                    $('#editarModal{{ $asignacion->id_asignacion }}').on('show.bs.modal', function() {
+                        const carreraId = $('#carrera_editar_{{ $asignacion->id_asignacion }}').val();
+                        const grupoSeleccionado = {{ $asignacion->id_grupo }};
+
+                        // Cargar grupos
+                        cargarGrupos(
+                            carreraId, 
+                            '#grupo_editar_{{ $asignacion->id_asignacion }}',
+                            '#periodo_escolar_editar_{{ $asignacion->id_asignacion }}_display',
+                            '#periodo_escolar_editar_{{ $asignacion->id_asignacion }}',
+                            grupoSeleccionado
+                        );
+
+                        // Cargar materias
+                        const numeroPeriodoId = $('#numero_periodo_editar_{{ $asignacion->id_asignacion }}').val();
+                        const materiaSeleccionada = {{ $asignacion->id_materia }};
+                        if (carreraId && numeroPeriodoId) {
+                            cargarMateriasIndividual(
+                                carreraId, 
+                                numeroPeriodoId,
+                                '#materias-container-editar-{{ $asignacion->id_asignacion }}',
+                                materiaSeleccionada
+                            );
+                        }
+                    });
+
+                    // Cuando cambia la carrera en edición
+                    $('#carrera_editar_{{ $asignacion->id_asignacion }}').change(function() {
+                        const carreraId = $(this).val();
+                        cargarGrupos(
+                            carreraId, 
+                            '#grupo_editar_{{ $asignacion->id_asignacion }}',
+                            '#periodo_escolar_editar_{{ $asignacion->id_asignacion }}_display',
+                            '#periodo_escolar_editar_{{ $asignacion->id_asignacion }}'
+                        );
+
+                        const numeroPeriodoId = $('#numero_periodo_editar_{{ $asignacion->id_asignacion }}').val();
+                        const materiaSeleccionada = {{ $asignacion->id_materia }};
+                        if (carreraId && numeroPeriodoId) {
+                            cargarMateriasIndividual(
+                                carreraId, 
+                                numeroPeriodoId,
+                                '#materias-container-editar-{{ $asignacion->id_asignacion }}',
+                                materiaSeleccionada
+                            );
+                        }
+                    });
+
+                    // Cuando cambia el número de período en edición
+                    $('#numero_periodo_editar_{{ $asignacion->id_asignacion }}').change(function() {
+                        const carreraId = $('#carrera_editar_{{ $asignacion->id_asignacion }}').val();
+                        const numeroPeriodoId = $(this).val();
+                        const materiaSeleccionada = {{ $asignacion->id_asignacion }};
+
+                        if (carreraId && numeroPeriodoId) {
+                            cargarMateriasIndividual(
+                                carreraId, 
+                                numeroPeriodoId,
+                                '#materias-container-editar-{{ $asignacion->id_asignacion }}',
+                                materiaSeleccionada
+                            );
+                        } else {
+                            $('#materias-container-editar-{{ $asignacion->id_asignacion }}').html(
+                                '<div class="alert alert-warning">Seleccione carrera y número de período</div>'
+                            );
+                        }
+                    });
+                });
+            @endforeach
+
+            // ========== MODAL ASIGNACIÓN MASIVA ==========
+
+            // Filtrar grupos por carrera en modal masivo
+            $('#carrera').change(function() {
+                const carreraId = $(this).val();
+                cargarGrupos(carreraId, '#grupo', '#periodo_escolar_display', '#periodo_escolar');
+
+                // Intentar cargar materias si ya hay período seleccionado
+                const idNumeroPeriodo = $('#numero_periodo').val();
+                if (carreraId && idNumeroPeriodo) {
+                    cargarMateriasMasivas(carreraId, idNumeroPeriodo);
+                }
+            });
+
+            // Cargar materias cuando se seleccione número de período en modal masivo
+            $('#numero_periodo').change(function() {
+                const carreraId = $('#carrera').val();
+                const idNumeroPeriodo = $(this).val();
+
+                console.log('Número de período seleccionado:', idNumeroPeriodo);
+                console.log('Carrera actual:', carreraId);
+
+                if (carreraId && idNumeroPeriodo) {
+                    cargarMateriasMasivas(carreraId, idNumeroPeriodo);
+                } else {
+                    let mensaje = '<div class="alert alert-warning"><i class="fas fa-exclamation-triangle"></i> ';
+                    if (!carreraId && !idNumeroPeriodo) {
+                        mensaje += 'Seleccione una carrera y número de período';
+                    } else if (!carreraId) {
+                        mensaje += 'Seleccione una carrera';
+                    } else {
+                        mensaje += 'Seleccione un número de período';
+                    }
+                    mensaje += '</div>';
+                    $('#materias-container').html(mensaje);
+                }
+            });
+
+            // Función para cargar materias en modal masivo
+            function cargarMateriasMasivas(carreraId, idNumeroPeriodo) {
+                console.log('Cargando materias masivas para carrera:', carreraId, 'período:', idNumeroPeriodo);
+
+                $('#materias-container').html(
+                    '<div class="text-center"><i class="fas fa-spinner fa-spin fa-2x text-primary"></i><p class="mt-2">Cargando materias...</p></div>'
+                );
+
+                const url = `{{ url('asignaciones/masiva/materias-carrera-periodo') }}/${carreraId}/${idNumeroPeriodo}`;
+                console.log('URL de petición:', url);
+
+                $.ajax({
+                    url: url,
+                    method: 'GET',
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                        'Accept': 'application/json'
+                    },
+                    success: function(response) {
+                        console.log('Respuesta recibida:', response);
+                        let html = '';
+
+                        if (response.length === 0) {
+                            html = `
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle"></i> 
+                                No hay materias para esta carrera y período seleccionados
+                            </div>`;
+                        } else {
+                            const carreraSeleccionada = $('#carrera option:selected').text().trim();
+                            const periodoSeleccionado = $('#numero_periodo option:selected').text().trim();
+
+                            html += `
+                            <div class="alert alert-success mb-3">
+                                <i class="fas fa-check-circle"></i> 
+                                Se encontraron ${response.length} materias para ${carreraSeleccionada} - ${periodoSeleccionado}
+                            </div>`;
+
+                            response.forEach((materia) => {
+                                html += `
+                                <div class="materia-item">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-1 text-center">
+                                            <input type="checkbox" name="materias[]" value="${materia.id_materia}" 
+                                                   class="materia-checkbox" style="width: 20px; height: 20px;">
+                                        </div>
+                                        <div class="col-md-5">
+                                            <strong>${materia.nombre}</strong><br>
+                                            <small class="text-muted">Clave: ${materia.clave || 'N/A'}</small><br>
+                                            <small class="text-info">Créditos: ${materia.creditos || 'N/A'} | Horas: ${materia.horas || 'N/A'}</small>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="small mb-1">Docente <span class="text-muted">(seleccione si asignará esta materia)</span></label>
+                                            <select name="docentes[${materia.id_materia}]" class="form-control form-control-sm docente-select">
+                                                <option value="">-- Seleccione un docente --</option>`;
+
+                                docentes.forEach(docente => {
+                                    html += `<option value="${docente.id_docente}">${docente.nombre_completo}</option>`;
+                                });
+
+                                html += `
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                            });
+                        }
+
+                        $('#materias-container').html(html);
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error al cargar materias:', error);
+                        $('#materias-container').html(`
+                        <div class="alert alert-danger">
+                            <i class="fas fa-times-circle"></i> 
+                            Error al cargar las materias. Por favor, intente nuevamente.
+                        </div>
+                    `);
+                    }
+                });
+            }
+
+            // Seleccionar/Deseleccionar todas en modal masivo
+            $('#selectAll').click(function() {
+                const checkboxes = $('.materia-checkbox');
+                const allChecked = checkboxes.length > 0 && checkboxes.filter(':checked').length === checkboxes.length;
+
+                checkboxes.each(function() {
+                    $(this).prop('checked', !allChecked);
+                    $(this).trigger('change'); // Disparar el evento change para actualizar los selects
+                });
+
+                $(this).html(allChecked ?
+                    '<i class="fas fa-check-square"></i> Seleccionar Todas' :
+                    '<i class="fas fa-square"></i> Deseleccionar Todas');
+            });
+
+            // Marcar visualmente items seleccionados en modal masivo
+            $(document).on('change', '.materia-checkbox', function() {
+                const isChecked = $(this).is(':checked');
+                const materiaItem = $(this).closest('.materia-item');
+                const docenteSelect = materiaItem.find('.docente-select');
+                
+                materiaItem.toggleClass('selected', isChecked);
+                
+                // Habilitar/deshabilitar el select de docente según el checkbox
+                if (isChecked) {
+                    docenteSelect.prop('disabled', false);
+                    docenteSelect.prop('required', true);
+                    // Resaltar visualmente
+                    docenteSelect.addClass('select-enabled');
+                } else {
+                    // NO deshabilitar, solo limpiar y quitar estilo
+                    docenteSelect.prop('required', false);
+                    docenteSelect.val(''); // Limpiar la selección
+                    docenteSelect.removeClass('select-enabled');
+                    // IMPORTANTE: NO usar .prop('disabled', true)
+                }
+            });
+
+            // ========== VALIDACIONES ==========
+
+            // Validar antes de enviar formulario masivo
+            // Validar antes de enviar formulario masivo
+           // Validar antes de enviar formulario masivo
+$('#formAsignacionMasiva').submit(function(e) {
+    e.preventDefault(); // Prevenir envío por defecto
+
+    const materiasSeleccionadas = $('.materia-checkbox:checked');
+    if (materiasSeleccionadas.length === 0) {
+        alert('Debe seleccionar al menos una materia');
+        return false;
+    }
+
+    // Validar que todas las materias seleccionadas tengan docente asignado
+    let todasTienenDocente = true;
+    let materiasSinDocente = [];
+    materiasSeleccionadas.each(function() {
+        const materiaId = $(this).val();
+        const docenteSelect = $(`select[name="docentes[${materiaId}]"]`);
+        if (!docenteSelect.val() || docenteSelect.val() === '') {
+            todasTienenDocente = false;
+            const materiaNombre = $(this).closest('.materia-item').find('strong').text();
+            materiasSinDocente.push(materiaNombre);
+        }
+    });
+
+    if (!todasTienenDocente) {
+        alert('Todas las materias seleccionadas deben tener un docente asignado.\nMaterias sin docente:\n- ' + materiasSinDocente.join('\n- '));
+        return false;
+    }
+
+    // Validar que el período escolar esté seleccionado
+    const periodoEscolar = $('#periodo_escolar').val();
+    if (!periodoEscolar) {
+        alert('Debe seleccionar un grupo para que se asigne el período escolar');
+        return false;
+    }
+
+    // ✅ CORRECCIÓN: DESHABILITAR LAS MATERIAS NO SELECCIONADAS EN LUGAR DE ELIMINARLAS
+    $('.materia-checkbox').not(':checked').each(function() {
+        const materiaId = $(this).val();
+        const docenteSelect = $(`select[name="docentes[${materiaId}]"]`);
+        // Deshabilitar el select y el checkbox para que el navegador los ignore
+        docenteSelect.prop('disabled', true);
+        $(this).prop('disabled', true); // También deshabilitamos el checkbox
+    });
+
+    // Log para debug ANTES de enviar
+    console.log('=== DATOS DEL FORMULARIO ANTES DE ENVIAR ===');
+    console.log('Grupo:', $('#grupo').val());
+    console.log('Período Escolar:', $('#periodo_escolar').val());
+    console.log('Materias seleccionadas:', materiasSeleccionadas.length);
+
+    console.log('=== DOCENTES QUE SE ENVIARÁN ===');
+    $('select[name^="docentes["]').each(function() {
+        console.log('Select encontrado:', {
+            name: $(this).attr('name'),
+            value: $(this).val(),
+            disabled: $(this).prop('disabled')
+        });
+    });
+
+    // Serializar y mostrar datos
+    const formData = $(this).serialize();
+    console.log('=== FORM DATA SERIALIZADO ===');
+    console.log(formData);
+
+    // ⚠️ NO PREVENIR MÁS - Permitir envío normal
+    this.submit();
+});
+
+            // Validar antes de enviar formulario individual
+            $('#formNuevaAsignacion').submit(function(e) {
+                const materiaSeleccionada = $('#materias-container-nueva select[name="id_materia"]').val();
+                if (!materiaSeleccionada) {
+                    e.preventDefault();
+                    alert('Debe seleccionar una materia');
+                    return false;
+                }
+
+                const periodoEscolar = $('#periodo_escolar_nueva').val();
+                if (!periodoEscolar) {
+                    e.preventDefault();
+                    alert('Debe seleccionar un grupo para que se asigne el período escolar');
+                    return false;
+                }
+            });
+
+            // Configuración inicial de modales
             setTimeout(function() {
                 $('.modal').each(function() {
                     $(this).modal({
@@ -666,7 +1414,6 @@
             }, 500);
         });
     </script>
-
 </body>
 
 </html>

@@ -22,24 +22,24 @@ class HistorialController extends Controller
      */
     public function index(Request $request)
     {
-         // Iniciamos la consulta base con relaciones
-    $query = Alumno::with(['datosPersonales', 'datosAcademicos', 'statusAcademico', 'generaciones']);
+        // Iniciamos la consulta base con relaciones
+        $query = Alumno::with(['datosPersonales', 'datosAcademicos', 'statusAcademico', 'generaciones']);
 
-   // 🔹 Filtro general (por matrícula o nombre)
-if ($request->filled('busqueda')) {
-    $busqueda = $request->busqueda;
+        // 🔹 Filtro general (por matrícula o nombre)
+        if ($request->filled('busqueda')) {
+            $busqueda = $request->busqueda;
 
-    $query->where(function ($q) use ($busqueda) {
-        $q->whereHas('datosAcademicos', function ($q2) use ($busqueda) {
-            $q2->where('matricula', 'LIKE', '%' . $busqueda . '%');
-        })
-        ->orWhereHas('datosPersonales', function ($q3) use ($busqueda) {
-            $q3->where('nombres', 'LIKE', '%' . $busqueda . '%')
-               ->orWhere('primer_apellido', 'LIKE', '%' . $busqueda . '%')
-               ->orWhere('segundo_apellido', 'LIKE', '%' . $busqueda . '%');
-        });
-    });
-}
+            $query->where(function ($q) use ($busqueda) {
+                $q->whereHas('datosAcademicos', function ($q2) use ($busqueda) {
+                    $q2->where('matricula', 'LIKE', '%' . $busqueda . '%');
+                })
+                ->orWhereHas('datosPersonales', function ($q3) use ($busqueda) {
+                    $q3->where('nombres', 'LIKE', '%' . $busqueda . '%')
+                        ->orWhere('primer_apellido', 'LIKE', '%' . $busqueda . '%')
+                        ->orWhere('segundo_apellido', 'LIKE', '%' . $busqueda . '%');
+                });
+            });
+        }
         $historial = Historial::with([
             'alumno',
             'historialStatus',
@@ -83,8 +83,9 @@ if ($request->filled('busqueda')) {
             
             // Buscar asignaciones con las relaciones correctas
             $asignaciones = AsignacionDocente::with([
-                    'docente:id_docente,nombre,apellido',
-                    'materia:id_materia,nombre,horas', // Cambiado a 'nombre' y 'horas'
+                    // Se agregan datosDocentes para obtener el nombre real del docente
+                    'docente.datosDocentes', 
+                    'materia:id_materia,nombre,horas', 
                     'grupo:id_grupo,nombre',
                     'periodoEscolar:id_periodo_escolar,nombre'
                 ])
@@ -93,15 +94,27 @@ if ($request->filled('busqueda')) {
                 ->get();
 
             
-            // Formatear las asignaciones según la estructura de tu modelo Materia
+            // Formatear las asignaciones
             $asignacionesFormateadas = $asignaciones->map(function ($asignacion) {
+                // Modificación aquí para acceder a datosDocentes
+                $nombreCompleto = trim(
+                    ($asignacion->docente?->datosDocentes?->nombres ?? '') . ' ' .
+                    ($asignacion->docente?->datosDocentes?->primer_apellido ?? '') . ' ' .
+                    ($asignacion->docente?->datosDocentes?->segundo_apellido ?? '')
+                );
+                
+                // Si datosDocentes no tiene nombre, se usa el nombre que esté directamente en la tabla docente (si existe)
+                if (empty($nombreCompleto)) {
+                    $nombreCompleto = trim(($asignacion->docente->nombre ?? '') . ' ' . ($asignacion->docente->apellido ?? ''));
+                }
+
                 return [
                     'id_asignacion' => $asignacion->id_asignacion,
-                    'materia_nombre' => $asignacion->materia->nombre ?? 'Sin nombre', // Cambiado a 'nombre'
-                    'docente_nombre' => trim(($asignacion->docente->nombre ?? '') . ' ' . ($asignacion->docente->apellido ?? '')),
+                    'materia_nombre' => $asignacion->materia->nombre ?? 'Sin nombre',
+                    'docente_nombre' => $nombreCompleto, // Docente completo
                     'grupo_nombre' => $asignacion->grupo->nombre ?? 'N/A',
                     'periodo_nombre' => $asignacion->periodoEscolar->nombre ?? 'N/A',
-                    'horas_semana' => $asignacion->materia->horas ?? '0' // Cambiado a 'horas'
+                    'horas_semana' => $asignacion->materia->horas ?? '0'
                 ];
             });
 
@@ -371,16 +384,28 @@ if ($request->filled('busqueda')) {
             
             Log::info("Buscando asignaciones para grupo: $idGrupo, periodo: $idPeriodo, numero periodo: $idNumeroPeriodo");
 
-            $asignaciones = AsignacionDocente::with(['materia', 'docente.datosPersonales'])
+            // Se añade la relación 'docente.datosDocentes' para obtener el nombre completo
+            $asignaciones = AsignacionDocente::with(['materia', 'docente.datosDocentes'])
                 ->where('id_grupo', $idGrupo)
                 ->where('id_periodo_escolar', $idPeriodo)
                 ->get()
                 ->map(function ($asignacion) {
+                    // CÓDIGO CORREGIDO PARA MOSTRAR EL NOMBRE COMPLETO DEL DOCENTE
+                    $docenteNombre = trim(
+                        ($asignacion->docente?->datosDocentes?->nombres ?? '') . ' ' .
+                        ($asignacion->docente?->datosDocentes?->primer_apellido ?? '') . ' ' .
+                        ($asignacion->docente?->datosDocentes?->segundo_apellido ?? '')
+                    );
+                    
+                    // Fallback por si la relación datosDocentes no tiene el nombre
+                    if (empty($docenteNombre)) {
+                        $docenteNombre = trim(($asignacion->docente->nombre ?? '') . ' ' . ($asignacion->docente->apellido ?? 'N/A'));
+                    }
+                    
                     return [
                         'id' => $asignacion->id_asignacion,
                         'materia' => $asignacion->materia->nombre ?? 'N/A',
-                        'docente' => optional($asignacion->docente->datosPersonales)->nombres . ' ' . 
-                                   optional($asignacion->docente->datosPersonales)->primer_apellido ?? 'N/A',
+                        'docente' => $docenteNombre,
                         'clave' => $asignacion->materia->clave ?? ''
                     ];
                 });
@@ -479,7 +504,9 @@ if ($request->filled('busqueda')) {
             $validated = $request->validate([
                 'id_periodo_escolar' => 'required|exists:periodos_escolares,id_periodo_escolar',
                 'id_grupo' => 'required|exists:grupos,id_grupo',
-                'id_numero_periodo' => 'required|exists:numeros_periodos,id_numero_periodo',
+                // Corregir la validación de la tabla a 'numero_periodos' si ese es el nombre correcto de tu tabla. 
+                // Asumo que 'numero_periodos' es la tabla correcta, si es 'numero_periodo' la dejo en la línea anterior.
+                'id_numero_periodo' => 'required|exists:numero_periodos,id_numero_periodo', 
                 'fecha_inscripcion' => 'nullable|date',
                 'alumnos' => 'required|array|min:1',
                 'alumnos.*.id_alumno' => 'required|exists:alumnos,id_alumno',
@@ -495,9 +522,11 @@ if ($request->filled('busqueda')) {
             $duplicados = 0;
 
             foreach ($request->alumnos as $alumnoData) {
+                // Verificar si ya existe una reinscripción activa para este alumno en este grupo y período
                 $existe = Historial::where('id_alumno', $alumnoData['id_alumno'])
                     ->where('id_periodo_escolar', $request->id_periodo_escolar)
                     ->where('id_grupo', $request->id_grupo)
+                    // Asumiendo que id_historial_status = 1 significa 'Activo' o 'Vigente'
                     ->exists();
 
                 if ($existe) {
@@ -513,15 +542,19 @@ if ($request->filled('busqueda')) {
                     'fecha_inscripcion' => $alumnoData['fecha_inscripcion'] ?? $request->fecha_inscripcion ?? now(),
                     'id_status_inicio' => $alumnoData['id_status_inicio'],
                     'id_status_terminacion' => $alumnoData['id_status_terminacion'] ?? null,
-                    'id_historial_status' => 1,
+                    'id_historial_status' => 1, // Por defecto, se crea como Activo/Vigente
                 ];
 
-                // Asignar las asignaciones de docentes
+                // Asignar las asignaciones de docentes (columnas id_asignacion_1 a id_asignacion_8)
                 if (isset($alumnoData['asignaciones']) && is_array($alumnoData['asignaciones'])) {
                     for ($i = 1; $i <= 8; $i++) {
                         $historialData["id_asignacion_$i"] = $alumnoData['asignaciones'][$i - 1] ?? null;
                     }
                 }
+                
+                // Asegurar que las columnas 9 y 10 (si existen) estén a null
+                $historialData['id_asignacion_9'] = null;
+                $historialData['id_asignacion_10'] = null;
 
                 Historial::create($historialData);
                 $reinscripciones++;

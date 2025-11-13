@@ -11,9 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('estado', function (Blueprint $table) {
-            $table->integer('id_estado', true);
-            $table->string('nombre', 50);
+        Schema::create('planes_estudio', function (Blueprint $table) {
+            $table->integer('id_plan_estudio', true);
+            $table->string('nombre', 100);
+            $table->integer('id_carrera')->nullable()->index('id_carrera');
+            $table->enum('vigencia', ['Vigente', 'No vigente']);
             $table->json('datos')->nullable();
         });
     }
@@ -23,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('estado');
+        Schema::dropIfExists('planes_estudio');
     }
 };

@@ -19,11 +19,7 @@ class Grupo extends Model
         'nombre',
         'id_turno',
         'id_carrera',
-        'datos'
-    ];
-
-    protected $casts = [
-        'datos' => 'array'
+        'periodo' // llave foranea de tabla periodos_escolares.id_periodo_escolar
     ];
 
     /**

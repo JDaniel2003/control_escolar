@@ -159,7 +159,8 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/asignaciones/masiva/materias', [AsignacionMasivaController::class, 'storeMaterias'])->name('asignaciones.masiva.store-materias');
     Route::post('/asignaciones/masiva/docente', [AsignacionMasivaController::class, 'storeDocente'])->name('asignaciones.masiva.store-docente');
     Route::get('/asignaciones/masiva/materias-carrera/{id_carrera}', [AsignacionMasivaController::class, 'getMateriasPorCarrera']);
-
+Route::post('/asignaciones/masiva/store-materias', [AsignacionDocenteController::class, 'storeMasivoMaterias'])
+    ->name('asignaciones.masiva.store-materias');
     // Asignaciones individuales
     Route::get('/asignaciones', [AsignacionDocenteController::class, 'index'])->name('asignaciones.index');
     Route::post('/asignaciones', [AsignacionDocenteController::class, 'store'])->name('asignaciones.store');
@@ -169,6 +170,14 @@ Route::middleware(['auth'])->group(function () {
 
 Route::get('/buscar-alumno', [HistorialController::class, 'buscarAlumno'])->name('buscar.alumno');
 Route::get('/asignaciones/disponibles', [HistorialController::class, 'getAsignacionesDisponibles']);
+
+    // Rutas para asignaciones
+Route::resource('asignaciones', AsignacionDocenteController::class);
+
+//////////////////////////////---ASIGNACIONES MASIVAS----///////////////////////////////////////////////
+Route::post('/asignaciones/masiva/store-materias', [AsignacionDocenteController::class, 'storeMasivoMaterias'])->name('asignaciones.masiva.store-materias');
+Route::get('/asignaciones/masiva/materias-carrera-periodo/{carreraId}/{idNumeroPeriodo}', [AsignacionDocenteController::class, 'materiasPorCarreraYPeriodo'])->name('asignaciones.masiva.materias-carrera-periodo');
+/////////////////////////////////////////////////////////////////////////////
 
 Route::middleware(['auth'])->group(function () {
 Route::get('/historial/reinscripcion-masiva', [HistorialController::class, 'reinscripcionMasiva'])
@@ -193,7 +202,19 @@ Route::get('/test-vista', function() {
     
     return view('historial.reinscripcion-masiva', compact('periodos', 'grupos', 'statusAcademicos'));
 })->middleware('auth');
-Route::get('/test', fn() => 'Laravel funciona');
+
+
+////////////////////////// Obtener alumnos del grupo
+Route::post('/historial/obtener-alumnos-grupo', [HistorialController::class, 'obtenerAlumnosGrupo'])
+    ->name('historial.obtener-alumnos-grupo');
+
+// Obtener materias del grupo (NUEVA)
+Route::post('/asignaciones/obtener-materias-grupo', [AsignacionDocenteController::class, 'obtenerMateriasGrupo'])
+    ->name('asignaciones.obtener-materias-grupo');
+
+// Guardar reinscripciones masivas
+Route::post('/historial/store-masivo', [HistorialController::class, 'storeMasivo'])
+    ->name('historial.store-masivo');
 
 #Route::get('/login', function () {
  #   return view('auth.login');

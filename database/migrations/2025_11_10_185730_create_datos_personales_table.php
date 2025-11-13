@@ -22,6 +22,7 @@ return new class extends Migration
             $table->date('fecha_nacimiento')->nullable();
             $table->integer('edad')->nullable();
             $table->string('lugar_nacimiento', 100)->nullable();
+            $table->integer('estado_nacimiento')->nullable()->index('fk_estado_nacimiento');
             $table->integer('id_estado_civil')->nullable()->index('id_estado_civil');
             $table->integer('id_tipo_sangre')->nullable()->index('id_tipo_sangre');
             $table->integer('id_domicilio_alumno')->nullable()->index('id_domicilio_alumno');

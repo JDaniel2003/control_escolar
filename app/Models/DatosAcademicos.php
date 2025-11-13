@@ -23,4 +23,7 @@ class DatosAcademicos extends Model
 {
     return $this->belongsTo(Carrera::class, 'id_carrera');
 }
+public function planEstudio() {
+    return $this->belongsTo(PlanEstudio::class, 'id_plan_estudio');
+}
 }

@@ -17,6 +17,7 @@ return new class extends Migration
             $table->integer('id_turno')->nullable()->index('id_turno');
             $table->integer('id_carrera')->nullable()->index('id_carrera');
             $table->json('datos')->nullable();
+            $table->integer('periodo')->nullable()->index('grupos_ibfk_5');
         });
     }
 

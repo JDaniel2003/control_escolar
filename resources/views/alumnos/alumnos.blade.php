@@ -86,7 +86,8 @@
                     <a class="nav-link navbar-active-item px-3 mr-1">Alumnos</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link text-white px-3 mr-1" href="#">Asignaciones Docentes</a>
+                    <a class="nav-link text-white px-3 mr-1" href="{{ route('asignaciones.index') }}">Asignaciones
+                        Docentes</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link text-white px-3" href="{{ route('historial.index') }}">Historial</a>
@@ -160,12 +161,12 @@
                                         </select>
 
                                         <!-- Estatus -->
-                                        <select name="id_status_academico"
-                                            class="form-control form-control-sm w-auto @error('id_status_academico') is-invalid @enderror">
+                                        <select name="id_historial_status"
+                                            class="form-control form-control-sm w-auto @error('id_historial_status') is-invalid @enderror">
                                             <option value="">🔍 Buscar por Estatus</option>
                                             @foreach ($estatus as $status)
-                                                <option value="{{ $status->id_status_academico }}"
-                                                    {{ old('id_status_academico') == $status->id_status_academico ? 'selected' : '' }}>
+                                                <option value="{{ $status->id_historial_status }}"
+                                                    {{ old('id_historial_status') == $status->id_historial_status ? 'selected' : '' }}>
                                                     {{ $status->nombre }}
                                                 </option>
                                             @endforeach
@@ -290,19 +291,18 @@
                                                         <div class="modal-content">
 
                                                             {{-- Header --}}
-                                                            <div class="modal-header bg-white border-bottom"
-                                                                style="border-bottom: 3px solid #1e40af !important;">
-                                                                <div class="w-100">
-                                                                    <h5 class="modal-title font-weight-bold text-uppercase"
-                                                                        style="color: #1e3a8a; letter-spacing: 0.5px;">
-                                                                        <i class="fas fa-id-card mr-2"></i>Expediente
-                                                                        del Estudiante
-                                                                    </h5>
-                                                                    <small class="text-muted">Información académica y
-                                                                        personal</small>
+                                                            <div class="modal-header modal-header-custom border-0">
+                                                                <div class="w-100 text-center">
+                                                                    <h5 class="m-0 font-weight-bold">📓 Detalles del
+                                                                        Estudiante </h5>
+                                                                    <p class="m-0 mt-2 mb-0"
+                                                                        style="font-size: 0.9rem; opacity: 0.95;">
+                                                                        Información académica y personal
+                                                                    </p>
                                                                 </div>
-                                                                <button type="button" class="close"
-                                                                    data-dismiss="modal" aria-label="Cerrar">
+                                                                <button type="button" class="close text-white"
+                                                                    data-dismiss="modal" aria-label="Cerrar"
+                                                                    style="position: absolute; right: 1.5rem; top: 1.5rem; font-size: 1.8rem; opacity: 0.9;">
                                                                     <span aria-hidden="true">&times;</span>
                                                                 </button>
                                                             </div>
@@ -322,8 +322,8 @@
                                                                             </div>
                                                                         </div>
                                                                         <div class="col-md-10">
-                                                                            <h4 class="mb-2 font-weight-bold"
-                                                                                style="color: #1e3a8a;">
+                                                                            <h4
+                                                                                class="mb-2 font-weight-bold text-danger">
                                                                                 {{ $alumno->datosPersonales?->nombres ?? 'N/A' }}
                                                                                 {{ $alumno->datosPersonales?->primer_apellido ?? '' }}
                                                                                 {{ $alumno->datosPersonales?->segundo_apellido ?? '' }}
@@ -331,18 +331,19 @@
                                                                             <div class="row">
                                                                                 <div class="col-md-4">
                                                                                     <small
-                                                                                        class="text-muted d-block">Matrícula</small>
+                                                                                        class="text-muted text-uppercase d-block">Matrícula:
+                                                                                    </small>
                                                                                     <strong
-                                                                                        style="color: #1e40af;">{{ $alumno->datosAcademicos?->matricula ?? 'Sin Matrícula' }}</strong>
+                                                                                        class="text-muted d-block">{{ $alumno->datosAcademicos?->matricula ?? 'Sin Matrícula' }}</strong>
                                                                                 </div>
                                                                                 <div class="col-md-4">
                                                                                     <small
-                                                                                        class="text-muted d-block">CURP</small>
+                                                                                        class="text-muted text-uppercase d-block">CURP</small>
                                                                                     <strong>{{ $alumno->datosPersonales?->curp ?? 'Sin CURP' }}</strong>
                                                                                 </div>
                                                                                 <div class="col-md-4">
                                                                                     <small
-                                                                                        class="text-muted d-block">Estatus</small>
+                                                                                        class="text-muted text-uppercase d-block">Estatus</small>
                                                                                     <span
                                                                                         class="badge badge-{{ $alumno->statusAcademico?->color ?? 'secondary' }} px-3 py-1">
                                                                                         {{ $alumno->statusAcademico?->nombre ?? 'Sin Estatus' }}
@@ -361,8 +362,8 @@
                                                                         <div class="bg-white border rounded">
                                                                             <div class="px-4 py-3 border-bottom"
                                                                                 style="background-color: #f1f5f9;">
-                                                                                <h6 class="mb-0 font-weight-bold text-uppercase"
-                                                                                    style="color: #1e3a8a; font-size: 0.875rem; letter-spacing: 0.5px;">
+                                                                                <h6
+                                                                                    class="text-danger font-weight-bold mb-3">
                                                                                     <i
                                                                                         class="fas fa-graduation-cap mr-2"></i>Datos
                                                                                     Académicos
@@ -370,42 +371,36 @@
                                                                             </div>
                                                                             <div class="p-4">
                                                                                 <div class="row">
-                                                                                    <div class="col-md-6 mb-3">
+                                                                                    
+                                                                                    @if ($alumno->estatus && in_array($alumno->estatus, [1, 2, 3, 4, 5, 6, 8, 9]))
+                                                                                    <div class="text-center col-md-5 mb-3">
                                                                                         <label
-                                                                                            class="text-muted small mb-1">Carrera</label>
+                                                                                            class="text-muted text-uppercase d-block">Carrera</label>
                                                                                         <div class="font-weight-bold">
                                                                                             {{ $alumno->datosAcademicos?->carrera?->nombre ?? 'No Asignada' }}
                                                                                         </div>
                                                                                     </div>
-                                                                                    <div class="col-md-6 mb-3">
-                                                                                        <label
-                                                                                            class="text-muted small mb-1">Generación</label>
-                                                                                        <div class="font-weight-bold">
-                                                                                            {{ $alumno->generaciones?->nombre ?? 'N/A' }}
-                                                                                        </div>
-                                                                                    </div>
-                                                                                    @if ($alumno->id_status_academico && in_array($alumno->id_status_academico, [2, 3, 4]))
-                                                                                        <div class="col-md-4 mb-3">
+                                                                                    <div class="text-center col-md-4 mb-3">
                                                                                             <label
-                                                                                                class="text-muted small mb-1">Plan
+                                                                                                class="text-muted text-uppercase d-block">Plan
                                                                                                 de Estudios</label>
                                                                                             <div
                                                                                                 class="font-weight-bold">
                                                                                                 {{ $alumno->datosAcademicos?->planEstudio?->nombre ?? 'No asignado' }}
                                                                                             </div>
                                                                                         </div>
-                                                                                        <div class="col-md-4 mb-3">
-                                                                                            <label
-                                                                                                class="text-muted small mb-1">Semestre
-                                                                                                Actual</label>
-                                                                                            <div
-                                                                                                class="font-weight-bold">
-                                                                                                {{ $alumno->datosAcademicos?->semestre ?? 'N/A' }}
-                                                                                            </div>
+                                                                                    <div class="text-center col-md-4 mb-3">
+                                                                                        <label
+                                                                                            class="text-muted text-uppercase d-block">Generación</label>
+                                                                                        <div class="font-weight-bold">
+                                                                                            {{ $alumno->generaciones?->nombre ?? 'N/A' }}
                                                                                         </div>
-                                                                                        <div class="col-md-4 mb-3">
+                                                                                    </div>
+                                                                                        
+
+                                                                                        <div class="col-md-3 mb-3">
                                                                                             <label
-                                                                                                class="text-muted small mb-1">Servicio
+                                                                                                class="text-muted text-uppercase d-block">Servicio
                                                                                                 Social</label>
                                                                                             <div
                                                                                                 class="font-weight-bold {{ $alumno->servicios_social ? 'text-success' : 'text-warning' }}">
@@ -425,8 +420,8 @@
                                                                         <div class="bg-white border rounded">
                                                                             <div class="px-4 py-3 border-bottom"
                                                                                 style="background-color: #f1f5f9;">
-                                                                                <h6 class="mb-0 font-weight-bold text-uppercase"
-                                                                                    style="color: #1e3a8a; font-size: 0.875rem; letter-spacing: 0.5px;">
+                                                                                <h6
+                                                                                    class="text-danger font-weight-bold mb-3">
                                                                                     <i
                                                                                         class="fas fa-user mr-2"></i>Información
                                                                                     Personal
@@ -436,61 +431,70 @@
                                                                                 <div class="row">
                                                                                     <div class="col-md-4 mb-3">
                                                                                         <label
-                                                                                            class="text-muted small mb-1">Fecha
+                                                                                            class="text-muted text-uppercase d-block">Fecha
                                                                                             de Nacimiento</label>
-                                                                                        <div>
+                                                                                        <div class="font-weight-bold">
                                                                                             {{ $alumno->datosPersonales?->fecha_nacimiento ? \Carbon\Carbon::parse($alumno->datosPersonales->fecha_nacimiento)->format('d/m/Y') : 'N/A' }}
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <!-- En el modal de Ver Alumno -->
+                                                                                    <div class="col-md-4 mb-3">
+                                                                                        <label
+                                                                                            class="text-muted text-uppercase d-block">Estado
+                                                                                            de Nacimiento</label>
+                                                                                        <div class="font-weight-bold">
+                                                                                            {{ $alumno->datosPersonales->estadoNacimiento->nombre ?? 'No registrado' }}
                                                                                         </div>
                                                                                     </div>
                                                                                     <div class="col-md-2 mb-3">
                                                                                         <label
-                                                                                            class="text-muted small mb-1">Edad</label>
-                                                                                        <div>
+                                                                                            class="text-muted text-uppercase d-block">Edad</label>
+                                                                                        <div class="font-weight-bold">
                                                                                             {{ $alumno->datosPersonales?->edad ?? 'N/A' }}
                                                                                             años</div>
                                                                                     </div>
                                                                                     <div class="col-md-3 mb-3">
                                                                                         <label
-                                                                                            class="text-muted small mb-1">Género</label>
-                                                                                        <div>
+                                                                                            class="text-muted text-uppercase d-block">Género</label>
+                                                                                        <div class="font-weight-bold">
                                                                                             {{ $alumno->datosPersonales?->genero?->nombre ?? 'N/A' }}
                                                                                         </div>
                                                                                     </div>
                                                                                     <div class="col-md-3 mb-3">
                                                                                         <label
-                                                                                            class="text-muted small mb-1">Estado
+                                                                                            class="text-muted text-uppercase d-block">Estado
                                                                                             Civil</label>
-                                                                                        <div>
+                                                                                        <div class="font-weight-bold">
                                                                                             {{ $alumno->datosPersonales?->estadoCivil?->nombre ?? 'N/A' }}
                                                                                         </div>
                                                                                     </div>
                                                                                     <div class="col-md-3 mb-3">
                                                                                         <label
-                                                                                            class="text-muted small mb-1">Tipo
+                                                                                            class="text-muted text-uppercase d-block">Tipo
                                                                                             de Sangre</label>
-                                                                                        <div>
+                                                                                        <div class="font-weight-bold">
                                                                                             {{ $alumno->datosPersonales?->tipoSangre?->nombre ?? 'N/A' }}
                                                                                         </div>
                                                                                     </div>
                                                                                     <div class="col-md-3 mb-3">
                                                                                         <label
-                                                                                            class="text-muted small mb-1">NSS</label>
-                                                                                        <div>
+                                                                                            class="text-muted text-uppercase d-block">NSS</label>
+                                                                                        <div class="font-weight-bold">
                                                                                             {{ $alumno->datosPersonales?->numero_seguridad_social ?? 'No registrado' }}
                                                                                         </div>
                                                                                     </div>
                                                                                     <div class="col-md-3 mb-3">
                                                                                         <label
-                                                                                            class="text-muted small mb-1">Lengua
+                                                                                            class="text-muted text-uppercase d-block">Lengua
                                                                                             Indígena</label>
-                                                                                        <div>
+                                                                                        <div class="font-weight-bold">
                                                                                             {{ $alumno->datosPersonales?->lenguaIndigena?->nombre ?? 'No' }}
                                                                                         </div>
                                                                                     </div>
                                                                                     <div class="col-md-3 mb-3">
                                                                                         <label
-                                                                                            class="text-muted small mb-1">Discapacidad</label>
-                                                                                        <div>
+                                                                                            class="text-muted text-uppercase d-block">Discapacidad</label>
+                                                                                        <div class="font-weight-bold">
                                                                                             {{ $alumno->datosPersonales?->discapacidad?->nombre ?? 'Ninguna' }}
                                                                                         </div>
                                                                                     </div>
@@ -505,8 +509,8 @@
                                                                             <div class="bg-white border rounded h-100">
                                                                                 <div class="px-4 py-3 border-bottom"
                                                                                     style="background-color: #f1f5f9;">
-                                                                                    <h6 class="mb-0 font-weight-bold text-uppercase"
-                                                                                        style="color: #1e3a8a; font-size: 0.875rem; letter-spacing: 0.5px;">
+                                                                                    <h6
+                                                                                        class="text-danger font-weight-bold mb-3">
                                                                                         <i
                                                                                             class="fas fa-phone mr-2"></i>Contacto
                                                                                     </h6>
@@ -514,16 +518,16 @@
                                                                                 <div class="p-4">
                                                                                     <div class="mb-3">
                                                                                         <label
-                                                                                            class="text-muted small mb-1">Correo
+                                                                                            class="text-muted text-uppercase d-block">Correo
                                                                                             Electrónico</label>
-                                                                                        <div>
+                                                                                        <div class="font-weight-bold">
                                                                                             {{ $alumno->datosPersonales?->correo ?? 'No registrado' }}
                                                                                         </div>
                                                                                     </div>
                                                                                     <div>
                                                                                         <label
-                                                                                            class="text-muted small mb-1">Teléfono</label>
-                                                                                        <div>
+                                                                                            class="text-muted text-uppercase d-block">Teléfono</label>
+                                                                                        <div class="font-weight-bold">
                                                                                             {{ $alumno->datosPersonales?->telefono ?? 'No registrado' }}
                                                                                         </div>
                                                                                     </div>
@@ -534,14 +538,14 @@
                                                                             <div class="bg-white border rounded h-100">
                                                                                 <div class="px-4 py-3 border-bottom"
                                                                                     style="background-color: #f1f5f9;">
-                                                                                    <h6 class="mb-0 font-weight-bold text-uppercase"
-                                                                                        style="color: #1e3a8a; font-size: 0.875rem; letter-spacing: 0.5px;">
+                                                                                    <h6
+                                                                                        class="text-danger font-weight-bold mb-3">
                                                                                         <i
                                                                                             class="fas fa-map-marker-alt mr-2"></i>Domicilio
                                                                                     </h6>
                                                                                 </div>
                                                                                 <div class="p-4">
-                                                                                    <div class="mb-2">
+                                                                                    <div class="font-weight-bold">
                                                                                         <strong>{{ $alumno->datosPersonales?->domicilioAlumno?->calle ?? 'No registrada' }}</strong>
                                                                                         #{{ $alumno->datosPersonales?->domicilioAlumno?->numero_exterior ?? 'S/N' }}
                                                                                         @if ($alumno->datosPersonales?->domicilioAlumno?->numero_interior)
@@ -549,7 +553,7 @@
                                                                                             {{ $alumno->datosPersonales?->domicilioAlumno?->numero_interior }}
                                                                                         @endif
                                                                                     </div>
-                                                                                    <div>
+                                                                                    <div class="font-weight-bold">
                                                                                         {{ $alumno->datosPersonales?->domicilioAlumno?->colonia ?? '' }}<br>
                                                                                         {{ $alumno->datosPersonales?->domicilioAlumno?->municipio ?? '' }},
                                                                                         {{ $alumno->datosPersonales?->domicilioAlumno?->estado?->nombre ?? '' }}<br>
@@ -566,8 +570,8 @@
                                                                         <div class="bg-white border rounded">
                                                                             <div class="px-4 py-3 border-bottom"
                                                                                 style="background-color: #f1f5f9;">
-                                                                                <h6 class="mb-0 font-weight-bold text-uppercase"
-                                                                                    style="color: #1e3a8a; font-size: 0.875rem; letter-spacing: 0.5px;">
+                                                                                <h6
+                                                                                    class="text-danger font-weight-bold mb-3">
                                                                                     <i
                                                                                         class="fas fa-school mr-2"></i>Escuela
                                                                                     de Procedencia
@@ -577,44 +581,44 @@
                                                                                 <div class="row">
                                                                                     <div class="col-md-4 mb-3">
                                                                                         <label
-                                                                                            class="text-muted small mb-1">Subsistema</label>
-                                                                                        <div>
-                                                                                            {{ $alumno->escuelaProcedencia?->subsistema?->nombre ?? 'No especificado' }}
+                                                                                            class="text-muted text-uppercase d-block">Subsistema</label>
+                                                                                        <div class="font-weight-bold">
+                                                                                            {{ $alumno->escuelaProcedencia?->subsistemas?->nombre ?? 'No especificado' }}
                                                                                         </div>
                                                                                     </div>
                                                                                     <div class="col-md-4 mb-3">
                                                                                         <label
-                                                                                            class="text-muted small mb-1">Tipo
+                                                                                            class="text-muted text-uppercase d-block">Tipo
                                                                                             de Escuela</label>
-                                                                                        <div>
-                                                                                            {{ $alumno->escuelaProcedencia?->tipoEscuela?->nombre ?? 'No especificado' }}
+                                                                                        <div class="font-weight-bold">
+                                                                                            {{ $alumno->escuelaProcedencia?->tiposEscuela?->nombre ?? 'No especificado' }}
                                                                                         </div>
                                                                                     </div>
                                                                                     <div class="col-md-4 mb-3">
                                                                                         <label
-                                                                                            class="text-muted small mb-1">Área
+                                                                                            class="text-muted text-uppercase d-block">Área
                                                                                             de Especialización</label>
-                                                                                        <div>
+                                                                                        <div class="font-weight-bold">
                                                                                             {{ $alumno->escuelaProcedencia?->areaEspecializacion?->nombre ?? 'No especificada' }}
                                                                                         </div>
                                                                                     </div>
                                                                                     <div class="col-md-4 mb-3">
                                                                                         <label
-                                                                                            class="text-muted small mb-1">Localidad</label>
-                                                                                        <div>
+                                                                                            class="text-muted text-uppercase d-block">Localidad</label>
+                                                                                        <div class="font-weight-bold">
                                                                                             {{ $alumno->escuelaProcedencia?->localidad ?? 'No registrada' }}
                                                                                         </div>
                                                                                     </div>
                                                                                     <div class="col-md-4 mb-3">
                                                                                         <label
-                                                                                            class="text-muted small mb-1">Estado</label>
-                                                                                        <div>
-                                                                                            {{ $alumno->escuelaProcedencia?->estado?->nombre ?? 'No registrado' }}
+                                                                                            class="text-muted text-uppercase d-block">Estado</label>
+                                                                                        <div class="font-weight-bold">
+                                                                                            {{ $alumno->escuelaProcedencia?->estados?->nombre ?? 'No registrado' }}
                                                                                         </div>
                                                                                     </div>
                                                                                     <div class="col-md-2 mb-3">
                                                                                         <label
-                                                                                            class="text-muted small mb-1">Promedio</label>
+                                                                                            class="text-muted text-uppercase d-block">Promedio</label>
                                                                                         <div
                                                                                             class="font-weight-bold text-primary">
                                                                                             {{ $alumno->escuelaProcedencia?->promedio_egreso ?? 'N/A' }}
@@ -622,9 +626,9 @@
                                                                                     </div>
                                                                                     <div class="col-md-2 mb-3">
                                                                                         <label
-                                                                                            class="text-muted small mb-1">Beca</label>
-                                                                                        <div>
-                                                                                            {{ $alumno->escuelaProcedencia?->beca?->nombre ?? 'No' }}
+                                                                                            class="text-muted text-uppercase d-block">Beca</label>
+                                                                                        <div class="font-weight-bold">
+                                                                                            {{ $alumno->escuelaProcedencia?->becas?->nombre ?? 'No' }}
                                                                                         </div>
                                                                                     </div>
                                                                                 </div>
@@ -636,8 +640,8 @@
                                                                     <div class="bg-white border rounded">
                                                                         <div class="px-4 py-3 border-bottom"
                                                                             style="background-color: #f1f5f9;">
-                                                                            <h6 class="mb-0 font-weight-bold text-uppercase"
-                                                                                style="color: #1e3a8a; font-size: 0.875rem; letter-spacing: 0.5px;">
+                                                                            <h6
+                                                                                class="text-danger font-weight-bold mb-3">
                                                                                 <i
                                                                                     class="fas fa-user-tie mr-2"></i>Tutor
                                                                                 o Responsable Legal
@@ -647,7 +651,7 @@
                                                                             <div class="row">
                                                                                 <div class="col-md-4 mb-3">
                                                                                     <label
-                                                                                        class="text-muted small mb-1">Nombre
+                                                                                        class="text-muted text-uppercase d-block">Nombre
                                                                                         Completo</label>
                                                                                     <div class="font-weight-bold">
                                                                                         {{ $alumno->tutor?->nombres ?? 'No registrado' }}
@@ -655,22 +659,22 @@
                                                                                 </div>
                                                                                 <div class="col-md-3 mb-3">
                                                                                     <label
-                                                                                        class="text-muted small mb-1">Parentesco</label>
-                                                                                    <div>
-                                                                                        {{ $alumno->tutor?->parentesco?->nombre ?? 'No especificado' }}
+                                                                                        class="text-muted text-uppercase d-block">Parentesco</label>
+                                                                                    <div class="font-weight-bold">
+                                                                                        {{ $alumno->tutor?->parentescos?->nombre ?? 'No especificado' }}
                                                                                     </div>
                                                                                 </div>
                                                                                 <div class="col-md-3 mb-3">
                                                                                     <label
-                                                                                        class="text-muted small mb-1">Teléfono</label>
-                                                                                    <div>
+                                                                                        class="text-muted text-uppercase d-block">Teléfono</label>
+                                                                                    <div class="font-weight-bold">
                                                                                         {{ $alumno->tutor?->telefono ?? 'No registrado' }}
                                                                                     </div>
                                                                                 </div>
                                                                                 <div class="col-12">
                                                                                     <label
-                                                                                        class="text-muted small mb-1">Domicilio</label>
-                                                                                    <div>
+                                                                                        class="text-muted text-uppercase d-block">Domicilio</label>
+                                                                                    <div class="font-weight-bold">
                                                                                         {{ $alumno->tutor?->domiciliosTutor?->calle ?? 'No registrada' }}
                                                                                         #{{ $alumno->tutor?->domiciliosTutor?->numero_exterior ?? '' }}
                                                                                         {{ $alumno->tutor?->domiciliosTutor?->numero_interior ? 'Int. ' . $alumno->tutor?->domiciliosTutor?->numero_interior : '' }},
@@ -852,6 +856,29 @@
                                                                                                     value="{{ old('lugar_nacimiento', optional($alumno->datosPersonales)->lugar_nacimiento) }}"
                                                                                                     placeholder="Ciudad, Estado">
                                                                                             </div>
+                                                                                            <div class="col-md-3 mb-2">
+                                                                                                <label
+                                                                                                    class="form-label-custom small mb-1">Estado
+                                                                                                    de
+                                                                                                    Nacimiento</label>
+                                                                                                <select
+                                                                                                    name="estado_nacimiento"
+                                                                                                    class="form-control form-control-sm">
+                                                                                                    <option
+                                                                                                        value="">
+                                                                                                        -- Selecciona --
+                                                                                                    </option>
+                                                                                                    @foreach ($estados as $estado)
+                                                                                                        <option
+                                                                                                            value="{{ $estado->id_estado }}"
+                                                                                                            {{ old('estado_nacimiento', $alumno->datosPersonales->estado_nacimiento ?? null) == $estado->id_estado ? 'selected' : '' }}>
+                                                                                                            {{ $estado->nombre }}
+                                                                                                        </option>
+                                                                                                    @endforeach
+                                                                                                </select>
+                                                                                            </div>
+
+
                                                                                         </div>
 
                                                                                         <div class="row">
@@ -1520,10 +1547,12 @@
                                                                                                     Estatus <span
                                                                                                         class="text-danger">*</span>
                                                                                                 </label>
+
                                                                                                 <select
-                                                                                                    name="id_status_academico"
-                                                                                                    id="id_status_academico_editar{{ $alumno->id_alumno }}"
+                                                                                                    name="id_historial_status"
+                                                                                                    id="id_historial_status_editar{{ $alumno->id_alumno }}"
                                                                                                     class="form-control form-control-sm"
+                                                                                                    onchange="toggleSeccionAcademica{{ $alumno->id_alumno }}(this.value)"
                                                                                                     required>
                                                                                                     <option
                                                                                                         value="">
@@ -1531,8 +1560,8 @@
                                                                                                     </option>
                                                                                                     @foreach ($estatus as $status)
                                                                                                         <option
-                                                                                                            value="{{ $status->id_status_academico }}"
-                                                                                                            {{ old('id_status_academico', $alumno->id_status_academico) == $status->id_status_academico ? 'selected' : '' }}>
+                                                                                                            value="{{ $status->id_historial_status }}"
+                                                                                                            {{ $alumno->estatus == $status->id_historial_status ? 'selected' : '' }}>
                                                                                                             {{ $status->nombre }}
                                                                                                         </option>
                                                                                                     @endforeach
@@ -1542,7 +1571,7 @@
 
                                                                                         {{-- =================== DATOS ACADÉMICOS (CONDICIONAL) =================== --}}
                                                                                         <div id="seccionAcademicaEditar{{ $alumno->id_alumno }}"
-                                                                                            style="{{ in_array($alumno->id_status_academico, [2, 3, 4]) ? 'display:block;' : 'display:none;' }}">
+                                                                                            style="{{ in_array($alumno->estatus, [1, 2, 3, 4, 5, 6, 8, 9]) ? 'display:block;' : 'display:none;' }}">
                                                                                             <div class="row mt-3">
                                                                                                 <div
                                                                                                     class="col-md-4 mb-2">
@@ -1566,12 +1595,13 @@
                                                                                                             value="">
                                                                                                             --
                                                                                                             Selecciona
-                                                                                                            --
-                                                                                                        </option>
+                                                                                                            --</option>
                                                                                                         @foreach ($carreras as $carrera)
                                                                                                             <option
                                                                                                                 value="{{ $carrera->id_carrera }}"
-                                                                                                                {{ old('id_carrera', $alumno->datosAcademicos?->id_carrera) == $carrera->id_carrera ? 'selected' : '' }}>
+                                                                                                                @if (old('id_carrera')) {{ old('id_carrera') == $carrera->id_carrera ? 'selected' : '' }}
+                                    @else
+                                        {{ $alumno->datosAcademicos?->id_carrera == $carrera->id_carrera ? 'selected' : '' }} @endif>
                                                                                                                 {{ $carrera->nombre }}
                                                                                                             </option>
                                                                                                         @endforeach
@@ -1588,12 +1618,13 @@
                                                                                                             value="">
                                                                                                             --
                                                                                                             Selecciona
-                                                                                                            --
-                                                                                                        </option>
+                                                                                                            --</option>
                                                                                                         @foreach ($generaciones as $generacion)
                                                                                                             <option
                                                                                                                 value="{{ $generacion->id_generacion }}"
-                                                                                                                {{ old('id_generacion', $alumno->id_generacion) == $generacion->id_generacion ? 'selected' : '' }}>
+                                                                                                                @if (old('id_generacion')) {{ old('id_generacion') == $generacion->id_generacion ? 'selected' : '' }}
+                                    @else
+                                        {{ $alumno->id_generacion == $generacion->id_generacion ? 'selected' : '' }} @endif>
                                                                                                                 {{ $generacion->nombre }}
                                                                                                             </option>
                                                                                                         @endforeach
@@ -1612,15 +1643,43 @@
                                                                                                             value="">
                                                                                                             --
                                                                                                             Selecciona
-                                                                                                            --
-                                                                                                        </option>
+                                                                                                            --</option>
                                                                                                         @foreach ($planes as $plan)
                                                                                                             <option
                                                                                                                 value="{{ $plan->id_plan_estudio }}"
-                                                                                                                {{ old('id_plan_estudio', $alumno->datosAcademicos?->id_plan_estudio) == $plan->id_plan_estudio ? 'selected' : '' }}>
+                                                                                                                @if (old('id_plan_estudio')) {{ old('id_plan_estudio') == $plan->id_plan_estudio ? 'selected' : '' }}
+                                    @else
+                                        {{ $alumno->datosAcademicos?->id_plan_estudio == $plan->id_plan_estudio ? 'selected' : '' }} @endif>
                                                                                                                 {{ $plan->nombre }}
                                                                                                             </option>
                                                                                                         @endforeach
+                                                                                                    </select>
+                                                                                                </div>
+                                                                                                <div
+                                                                                                    class="col-md-4 mb-2">
+                                                                                                    <label
+                                                                                                        class="form-label-custom small mb-1">
+                                                                                                        Servicio Social
+                                                                                                        <span
+                                                                                                            class="text-danger">*</span>
+                                                                                                    </label>
+                                                                                                    <select
+                                                                                                        name="servicios_social"
+                                                                                                        class="form-control form-control-sm"
+                                                                                                        required>
+                                                                                                        <option
+                                                                                                            value="">
+                                                                                                            --
+                                                                                                            Selecciona
+                                                                                                            --</option>
+                                                                                                        <option
+                                                                                                            value="1"
+                                                                                                            {{ ($alumno->servicios_social ?? 0) == 1 ? 'selected' : '' }}>
+                                                                                                            Sí</option>
+                                                                                                        <option
+                                                                                                            value="0"
+                                                                                                            {{ ($alumno->servicios_social ?? 0) == 0 ? 'selected' : '' }}>
+                                                                                                            No</option>
                                                                                                     </select>
                                                                                                 </div>
                                                                                             </div>
@@ -1628,6 +1687,29 @@
                                                                                     </div>
                                                                                 </div>
                                                                             </div>
+
+                                                                            {{-- Script para manejar la visibilidad de la sección académica --}}
+                                                                            <script>
+                                                                                function toggleSeccionAcademica{{ $alumno->id_alumno }}(statusId) {
+                                                                                    const seccion = document.getElementById('seccionAcademicaEditar{{ $alumno->id_alumno }}');
+                                                                                    // IDs de estatus que requieren datos académicos
+                                                                                    const estatusConAcademicos = [1, 2, 3, 4, 5, 6, 8, 9];
+
+                                                                                    if (estatusConAcademicos.includes(parseInt(statusId))) {
+                                                                                        seccion.style.display = 'block';
+                                                                                    } else {
+                                                                                        seccion.style.display = 'none';
+                                                                                    }
+                                                                                }
+
+                                                                                // Inicializar al cargar la página
+                                                                                document.addEventListener('DOMContentLoaded', function() {
+                                                                                    const select = document.getElementById('id_historial_status_editar{{ $alumno->id_alumno }}');
+                                                                                    if (select && select.value) {
+                                                                                        toggleSeccionAcademica{{ $alumno->id_alumno }}(select.value);
+                                                                                    }
+                                                                                });
+                                                                            </script>
                                                                         </div>
 
                                                                         {{-- Nota de campos obligatorios --}}
@@ -1796,6 +1878,19 @@
                                                         class="form-control form-control-sm"
                                                         placeholder="Ciudad, Estado">
                                                 </div>
+                                                <div class="col-md-3 mb-2">
+                                                    <label class="form-label-custom small mb-1">Estado de
+                                                        Nacimiento</label>
+                                                    <select name="estado_nacimiento"
+                                                        class="form-control form-control-sm">
+                                                        <option value="">-- Selecciona --</option>
+                                                        @foreach ($estados as $estado)
+                                                            <option value="{{ $estado->id_estado }}">
+                                                                {{ $estado->nombre }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
                                             </div>
 
                                             <div class="row">
@@ -1902,8 +1997,8 @@
                                             <i class="fas fa-chevron-down float-right mt-1"></i>
                                         </button>
                                     </div>
-                                    <div id="collapseDomicilio" class="collapse" aria-labelledby="headingDomicilio"
-                                        data-parent="#alumnoAccordion">
+                                    <div id="collapseDomicilio" class="collapse"
+                                        aria-labelledby="headingDomicilio" data-parent="#alumnoAccordion">
                                         <div class="card-body p-3">
                                             <div class="row">
                                                 <div class="col-md-4 mb-2">
@@ -2217,11 +2312,11 @@
                                                     <label class="form-label-custom small mb-1">
                                                         Estatus <span class="text-danger">*</span>
                                                     </label>
-                                                    <select name="id_status_academico" id="id_status_academico"
+                                                    <select name="id_historial_status" id="id_historial_status"
                                                         class="form-control form-control-sm" required>
                                                         <option value="">-- Selecciona --</option>
                                                         @foreach ($estatus as $status)
-                                                            <option value="{{ $status->id_status_academico }}">
+                                                            <option value="{{ $status->id_historial_status }}">
                                                                 {{ $status->nombre }}
                                                             </option>
                                                         @endforeach
@@ -2275,6 +2370,21 @@
                                                             @endforeach
                                                         </select>
                                                     </div>
+                                                    <div class="col-md-4 mb-2">
+                                                        <label class="form-label-custom small mb-1">
+                                                            Servicio Social <span class="text-danger">*</span>
+                                                        </label>
+                                                        <select name="servicios_social"
+                                                            class="form-control form-control-sm" required>
+                                                            <option value="">-- Selecciona --</option>
+                                                            <option value="1"
+                                                                {{ old('servicios_social') == '1' ? 'selected' : '' }}>
+                                                                Sí</option>
+                                                            <option value="0"
+                                                                {{ old('servicios_social', '0') == '0' ? 'selected' : '' }}>
+                                                                No</option>
+                                                        </select>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -2308,7 +2418,7 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const statusSelect = document.getElementById('id_status_academico');
+            const statusSelect = document.getElementById('id_historial_status');
             const seccionAcademica = document.getElementById('seccionAcademica');
 
             statusSelect.addEventListener('change', function() {
@@ -2350,7 +2460,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Para cada select de estatus académico
-            document.querySelectorAll('[id^="id_status_academico_editar"]').forEach(function(select) {
+            document.querySelectorAll('[id^="id_historial_status_editar"]').forEach(function(select) {
                 // Mostrar/ocultar al cargar la página
                 toggleSeccionAcademica(select);
 
@@ -2361,11 +2471,11 @@
             });
 
             function toggleSeccionAcademica(selectElement) {
-                const alumnoId = selectElement.id.replace('id_status_academico_editar', '');
+                const alumnoId = selectElement.id.replace('id_historial_status_editar', '');
                 const seccion = document.getElementById('seccionAcademicaEditar' + alumnoId);
                 const selectedValue = parseInt(selectElement.value);
 
-                if ([2, 3, 4].includes(selectedValue)) {
+                if ([1, 2, 3, 4, 5, 6, 8, 9].includes(selectedValue)) {
                     seccion.style.display = 'block';
                 } else {
                     seccion.style.display = 'none';

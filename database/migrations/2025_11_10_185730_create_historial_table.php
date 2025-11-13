@@ -26,6 +26,8 @@ return new class extends Migration
             $table->integer('id_asignacion_6')->nullable()->index('id_asignacion_6');
             $table->integer('id_asignacion_7')->nullable()->index('id_asignacion_7');
             $table->integer('id_asignacion_8')->nullable()->index('id_asignacion_8');
+            $table->integer('id_asignacion_9')->nullable()->index('id_asignacion_9');
+            $table->integer('id_asignacion_10')->nullable()->index('id_asignacion_10');
         });
     }
 

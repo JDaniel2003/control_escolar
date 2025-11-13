@@ -24,6 +24,7 @@ class DatosPersonales extends Model
         'fecha_nacimiento',
         'edad',
         'lugar_nacimiento',
+        'estado_nacimiento',
         'id_estado_civil',
         'id_tipo_sangre',
         'id_domicilio_alumno',
@@ -81,6 +82,10 @@ public function discapacidad()
 public function domicilioAlumno()
 {
     return $this->belongsTo(DomicilioAlumno::class, 'id_domicilio_alumno', 'id_domicilio_alumno');
+}
+public function estadoNacimiento()
+{
+    return $this->belongsTo(Estado::class, 'estado_nacimiento', 'id_estado');
 }
 }
 

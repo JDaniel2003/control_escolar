@@ -12,6 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('periodos_escolares', function (Blueprint $table) {
+            $table->foreign(['id_ciclo'], 'fk_periodo_ciclo')->references(['id_ciclo'])->on('ciclos_escolares')->onUpdate('restrict')->onDelete('restrict');
             $table->foreign(['id_tipo_periodo'], 'periodos_escolares_ibfk_1')->references(['id_tipo_periodo'])->on('tipos_periodos')->onUpdate('restrict')->onDelete('restrict');
         });
     }
@@ -22,6 +23,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('periodos_escolares', function (Blueprint $table) {
+            $table->dropForeign('fk_periodo_ciclo');
             $table->dropForeign('periodos_escolares_ibfk_1');
         });
     }

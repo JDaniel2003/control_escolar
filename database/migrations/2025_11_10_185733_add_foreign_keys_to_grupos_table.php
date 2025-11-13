@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::table('grupos', function (Blueprint $table) {
             $table->foreign(['id_turno'], 'grupos_ibfk_1')->references(['id_turno'])->on('turnos')->onUpdate('restrict')->onDelete('restrict');
             $table->foreign(['id_carrera'], 'grupos_ibfk_2')->references(['id_carrera'])->on('carreras')->onUpdate('restrict')->onDelete('restrict');
+            $table->foreign(['periodo'], 'grupos_ibfk_5')->references(['id_periodo_escolar'])->on('periodos_escolares')->onUpdate('restrict')->onDelete('restrict');
         });
     }
 
@@ -25,6 +26,7 @@ return new class extends Migration
         Schema::table('grupos', function (Blueprint $table) {
             $table->dropForeign('grupos_ibfk_1');
             $table->dropForeign('grupos_ibfk_2');
+            $table->dropForeign('grupos_ibfk_5');
         });
     }
 };
