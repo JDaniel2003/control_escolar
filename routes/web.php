@@ -152,33 +152,24 @@ Route::prefix('historial')->group(function () {
 });
 
 Route::middleware(['auth'])->group(function () {
-    // Asignaciones masivas
-    Route::get('/asignaciones/masiva', [AsignacionMasivaController::class, 'index'])->name('asignaciones.masiva.index');
-    Route::get('/asignaciones/masiva/materias-grupo', [AsignacionMasivaController::class, 'materiasGrupo'])->name('asignaciones.masiva.materias-grupo');
-    Route::get('/asignaciones/masiva/docente-materias', [AsignacionMasivaController::class, 'docenteMaterias'])->name('asignaciones.masiva.docente-materias');
-    Route::post('/asignaciones/masiva/materias', [AsignacionMasivaController::class, 'storeMaterias'])->name('asignaciones.masiva.store-materias');
-    Route::post('/asignaciones/masiva/docente', [AsignacionMasivaController::class, 'storeDocente'])->name('asignaciones.masiva.store-docente');
-    Route::get('/asignaciones/masiva/materias-carrera/{id_carrera}', [AsignacionMasivaController::class, 'getMateriasPorCarrera']);
-Route::post('/asignaciones/masiva/store-materias', [AsignacionDocenteController::class, 'storeMasivoMaterias'])
-    ->name('asignaciones.masiva.store-materias');
-    // Asignaciones individuales
+    // Rutas para asignaciones docentes individuales
     Route::get('/asignaciones', [AsignacionDocenteController::class, 'index'])->name('asignaciones.index');
     Route::post('/asignaciones', [AsignacionDocenteController::class, 'store'])->name('asignaciones.store');
     Route::put('/asignaciones/{asignacione}', [AsignacionDocenteController::class, 'update'])->name('asignaciones.update');
     Route::delete('/asignaciones/{asignacione}', [AsignacionDocenteController::class, 'destroy'])->name('asignaciones.destroy');
+    
+    // Rutas para asignaciones masivas (¡SIN DUPLICADOS!)
+    Route::post('/asignaciones/masiva/store-materias', [AsignacionDocenteController::class, 'storeMasivoMaterias'])
+        ->name('asignaciones.masiva.store-materias');
+    
+    Route::get('/asignaciones/masiva/materias-carrera-periodo/{carreraId}/{idNumeroPeriodo}', 
+        [AsignacionDocenteController::class, 'materiasPorCarreraYPeriodo'])
+        ->name('asignaciones.masiva.materias-carrera-periodo');
 });
 
+// Rutas públicas si son necesarias
 Route::get('/buscar-alumno', [HistorialController::class, 'buscarAlumno'])->name('buscar.alumno');
 Route::get('/asignaciones/disponibles', [HistorialController::class, 'getAsignacionesDisponibles']);
-
-    // Rutas para asignaciones
-Route::resource('asignaciones', AsignacionDocenteController::class);
-
-//////////////////////////////---ASIGNACIONES MASIVAS----///////////////////////////////////////////////
-Route::post('/asignaciones/masiva/store-materias', [AsignacionDocenteController::class, 'storeMasivoMaterias'])->name('asignaciones.masiva.store-materias');
-Route::get('/asignaciones/masiva/materias-carrera-periodo/{carreraId}/{idNumeroPeriodo}', [AsignacionDocenteController::class, 'materiasPorCarreraYPeriodo'])->name('asignaciones.masiva.materias-carrera-periodo');
-/////////////////////////////////////////////////////////////////////////////
-
 Route::middleware(['auth'])->group(function () {
 Route::get('/historial/reinscripcion-masiva', [HistorialController::class, 'reinscripcionMasiva'])
     ->name('historial.reinscripcion-masiva');
@@ -215,7 +206,17 @@ Route::post('/asignaciones/obtener-materias-grupo', [AsignacionDocenteController
 // Guardar reinscripciones masivas
 Route::post('/historial/store-masivo', [HistorialController::class, 'storeMasivo'])
     ->name('historial.store-masivo');
+    // Rutas opcionales para filtrar por grupo (si lo necesitas en el futuro)
+Route::get('/periodos-grupo', [HistorialController::class, 'getPeriodosPorGrupo'])->name('periodos.por-grupo');
+Route::get('/numeros-periodo-grupo', [HistorialController::class, 'getNumerosPeriodoPorGrupo'])->name('numeros-periodo.por-grupo');
+Route::get('/obtener-numero-periodo', [HistorialController::class, 'obtenerNumeroPeriodoPorGrupo']);
+Route::get('/grupo/{id}/periodo', [HistorialController::class, 'getPeriodoByGrupo']);
 
-#Route::get('/login', function () {
- #   return view('auth.login');
-#})->name('login');
+// Búsqueda
+Route::get('/buscar-alumno', [HistorialController::class, 'buscarAlumno']);
+Route::get('/asignaciones/disponibles', [HistorialController::class, 'getAsignacionesDisponibles']);
+
+// Reinscripción masiva
+Route::post('/historial/obtener-alumnos-grupo', [HistorialController::class, 'obtenerAlumnosGrupo']);
+Route::post('/historial/obtener-materias-grupo', [HistorialController::class, 'obtenerMateriasGrupo']);
+Route::post('/historial/store-masivo', [HistorialController::class, 'storeMasivo'])->name('historial.store-masivo');

@@ -19,6 +19,7 @@
     <link rel="icon" type="image/png" href="{{ asset('libs/sbadmin/img/up_logo.png') }}">
     <!-- Custom styles for this template-->
     <link href="{{ asset('libs/sbadmin/css/sb-admin-2.min.css') }}" rel="stylesheet">
+    
 </head>
 
 <body id="page-top">
@@ -345,7 +346,7 @@
                     @csrf
                     <div class="modal-body modal-body-custom p-4">
                         <div class="form-container p-4 bg-white rounded shadow-sm border">
-                            <div class="info-section mb-4">
+                            <div class="info-section mb-2">
                                 <div class="card shadow mb-4 border-0">
 
                                     <div class="card-header py-3 text-white card-header-custom">
@@ -355,7 +356,7 @@
                                     <div class="info-section p-4 mb-4">
 
                                         <div class="row">
-                                            <div class="col-md-4">
+                                            <div class="col-md-7">
                                                 <div class="form-group">
                                                     <label class="form-label-custom d-flex">
                                                         Carrera
@@ -371,7 +372,7 @@
                                                     </select>
                                                 </div>
                                             </div>
-                                            <div class="col-md-4">
+                                            <div class="col-md-5">
                                                 <div class="form-group">
                                                     <label class="form-label-custom d-flex">
                                                         Grupo
@@ -384,7 +385,21 @@
                                                     </select>
                                                 </div>
                                             </div>
-                                            <div class="col-md-4">
+                                            <div class="col-md-5">
+                                                <div class="form-group">
+                                                    <label class="form-label-custom d-flex">
+                                                        Período Escolar
+
+                                                    </label>
+                                                    <input type="text" id="periodo_escolar_nueva_display"
+                                                        class="form-control form-control-custom" readonly
+                                                        placeholder="Seleccione un grupo">
+                                                    <input type="hidden" name="id_periodo_escolar"
+                                                        id="periodo_escolar_nueva">
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-7">
                                                 <div class="form-group">
                                                     <label class="form-label-custom d-flex">
                                                         Docente
@@ -399,21 +414,6 @@
                                                             </option>
                                                         @endforeach
                                                     </select>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-md-6">
-                                                <div class="form-group">
-                                                    <label class="form-label-custom d-flex">
-                                                        Período Escolar
-                                                        <span class="text-muted ml-2">(Se llena automáticamente)</span>
-                                                    </label>
-                                                    <input type="text" id="periodo_escolar_nueva_display" 
-                                                        class="form-control form-control-custom" 
-                                                        readonly 
-                                                        placeholder="Seleccione un grupo">
-                                                    <input type="hidden" name="id_periodo_escolar" id="periodo_escolar_nueva">
                                                 </div>
                                             </div>
                                             <div class="col-md-6">
@@ -527,13 +527,13 @@
                             @endif
 
                             <!-- Sección 1: Selección de Grupo y Número de Período -->
-                            <div class="card shadow mb-4 border-0">
+                            <div class="card shadow mb-2 border-0">
                                 <div class="card-header py-3  text-white card-header-custom">
                                     <h6 class="m-0 font-weight-bold">
                                         <i class="fas fa-users"></i> Seleccione Grupo y Número de Período
                                     </h6>
                                 </div>
-                                <div class="card-body">
+                                <div class="card-body1">
                                     <div class="row">
                                         <div class="col-md-3">
                                             <div class="form-group">
@@ -567,11 +567,9 @@
                                             <div class="form-group">
                                                 <label class="form-label-custom d-flex">
                                                     Período Escolar
-                                                    <span class="text-muted ml-2">(Automático)</span>
                                                 </label>
-                                                <input type="text" id="periodo_escolar_display" 
-                                                    class="form-control form-control-custom" 
-                                                    readonly 
+                                                <input type="text" id="periodo_escolar_display"
+                                                    class="form-control form-control-custom" readonly
                                                     placeholder="Seleccione un grupo">
                                                 <input type="hidden" name="id_periodo_escolar" id="periodo_escolar">
                                             </div>
@@ -599,7 +597,8 @@
                                     </div>
                                     <div class="periodo-info mt-3">
                                         <i class="fas fa-info-circle text-primary"></i>
-                                        <strong>Nota:</strong> Al seleccionar el grupo, el período escolar se llenará automáticamente. 
+                                        <strong>Nota:</strong> Al seleccionar el grupo, el período escolar se llenará
+                                        automáticamente.
                                         Las materias se filtrarán según el número de período seleccionado.
                                     </div>
                                 </div>
@@ -655,39 +654,86 @@
     <!-- Modales de Detalle, Editar y Eliminar -->
     @foreach ($asignaciones as $asignacion)
         <!-- Modal Detalle -->
-        <div class="modal fade" id="detalleModal{{ $asignacion->id_asignacion }}"
-            tabindex="-1" role="dialog"
-            aria-labelledby="detalleModalLabel{{ $asignacion->id_asignacion }}"
-            aria-hidden="true">
+        <div class="modal fade" id="detalleModal{{ $asignacion->id_asignacion }}" tabindex="-1" role="dialog"
+            aria-labelledby="detalleModalLabel{{ $asignacion->id_asignacion }}" aria-hidden="true">
             <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title"
-                            id="detalleModalLabel{{ $asignacion->id_asignacion }}">
-                            Detalles de la Asignación</h5>
-                        <button type="button" class="close"
-                            data-dismiss="modal" aria-label="Close">
+                <div class="modal-content border-0 shadow-lg">
+                    <div class="modal-header modal-header-custom border-0">
+                        <div class="w-100">
+                            <div class="text-center">
+                                <h5 class="m-0 font-weight-bold"
+                                    id="detalleModalLabel{{ $asignacion->id_asignacion }}">
+                                    Detalles de la Asignación
+                                </h5>
+                                <p class="m-0 mt-2 mb-0" style="font-size: 0.9rem; opacity: 0.95;">
+                                    Información completa de la asignación docente
+                                </p>
+                            </div>
+                        </div>
+                        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Cerrar"
+                            style="position: absolute; right: 1.5rem; top: 1.5rem; font-size: 1.8rem; opacity: 0.9;">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
-                    <div class="modal-body">
-                        <p><strong>Docente:</strong>
-                            {{ $asignacion->docente->nombre_completo ?? 'N/A' }}
-                        </p>
-                        <p><strong>Materia:</strong>
-                            {{ $asignacion->materia->nombre ?? 'N/A' }}
-                        </p>
-                        <p><strong>Grupo:</strong>
-                            {{ $asignacion->grupo->nombre ?? 'N/A' }}
-                        </p>
-                        <p><strong>Período Escolar:</strong>
-                            {{ $asignacion->periodoEscolar->nombre ?? 'N/A' }}
-                        </p>
+                    <div class="modal-body modal-body-custom p-4">
+                        <div class="form-container p-4 bg-white rounded shadow-sm border">
+                            <div class="info-section mb-4">
+                                <div class="card shadow mb-4 border-0">
+                                    <div class="card-header py-3 text-white card-header-custom">
+                                        <h6 class="m-0 font-weight-bold text-danger"><i
+                                                class="fas fa-chalkboard-teacher mr-2"></i> Información de la
+                                            Asignación</h6>
+                                    </div>
+                                    <div class="card-body1">
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <div class="info-item">
+                                                    <label class="text-muted text-uppercase d-block">
+                                                        Docente:
+                                                    </label>
+                                                    <div class="text-muted d-block font-weight-bold">
+                                                        {{ $asignacion->docente->nombre_completo ?? 'N/A' }}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <div class="info-item">
+                                                    <label class="text-muted text-uppercase d-block"> Materia:
+                                                    </label>
+                                                    <div class="text-muted d-block font-weight-bold">
+                                                        {{ $asignacion->materia->nombre ?? 'N/A' }}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <div class="info-item">
+                                                    <label class="text-muted text-uppercase d-block"> Grupo:
+                                                    </label>
+                                                    <div class="text-muted d-block font-weight-bold">
+                                                        {{ $asignacion->grupo->nombre ?? 'N/A' }}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <div class="info-item">
+                                                    <label class="text-muted text-uppercase d-block"> Período Escolar:
+                                                    </label>
+                                                    <div class="text-muted d-block font-weight-bold">
+                                                        {{ $asignacion->periodoEscolar->nombre ?? 'N/A' }}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button"
-                            class="btn btn-secondary"
-                            data-dismiss="modal">Cerrar</button>
+                    <div class="modal-footer modal-footer-custom border-top">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                            <i class="fas fa-times mr-2"></i>
+                            Cerrar
+                        </button>
                     </div>
                 </div>
             </div>
@@ -754,14 +800,24 @@
                                                         Grupo
                                                         <span class="required-asterisk ml-1">*</span>
                                                     </label>
+
                                                     <select name="id_grupo"
                                                         id="grupo_editar_{{ $asignacion->id_asignacion }}"
                                                         class="form-control form-control-custom" required>
-                                                        <option value="{{ $asignacion->id_grupo }}">
-                                                            {{ $asignacion->grupo->nombre }}</option>
+
+                                                        <option value="">-- Seleccione un grupo --</option>
+
+                                                        @foreach ($grupos as $grupo)
+                                                            <option value="{{ $grupo->id_grupo }}"
+                                                                {{ old('id_grupo', $asignacion->id_grupo) == $grupo->id_grupo ? 'selected' : '' }}>
+                                                                {{ $grupo->nombre }}
+                                                            </option>
+                                                        @endforeach
+
                                                     </select>
                                                 </div>
                                             </div>
+
                                             <div class="col-md-4">
                                                 <div class="form-group">
                                                     <label class="form-label-custom d-flex">
@@ -787,11 +843,11 @@
                                                         Período Escolar
                                                         <span class="text-muted ml-2">(Automático)</span>
                                                     </label>
-                                                    <input type="text" id="periodo_escolar_editar_{{ $asignacion->id_asignacion }}_display" 
-                                                        class="form-control form-control-custom" 
-                                                        readonly 
+                                                    <input type="text"
+                                                        id="periodo_escolar_editar_{{ $asignacion->id_asignacion }}_display"
+                                                        class="form-control form-control-custom" readonly
                                                         value="{{ $asignacion->periodoEscolar->nombre ?? '' }}">
-                                                    <input type="hidden" name="id_periodo_escolar" 
+                                                    <input type="hidden" name="id_periodo_escolar"
                                                         id="periodo_escolar_editar_{{ $asignacion->id_asignacion }}"
                                                         value="{{ $asignacion->id_periodo_escolar }}">
                                                 </div>
@@ -922,7 +978,8 @@
             // ========== FUNCIONES COMPARTIDAS ==========
 
             // Función para cargar grupos por carrera y autocompletar período
-            function cargarGrupos(carreraId, grupoSelectId, periodoDisplayId, periodoHiddenId, grupoSeleccionado = null) {
+            function cargarGrupos(carreraId, grupoSelectId, periodoDisplayId, periodoHiddenId, grupoSeleccionado =
+                null) {
                 const grupoSelect = $(grupoSelectId);
                 grupoSelect.html('<option value="">-- Seleccione un grupo --</option>');
 
@@ -933,7 +990,8 @@
                     console.log('Grupos filtrados:', gruposFiltrados);
 
                     gruposFiltrados.forEach(grupo => {
-                        const selected = grupoSeleccionado && grupo.id_grupo == grupoSeleccionado ? 'selected' : '';
+                        const selected = grupoSeleccionado && grupo.id_grupo == grupoSeleccionado ?
+                            'selected' : '';
                         grupoSelect.append(
                             `<option value="${grupo.id_grupo}" data-periodo="${grupo.periodo}">${grupo.nombre}</option>`
                         );
@@ -958,11 +1016,11 @@
             // Función para cargar y mostrar el período del grupo
             function cargarPeriodoGrupo(periodoId, displayId, hiddenId) {
                 console.log('Cargando período:', periodoId);
-                
+
                 if (periodoId) {
                     const periodo = periodos.find(p => p.id_periodo_escolar == periodoId);
                     console.log('Período encontrado:', periodo);
-                    
+
                     if (periodo) {
                         $(displayId).val(periodo.nombre);
                         $(hiddenId).val(periodo.id_periodo_escolar);
@@ -977,7 +1035,8 @@
             }
 
             // Función para cargar materias individual (para modales individuales)
-            function cargarMateriasIndividual(carreraId, numeroPeriodoId, contenedorId, materiaSeleccionada = null) {
+            function cargarMateriasIndividual(carreraId, numeroPeriodoId, contenedorId, materiaSeleccionada =
+            null) {
                 console.log('Cargando materias individual para carrera:', carreraId, 'período:', numeroPeriodoId);
 
                 $(contenedorId).html(
@@ -990,7 +1049,8 @@
                     return;
                 }
 
-                const url = `{{ url('asignaciones/masiva/materias-carrera-periodo') }}/${carreraId}/${numeroPeriodoId}`;
+                const url =
+                    `{{ url('asignaciones/masiva/materias-carrera-periodo') }}/${carreraId}/${numeroPeriodoId}`;
                 console.log('URL de petición:', url);
 
                 $.ajax({
@@ -1025,8 +1085,10 @@
                                     <select name="id_materia" class="form-control form-control-custom" required>`;
 
                             response.forEach((materia) => {
-                                const selected = materiaSeleccionada && materia.id_materia == materiaSeleccionada ? 'selected' : '';
-                                html += `<option value="${materia.id_materia}" ${selected}>${materia.nombre} - ${materia.clave || 'Sin clave'}</option>`;
+                                const selected = materiaSeleccionada && materia.id_materia ==
+                                    materiaSeleccionada ? 'selected' : '';
+                                html +=
+                                    `<option value="${materia.id_materia}" ${selected}>${materia.nombre} - ${materia.clave || 'Sin clave'}</option>`;
                             });
 
                             html += `</select>
@@ -1053,7 +1115,8 @@
             // Filtrar grupos cuando cambia la carrera
             $('#carrera_nueva').change(function() {
                 const carreraId = $(this).val();
-                cargarGrupos(carreraId, '#grupo_nueva', '#periodo_escolar_nueva_display', '#periodo_escolar_nueva');
+                cargarGrupos(carreraId, '#grupo_nueva', '#periodo_escolar_nueva_display',
+                    '#periodo_escolar_nueva');
 
                 // Cargar materias si ya hay número de período seleccionado
                 const numeroPeriodoId = $('#numero_periodo_nueva').val();
@@ -1083,26 +1146,67 @@
             @foreach ($asignaciones as $asignacion)
                 // Configurar modal de edición para {{ $asignacion->id_asignacion }}
                 $(document).ready(function() {
+
+
                     // Cuando se abre el modal de edición
                     $('#editarModal{{ $asignacion->id_asignacion }}').on('show.bs.modal', function() {
-                        const carreraId = $('#carrera_editar_{{ $asignacion->id_asignacion }}').val();
-                        const grupoSeleccionado = {{ $asignacion->id_grupo }};
 
-                        // Cargar grupos
-                        cargarGrupos(
-                            carreraId, 
-                            '#grupo_editar_{{ $asignacion->id_asignacion }}',
-                            '#periodo_escolar_editar_{{ $asignacion->id_asignacion }}_display',
-                            '#periodo_escolar_editar_{{ $asignacion->id_asignacion }}',
-                            grupoSeleccionado
-                        );
+                        const carreraId = $('#carrera_editar_{{ $asignacion->id_asignacion }}')
+                            .val();
+                        const grupoSeleccionado =
+                        "{{ $asignacion->id_grupo }}"; // 🔹 Corregido: ahora se envía como string
 
-                        // Cargar materias
-                        const numeroPeriodoId = $('#numero_periodo_editar_{{ $asignacion->id_asignacion }}').val();
-                        const materiaSeleccionada = {{ $asignacion->id_materia }};
+                        // Cargar grupos con el seleccionado
+                        function cargarGrupos(carreraId, selectGrupoId, displayPeriodoId,
+                            hiddenPeriodoId, grupoSeleccionado = null) {
+
+                            if (!carreraId) {
+                                $(selectGrupoId).html(
+                                    '<option value="">Seleccione un grupo</option>');
+                                return;
+                            }
+
+                            $.ajax({
+                                url: '/obtener-grupos/' + carreraId,
+                                method: 'GET',
+                                success: function(response) {
+
+                                    let html =
+                                        '<option value="">-- Seleccione un grupo --</option>';
+
+                                    response.forEach(grupo => {
+                                        if (grupoSeleccionado &&
+                                            grupoSeleccionado == grupo.id_grupo
+                                            ) {
+                                            html +=
+                                                `<option value="${grupo.id_grupo}" selected>${grupo.nombre}</option>`;
+                                        } else {
+                                            html +=
+                                                `<option value="${grupo.id_grupo}">${grupo.nombre}</option>`;
+                                        }
+                                    });
+
+                                    $(selectGrupoId).html(html);
+
+                                    // Si necesitas asignar período según el grupo, aquí va tu lógica
+                                },
+                                error: function() {
+                                    $(selectGrupoId).html(
+                                        '<option value="">Error al cargar grupos</option>'
+                                        );
+                                }
+                            });
+                        }
+
+
+                        // 🔸 MATERIAS — NO SE TOCÓ NADA
+                        const numeroPeriodoId = $(
+                            '#numero_periodo_editar_{{ $asignacion->id_asignacion }}').val();
+                        const materiaSeleccionada = "{{ $asignacion->id_materia }}";
+
                         if (carreraId && numeroPeriodoId) {
                             cargarMateriasIndividual(
-                                carreraId, 
+                                carreraId,
                                 numeroPeriodoId,
                                 '#materias-container-editar-{{ $asignacion->id_asignacion }}',
                                 materiaSeleccionada
@@ -1112,19 +1216,24 @@
 
                     // Cuando cambia la carrera en edición
                     $('#carrera_editar_{{ $asignacion->id_asignacion }}').change(function() {
+
                         const carreraId = $(this).val();
+
                         cargarGrupos(
-                            carreraId, 
+                            carreraId,
                             '#grupo_editar_{{ $asignacion->id_asignacion }}',
                             '#periodo_escolar_editar_{{ $asignacion->id_asignacion }}_display',
                             '#periodo_escolar_editar_{{ $asignacion->id_asignacion }}'
                         );
 
-                        const numeroPeriodoId = $('#numero_periodo_editar_{{ $asignacion->id_asignacion }}').val();
-                        const materiaSeleccionada = {{ $asignacion->id_materia }};
+                        // 🔸 MATERIAS — NO SE TOCÓ NADA
+                        const numeroPeriodoId = $(
+                            '#numero_periodo_editar_{{ $asignacion->id_asignacion }}').val();
+                        const materiaSeleccionada = "{{ $asignacion->id_materia }}";
+
                         if (carreraId && numeroPeriodoId) {
                             cargarMateriasIndividual(
-                                carreraId, 
+                                carreraId,
                                 numeroPeriodoId,
                                 '#materias-container-editar-{{ $asignacion->id_asignacion }}',
                                 materiaSeleccionada
@@ -1134,13 +1243,15 @@
 
                     // Cuando cambia el número de período en edición
                     $('#numero_periodo_editar_{{ $asignacion->id_asignacion }}').change(function() {
-                        const carreraId = $('#carrera_editar_{{ $asignacion->id_asignacion }}').val();
+
+                        const carreraId = $('#carrera_editar_{{ $asignacion->id_asignacion }}')
+                            .val();
                         const numeroPeriodoId = $(this).val();
-                        const materiaSeleccionada = {{ $asignacion->id_asignacion }};
+                        const materiaSeleccionada = "{{ $asignacion->id_materia }}";
 
                         if (carreraId && numeroPeriodoId) {
                             cargarMateriasIndividual(
-                                carreraId, 
+                                carreraId,
                                 numeroPeriodoId,
                                 '#materias-container-editar-{{ $asignacion->id_asignacion }}',
                                 materiaSeleccionada
@@ -1151,6 +1262,7 @@
                             );
                         }
                     });
+
                 });
             @endforeach
 
@@ -1179,7 +1291,8 @@
                 if (carreraId && idNumeroPeriodo) {
                     cargarMateriasMasivas(carreraId, idNumeroPeriodo);
                 } else {
-                    let mensaje = '<div class="alert alert-warning"><i class="fas fa-exclamation-triangle"></i> ';
+                    let mensaje =
+                        '<div class="alert alert-warning"><i class="fas fa-exclamation-triangle"></i> ';
                     if (!carreraId && !idNumeroPeriodo) {
                         mensaje += 'Seleccione una carrera y número de período';
                     } else if (!carreraId) {
@@ -1200,7 +1313,8 @@
                     '<div class="text-center"><i class="fas fa-spinner fa-spin fa-2x text-primary"></i><p class="mt-2">Cargando materias...</p></div>'
                 );
 
-                const url = `{{ url('asignaciones/masiva/materias-carrera-periodo') }}/${carreraId}/${idNumeroPeriodo}`;
+                const url =
+                    `{{ url('asignaciones/masiva/materias-carrera-periodo') }}/${carreraId}/${idNumeroPeriodo}`;
                 console.log('URL de petición:', url);
 
                 $.ajax({
@@ -1222,7 +1336,8 @@
                             </div>`;
                         } else {
                             const carreraSeleccionada = $('#carrera option:selected').text().trim();
-                            const periodoSeleccionado = $('#numero_periodo option:selected').text().trim();
+                            const periodoSeleccionado = $('#numero_periodo option:selected').text()
+                                .trim();
 
                             html += `
                             <div class="alert alert-success mb-3">
@@ -1249,7 +1364,8 @@
                                                 <option value="">-- Seleccione un docente --</option>`;
 
                                 docentes.forEach(docente => {
-                                    html += `<option value="${docente.id_docente}">${docente.nombre_completo}</option>`;
+                                    html +=
+                                        `<option value="${docente.id_docente}">${docente.nombre_completo}</option>`;
                                 });
 
                                 html += `
@@ -1278,11 +1394,13 @@
             // Seleccionar/Deseleccionar todas en modal masivo
             $('#selectAll').click(function() {
                 const checkboxes = $('.materia-checkbox');
-                const allChecked = checkboxes.length > 0 && checkboxes.filter(':checked').length === checkboxes.length;
+                const allChecked = checkboxes.length > 0 && checkboxes.filter(':checked').length ===
+                    checkboxes.length;
 
                 checkboxes.each(function() {
                     $(this).prop('checked', !allChecked);
-                    $(this).trigger('change'); // Disparar el evento change para actualizar los selects
+                    $(this).trigger(
+                    'change'); // Disparar el evento change para actualizar los selects
                 });
 
                 $(this).html(allChecked ?
@@ -1295,9 +1413,9 @@
                 const isChecked = $(this).is(':checked');
                 const materiaItem = $(this).closest('.materia-item');
                 const docenteSelect = materiaItem.find('.docente-select');
-                
+
                 materiaItem.toggleClass('selected', isChecked);
-                
+
                 // Habilitar/deshabilitar el select de docente según el checkbox
                 if (isChecked) {
                     docenteSelect.prop('disabled', false);
@@ -1317,73 +1435,75 @@
 
             // Validar antes de enviar formulario masivo
             // Validar antes de enviar formulario masivo
-           // Validar antes de enviar formulario masivo
-$('#formAsignacionMasiva').submit(function(e) {
-    e.preventDefault(); // Prevenir envío por defecto
+            // Validar antes de enviar formulario masivo
+            $('#formAsignacionMasiva').submit(function(e) {
+                e.preventDefault(); // Prevenir envío por defecto
 
-    const materiasSeleccionadas = $('.materia-checkbox:checked');
-    if (materiasSeleccionadas.length === 0) {
-        alert('Debe seleccionar al menos una materia');
-        return false;
-    }
+                const materiasSeleccionadas = $('.materia-checkbox:checked');
+                if (materiasSeleccionadas.length === 0) {
+                    alert('Debe seleccionar al menos una materia');
+                    return false;
+                }
 
-    // Validar que todas las materias seleccionadas tengan docente asignado
-    let todasTienenDocente = true;
-    let materiasSinDocente = [];
-    materiasSeleccionadas.each(function() {
-        const materiaId = $(this).val();
-        const docenteSelect = $(`select[name="docentes[${materiaId}]"]`);
-        if (!docenteSelect.val() || docenteSelect.val() === '') {
-            todasTienenDocente = false;
-            const materiaNombre = $(this).closest('.materia-item').find('strong').text();
-            materiasSinDocente.push(materiaNombre);
-        }
-    });
+                // Validar que todas las materias seleccionadas tengan docente asignado
+                let todasTienenDocente = true;
+                let materiasSinDocente = [];
+                materiasSeleccionadas.each(function() {
+                    const materiaId = $(this).val();
+                    const docenteSelect = $(`select[name="docentes[${materiaId}]"]`);
+                    if (!docenteSelect.val() || docenteSelect.val() === '') {
+                        todasTienenDocente = false;
+                        const materiaNombre = $(this).closest('.materia-item').find('strong')
+                    .text();
+                        materiasSinDocente.push(materiaNombre);
+                    }
+                });
 
-    if (!todasTienenDocente) {
-        alert('Todas las materias seleccionadas deben tener un docente asignado.\nMaterias sin docente:\n- ' + materiasSinDocente.join('\n- '));
-        return false;
-    }
+                if (!todasTienenDocente) {
+                    alert('Todas las materias seleccionadas deben tener un docente asignado.\nMaterias sin docente:\n- ' +
+                        materiasSinDocente.join('\n- '));
+                    return false;
+                }
 
-    // Validar que el período escolar esté seleccionado
-    const periodoEscolar = $('#periodo_escolar').val();
-    if (!periodoEscolar) {
-        alert('Debe seleccionar un grupo para que se asigne el período escolar');
-        return false;
-    }
+                // Validar que el período escolar esté seleccionado
+                const periodoEscolar = $('#periodo_escolar').val();
+                if (!periodoEscolar) {
+                    alert('Debe seleccionar un grupo para que se asigne el período escolar');
+                    return false;
+                }
 
-    // ✅ CORRECCIÓN: DESHABILITAR LAS MATERIAS NO SELECCIONADAS EN LUGAR DE ELIMINARLAS
-    $('.materia-checkbox').not(':checked').each(function() {
-        const materiaId = $(this).val();
-        const docenteSelect = $(`select[name="docentes[${materiaId}]"]`);
-        // Deshabilitar el select y el checkbox para que el navegador los ignore
-        docenteSelect.prop('disabled', true);
-        $(this).prop('disabled', true); // También deshabilitamos el checkbox
-    });
+                // ✅ CORRECCIÓN: DESHABILITAR LAS MATERIAS NO SELECCIONADAS EN LUGAR DE ELIMINARLAS
+                $('.materia-checkbox').not(':checked').each(function() {
+                    const materiaId = $(this).val();
+                    const docenteSelect = $(`select[name="docentes[${materiaId}]"]`);
+                    // Deshabilitar el select y el checkbox para que el navegador los ignore
+                    docenteSelect.prop('disabled', true);
+                    $(this).prop('disabled', true); // También deshabilitamos el checkbox
+                });
 
-    // Log para debug ANTES de enviar
-    console.log('=== DATOS DEL FORMULARIO ANTES DE ENVIAR ===');
-    console.log('Grupo:', $('#grupo').val());
-    console.log('Período Escolar:', $('#periodo_escolar').val());
-    console.log('Materias seleccionadas:', materiasSeleccionadas.length);
+                // Log para debug ANTES de enviar
+                console.log('=== DATOS DEL FORMULARIO ANTES DE ENVIAR ===');
+                console.log('Grupo:', $('#grupo').val());
+                console.log('Período Escolar:', $('#periodo_escolar').val());
+                console.log('Materias seleccionadas:', materiasSeleccionadas.length);
 
-    console.log('=== DOCENTES QUE SE ENVIARÁN ===');
-    $('select[name^="docentes["]').each(function() {
-        console.log('Select encontrado:', {
-            name: $(this).attr('name'),
-            value: $(this).val(),
-            disabled: $(this).prop('disabled')
-        });
-    });
+                console.log('=== DOCENTES QUE SE ENVIARÁN ===');
+                $('select[name^="docentes["]').each(function() {
+                    console.log('Select encontrado:', {
+                        name: $(this).attr('name'),
+                        value: $(this).val(),
+                        disabled: $(this).prop('disabled')
+                    });
+                });
 
-    // Serializar y mostrar datos
-    const formData = $(this).serialize();
-    console.log('=== FORM DATA SERIALIZADO ===');
-    console.log(formData);
+                // Serializar y mostrar datos
+                const formData = $(this).serialize();
+                console.log('=== FORM DATA SERIALIZADO ===');
+                console.log(formData);
 
-    // ⚠️ NO PREVENIR MÁS - Permitir envío normal
-    this.submit();
-});
+                // ⚠️ NO PREVENIR MÁS - Permitir envío normal
+                this.submit();
+            });
 
             // Validar antes de enviar formulario individual
             $('#formNuevaAsignacion').submit(function(e) {

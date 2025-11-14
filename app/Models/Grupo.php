@@ -143,4 +143,9 @@ class Grupo extends Model
 {
     return $this->belongsTo(NumeroPeriodo::class, 'id_numero_periodo');
 }
+
+public function periodoEscolar()
+{
+    return $this->belongsTo(PeriodoEscolar::class, 'periodo', 'id_periodo_escolar');
+}
 }

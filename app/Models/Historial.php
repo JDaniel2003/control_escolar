@@ -14,6 +14,8 @@ class Historial extends Model
     public $timestamps = false;
 
     protected $fillable = [
+        'id_grupo',
+        'id_periodo_escolar',
         'id_alumno',
         'fecha_inscripcion',
         'id_status_inicio',

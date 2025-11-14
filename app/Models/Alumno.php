@@ -114,4 +114,8 @@ class Alumno extends Model
     {
         return $this->belongsTo(Beca::class, 'id_beca', 'id_beca');
     }
+    public function historial()
+{
+    return $this->hasMany(Historial::class, 'id_alumno');
+}
 }

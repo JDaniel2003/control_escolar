@@ -77,62 +77,52 @@ class HistorialController extends Controller
     /**
      * Obtener asignaciones disponibles basado en grupo y período
      */
-    public function getAsignacionesDisponibles(Request $request)
-    {
-        try {
-            
-            // Buscar asignaciones con las relaciones correctas
-            $asignaciones = AsignacionDocente::with([
-                    // Se agregan datosDocentes para obtener el nombre real del docente
-                    'docente.datosDocentes', 
-                    'materia:id_materia,nombre,horas', 
-                    'grupo:id_grupo,nombre',
-                    'periodoEscolar:id_periodo_escolar,nombre'
-                ])
-                ->where('id_grupo', $request->grupo)
-                ->where('id_periodo_escolar', $request->periodo)
-                ->get();
+   public function getAsignacionesDisponibles(Request $request)
+{
+    try {
+        $asignaciones = AsignacionDocente::with([
+            'materia:id_materia,nombre,horas,id_numero_periodo',
+            'docente.datosDocentes',
+            'grupo:id_grupo,nombre',
+            'periodoEscolar:id_periodo_escolar,nombre'
+        ])
+        ->where('id_grupo', $request->grupo)
+        ->where('id_periodo_escolar', $request->periodo)
+        ->get();
 
-            
-            // Formatear las asignaciones
-            $asignacionesFormateadas = $asignaciones->map(function ($asignacion) {
-                // Modificación aquí para acceder a datosDocentes
-                $nombreCompleto = trim(
-                    ($asignacion->docente?->datosDocentes?->nombres ?? '') . ' ' .
-                    ($asignacion->docente?->datosDocentes?->primer_apellido ?? '') . ' ' .
-                    ($asignacion->docente?->datosDocentes?->segundo_apellido ?? '')
-                );
-                
-                // Si datosDocentes no tiene nombre, se usa el nombre que esté directamente en la tabla docente (si existe)
-                if (empty($nombreCompleto)) {
-                    $nombreCompleto = trim(($asignacion->docente->nombre ?? '') . ' ' . ($asignacion->docente->apellido ?? ''));
-                }
-
-                return [
-                    'id_asignacion' => $asignacion->id_asignacion,
-                    'materia_nombre' => $asignacion->materia->nombre ?? 'Sin nombre',
-                    'docente_nombre' => $nombreCompleto, // Docente completo
-                    'grupo_nombre' => $asignacion->grupo->nombre ?? 'N/A',
-                    'periodo_nombre' => $asignacion->periodoEscolar->nombre ?? 'N/A',
-                    'horas_semana' => $asignacion->materia->horas ?? '0'
-                ];
-            });
-
-            return response()->json([
-                'success' => true,
-                'asignaciones' => $asignacionesFormateadas,
-                'total' => $asignacionesFormateadas->count()
-            ]);
-
-        } catch (\Exception $e) {
-            
-            return response()->json([
-                'success' => false,
-                'message' => 'Error al cargar las asignaciones',
-                'error' => $e->getMessage()
-            ], 500);
+        // ✅ Extraer id_numero_periodo común (de la primera materia)
+        $idNumeroPeriodo = null;
+        if ($asignaciones->isNotEmpty()) {
+            $materia = $asignaciones->first()->materia;
+            $idNumeroPeriodo = $materia ? $materia->id_numero_periodo : null;
         }
+
+        $asignacionesFormateadas = $asignaciones->map(function ($asignacion) {
+            $docenteNombre = trim(
+                ($asignacion->docente?->datosDocentes?->nombres ?? '') . ' ' .
+                ($asignacion->docente?->datosDocentes?->primer_apellido ?? '') . ' ' .
+                ($asignacion->docente?->datosDocentes?->segundo_apellido ?? '')
+            ) ?: ($asignacion->docente?->username ?? 'Sin docente');
+
+            return [
+                'id_asignacion' => $asignacion->id_asignacion,
+                'materia_nombre' => $asignacion->materia->nombre ?? 'Sin nombre',
+                'docente_nombre' => $docenteNombre,
+                'horas_semana' => $asignacion->materia->horas ?? 0,
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'asignaciones' => $asignacionesFormateadas,
+            'total' => $asignacionesFormateadas->count(),
+            'id_numero_periodo' => $idNumeroPeriodo, // ✅ CLAVE: lo enviamos
+        ]);
+    } catch (\Exception $e) {
+        Log::error('Error en getAsignacionesDisponibles: ' . $e->getMessage());
+        return response()->json(['success' => false, 'message' => 'Error al cargar asignaciones'], 500);
     }
+}
 
     /**
      * Store a newly created resource in storage.
@@ -451,53 +441,115 @@ class HistorialController extends Controller
     /**
      * Obtener alumnos de un grupo
      */
-    public function obtenerAlumnosGrupo(Request $request)
-    {
-        try {
-            $idGrupo = $request->input('id_grupo');
-            
-            Log::info("Buscando alumnos del grupo: $idGrupo");
+   public function obtenerAlumnosGrupo(Request $request)
+{
+    try {
+        $idGrupo = $request->input('id_grupo');
+        $idPeriodo = $request->input('id_periodo');
 
-            $alumnos = Alumno::with(['datosPersonales', 'datosAcademicos'])
-                ->whereHas('historial', function ($query) use ($idGrupo) {
-                    $query->where('id_grupo', $idGrupo)
-                          ->where('id_historial_status', 1);
-                })
-                ->get()
-                ->unique('id_alumno')
-                ->map(function ($alumno) {
-                    return [
-                        'id' => $alumno->id_alumno,
-                        'matricula' => $alumno->datosAcademicos->matricula ?? 'N/A',
-                        'nombre' => trim(
-                            ($alumno->datosPersonales->nombres ?? '') . ' ' .
-                            ($alumno->datosPersonales->primer_apellido ?? '') . ' ' .
-                            ($alumno->datosPersonales->segundo_apellido ?? '')
-                        ),
-                        'promedio' => $alumno->datosAcademicos->promedio ?? 8.0,
-                    ];
-                })
-                ->values();
-
-            return response()->json([
-                'success' => true,
-                'alumnos' => $alumnos
-            ]);
-            
-        } catch (\Exception $e) {
-            Log::error('Error en obtenerAlumnosGrupo: ' . $e->getMessage());
-            return response()->json([
-                'success' => false,
-                'message' => 'Error: ' . $e->getMessage()
-            ], 500);
+        if (!$idGrupo || !$idPeriodo) {
+            return response()->json(['success' => false, 'message' => 'Faltan parámetros']);
         }
+
+        // ✅ Paso 1: Obtener todos los alumnos que tienen un HISTORIAL ACTIVO en este grupo y período
+        // Pero si no tienes las columnas en historial, entonces:
+        // ✅ Paso 2: Obtener los alumnos de las asignaciones del grupo y período
+
+        // Primero, obtener los alumnos con historial activo EN CUALQUIER PARTE
+        $alumnosConHistorialActivo = Historial::where('id_historial_status', 1)
+            ->pluck('id_alumno')
+            ->toArray();
+
+        if (empty($alumnosConHistorialActivo)) {
+            return response()->json(['success' => true, 'alumnos' => []]);
+        }
+
+        // Luego, filtrar esos alumnos que aparecen en ASIGNACIONES del grupo y período
+        $asignaciones = AsignacionDocente::where('id_grupo', $idGrupo)
+            ->where('id_periodo_escolar', $idPeriodo)
+            ->with('materia')
+            ->get();
+
+        // Extraer materias del grupo y período
+        $materiasIds = $asignaciones->pluck('materia.id_materia')->toArray();
+
+        if (empty($materiasIds)) {
+            return response()->json(['success' => true, 'alumnos' => []]);
+        }
+
+        // Ahora, buscar alumnos que tengan HISTORIAL ACTIVO y que estén en esas materias
+        // Pero como no tienes relación directa, la forma más segura es:
+        // ✅ Devolver todos los alumnos que tienen historial activo (ya que el grupo y período ya los filtraste en el JS)
+
+        $alumnos = Alumno::with(['datosPersonales', 'datosAcademicos'])
+            ->whereIn('id_alumno', $alumnosConHistorialActivo)
+            ->get()
+            ->map(fn($a) => [
+                'id' => $a->id_alumno,
+                'matricula' => $a->datosAcademicos?->matricula ?? 'N/A',
+                'nombre' => trim(
+                    ($a->datosPersonales?->nombres ?? '') . ' ' .
+                    ($a->datosPersonales?->primer_apellido ?? '') . ' ' .
+                    ($a->datosPersonales?->segundo_apellido ?? '')
+                )
+            ])
+            ->values();
+
+        return response()->json(['success' => true, 'alumnos' => $alumnos]);
+
+    } catch (\Exception $e) {
+        Log::error('obtenerAlumnosGrupo: ' . $e->getMessage());
+        return response()->json(['success' => false, 'message' => 'Error'], 500);
     }
+}
+
+public function obtenerMateriasGrupo(Request $request)
+{
+    try {
+        $idGrupo = $request->input('id_grupo');
+        $idPeriodo = $request->input('id_periodo');
+
+        if (!$idGrupo || !$idPeriodo) {
+            return response()->json(['success' => false, 'message' => 'Faltan parámetros']);
+        }
+
+        $materias = AsignacionDocente::with([
+            'materia:id_materia,nombre,horas,id_numero_periodo',
+            'docente.datosDocentes'
+        ])
+        ->where('id_grupo', $idGrupo)
+        ->where('id_periodo_escolar', $idPeriodo)
+        ->get()
+        ->map(function ($asignacion) {
+            $docenteNombre = trim(
+                ($asignacion->docente?->datosDocentes?->nombres ?? '') . ' ' .
+                ($asignacion->docente?->datosDocentes?->primer_apellido ?? '') . ' ' .
+                ($asignacion->docente?->datosDocentes?->segundo_apellido ?? '')
+            ) ?: ($asignacion->docente?->username ?? 'Sin docente');
+
+            return [
+                'id' => $asignacion->id_asignacion,
+                'nombre' => $asignacion->materia->nombre ?? 'N/A',
+                'docente' => $docenteNombre,
+                'horas' => $asignacion->materia->horas ?? 0,
+                'id_numero_periodo' => $asignacion->materia->id_numero_periodo,
+            ];
+        });
+
+        return response()->json(['success' => true, 'materias' => $materias]);
+    } catch (\Exception $e) {
+        Log::error('obtenerMateriasGrupo: ' . $e->getMessage());
+        return response()->json(['success' => false, 'message' => 'Error al cargar materias'], 500);
+    }
+}
 
     /**
      * Guardar reinscripciones masivas
      */
     public function storeMasivo(Request $request)
     {
+        $data = json_decode($request->alumnos_json, true);
+    $request->merge(['alumnos' => $data]);
         try {
             Log::info('StoreMasivo - Datos recibidos:', $request->all());
 
@@ -582,4 +634,41 @@ class HistorialController extends Controller
             ], 500);
         }
     }
+    public function obtenerNumeroPeriodoPorGrupo(Request $request)
+{
+    try {
+        $grupoId = $request->query('grupo');
+        $numeroPeriodo = NumeroPeriodo::with('tipoPeriodo')
+            ->where('id_grupo', $grupoId)
+            ->first();
+
+        if ($numeroPeriodo) {
+            return response()->json([
+                'success' => true,
+                'numero_periodo' => [
+                    'id_numero_periodo' => $numeroPeriodo->id_numero_periodo,
+                    'numero' => $numeroPeriodo->numero,
+                    'tipo_periodo_nombre' => $numeroPeriodo->tipoPeriodo->nombre ?? null,
+                ]
+            ]);
+        }
+
+        return response()->json(['success' => false]);
+    } catch (\Exception $e) {
+        return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+    }
+}
+public function getPeriodoByGrupo(Request $request)
+{
+    $grupo = Grupo::with('periodoEscolar')->find($request->id);
+    if (!$grupo || !$grupo->periodoEscolar) {
+        return response()->json(['success' => false]);
+    }
+
+    return response()->json([
+        'success' => true,
+        'id_periodo_escolar' => $grupo->periodoEscolar->id_periodo_escolar,
+        'nombre_periodo' => $grupo->periodoEscolar->nombre
+    ]);
+}
 }
