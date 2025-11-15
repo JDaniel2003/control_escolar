@@ -220,3 +220,7 @@ Route::get('/asignaciones/disponibles', [HistorialController::class, 'getAsignac
 Route::post('/historial/obtener-alumnos-grupo', [HistorialController::class, 'obtenerAlumnosGrupo']);
 Route::post('/historial/obtener-materias-grupo', [HistorialController::class, 'obtenerMateriasGrupo']);
 Route::post('/historial/store-masivo', [HistorialController::class, 'storeMasivo'])->name('historial.store-masivo');
+Route::get('/historial/obtener-tipo-periodo/{id}', [HistorialController::class, 'obtenerTipoPeriodo']);
+Route::post('/historial/store-masivo-avanzado', 
+    [HistorialController::class, 'storeMasivoAvanzado']
+)->name('historial.store-masivo-avanzado');

@@ -99,6 +99,10 @@
                             <div class="mb-3 text-right">
                                 <button type="button" class="btn btn-info mr-2" data-toggle="modal"
                                     data-target="#modalReinscripcionMasiva">
+                                    <i class="fas fa-users"></i> Promoción
+                                </button>
+                                <button type="button" class="btn btn-info mr-2" data-toggle="modal"
+                                    data-target="#modalReinscripcionMasivaAvanzada">
                                     <i class="fas fa-users"></i> Reinscripción Masiva
                                 </button>
 
@@ -504,21 +508,9 @@
                                         <label>Status Terminación</label>
                                         <select name="id_status_terminacion" class="form-control">
                                             <option value="">Selecciona...</option>
-                                            @foreach ($statusAcademicos as $status)
-                                                <option value="{{ $status->id_status_academico }}"
-                                                    {{ $registro->id_status_terminacion == $status->id_status_academico ? 'selected' : '' }}>
-                                                    {{ $status->nombre }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                    <div class="flex-grow-1" style="min-width: 200px;">
-                                        <label>Estatus Historial</label>
-                                        <select name="id_historial_status" class="form-control">
-                                            <option value="">Selecciona...</option>
                                             @foreach ($historialStatus as $status)
                                                 <option value="{{ $status->id_historial_status }}"
-                                                    {{ $registro->id_historial_status == $status->id_historial_status ? 'selected' : '' }}>
+                                                    {{ $registro->id_status_terminacion == $status->id_historial_status ? 'selected' : '' }}>
                                                     {{ $status->nombre }}
                                                 </option>
                                             @endforeach
@@ -549,108 +541,231 @@
         </div>
     @endforeach
     <!-- -------------------------------------------------------------- -->
-<!-- Modal Reinscripción Masiva -->
-<!-- Modal Reinscripción Masiva Simple y Funcional -->
-<div class="modal fade" id="modalReinscripcionMasiva" tabindex="-1" role="dialog">
-    <div class="modal-dialog modal-xl" role="document">
-        <div class="modal-content">
-            <div class="modal-header bg-gradient-info text-white">
-                <h5 class="mb-0 font-weight-bold">
-                    <i class="fas fa-users mr-2"></i>Reinscripción Masiva
-                </h5>
-                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form id="formReinscripcionMasiva" method="POST" action="{{ route('historial.store-masivo') }}">
-                    @csrf
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label class="font-weight-bold">Período Escolar <span class="text-danger">*</span></label>
-                            <select name="id_periodo_escolar" id="periodoEscolarMasivo" class="form-control" required>
-                                <option value="">-- Selecciona un período --</option>
-                                @foreach($periodos as $periodo)
-                                    <option value="{{ $periodo->id_periodo_escolar }}">{{ $periodo->nombre }}</option>
-                                @endforeach
-                            </select>
+    <!-- Modal Reinscripción Masiva -->
+    <!-- Modal Reinscripción Masiva Simple y Funcional -->
+    <div class="modal fade" id="modalReinscripcionMasiva" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-gradient-info text-white">
+                    <h5 class="mb-0 font-weight-bold">
+                        <i class="fas fa-users mr-2"></i>Reinscripción Masiva
+                    </h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="formReinscripcionMasiva" method="POST"
+                        action="{{ route('historial.store-masivo') }}">
+                        @csrf
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="font-weight-bold">Período Escolar <span
+                                        class="text-danger">*</span></label>
+                                <select name="id_periodo_escolar" id="periodoEscolarMasivo" class="form-control"
+                                    required>
+                                    <option value="">-- Selecciona un período --</option>
+                                    @foreach ($periodos as $periodo)
+                                        <option value="{{ $periodo->id_periodo_escolar }}">{{ $periodo->nombre }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="font-weight-bold">Grupo <span class="text-danger">*</span></label>
+                                <select name="id_grupo_actual" id="grupoActualMasivo" class="form-control" required>
+                                    <option value="">-- Selecciona un grupo --</option>
+                                    @foreach ($grupos as $grupo)
+                                        <option value="{{ $grupo->id_grupo }}">
+                                            {{ $grupo->nombre }} - {{ $grupo->carrera->nombre ?? 'N/A' }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
                         </div>
-                        <div class="col-md-6">
-                            <label class="font-weight-bold">Grupo <span class="text-danger">*</span></label>
-                            <select name="id_grupo_actual" id="grupoActualMasivo" class="form-control" required>
-                                <option value="">-- Selecciona un grupo --</option>
-                                @foreach($grupos as $grupo)
-                                    <option value="{{ $grupo->id_grupo }}">
-                                        {{ $grupo->nombre }} - {{ $grupo->carrera->nombre ?? 'N/A' }}
-                                    </option>
-                                @endforeach
-                            </select>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="font-weight-bold">Número de Periodo</label>
+                                <input type="text" id="numeroPeriodoDisplay" class="form-control" readonly
+                                    placeholder="Se autorellenará">
+                                <input type="hidden" name="id_numero_periodo" id="id_numero_periodo_masivo">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="font-weight-bold">Fecha de Inscripción</label>
+                                <input type="date" name="fecha_inscripcion" class="form-control"
+                                    value="{{ date('Y-m-d') }}">
+                            </div>
                         </div>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label class="font-weight-bold">Número de Periodo</label>
-                            <input type="text" id="numeroPeriodoDisplay" class="form-control" readonly placeholder="Se autorellenará">
-                            <input type="hidden" name="id_numero_periodo" id="id_numero_periodo_masivo">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="font-weight-bold">Fecha de Inscripción</label>
-                            <input type="date" name="fecha_inscripcion" class="form-control" value="{{ date('Y-m-d') }}">
-                        </div>
-                    </div>
 
-                    <!-- Panel de configuración rápida -->
-                    <div class="alert alert-light border mb-3" id="panelConfigRapida" style="display: none;">
-                        <div class="row">
-                            <div class="col-md-5">
-                                <select id="statusInicioMasivo" class="form-control form-control-sm">
-                                    <option value="">-- Status Inicio (Rápido) --</option>
-                                    @foreach($statusAcademicos as $status)
-                                        <option value="{{ $status->id_status_academico }}">{{ $status->nombre }}</option>
-                                    @endforeach
-                                </select>
+                        <!-- Panel de configuración rápida -->
+                        <div class="alert alert-light border mb-3" id="panelConfigRapida" style="display: none;">
+                            <div class="row">
+                                <div class="col-md-10">
+                                    <select id="statusTerminacionMasivo" class="form-control form-control-sm">
+                                        <option value="">-- Status Terminación (Aplicar a seleccionados) --
+                                        </option>
+                                        @foreach ($historialStatus as $status)
+                                            <option value="{{ $status->id_historial_status }}">{{ $status->nombre }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <button type="button" id="btnAplicarRapido"
+                                        class="btn btn-sm btn-info btn-block">
+                                        <i class="fas fa-check mr-1"></i> Aplicar
+                                    </button>
+                                </div>
                             </div>
-                            <div class="col-md-5">
-                                <select id="statusTerminacionMasivo" class="form-control form-control-sm">
-                                    <option value="">-- Status Terminación (Rápido) --</option>
-                                    @foreach($statusAcademicos as $status)
-                                        <option value="{{ $status->id_status_academico }}">{{ $status->nombre }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="col-md-2">
-                                <button type="button" id="btnAplicarRapido" class="btn btn-sm btn-outline-info btn-block">
-                                    Aplicar
+                        </div>
+
+                        <div id="contenedorAlumnos" style="display: none;">
+                            <h6 class="font-weight-bold mb-2">
+                                <i class="fas fa-user-graduate mr-2"></i>Alumnos del Grupo
+                                <button type="button" id="btnSeleccionarTodos"
+                                    class="btn btn-sm btn-outline-secondary float-right">
+                                    Seleccionar Todos
                                 </button>
+                            </h6>
+                            <div id="listaAlumnos"
+                                style="max-height: 400px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; border-radius: 5px;">
+                                <div class="text-center py-3 text-muted">Selecciona grupo y período</div>
                             </div>
                         </div>
-                    </div>
-
-                    <div id="contenedorAlumnos" style="display: none;">
-                        <h6 class="font-weight-bold mb-2">
-                            <i class="fas fa-user-graduate mr-2"></i>Alumnos del Grupo
-                            <button type="button" id="btnSeleccionarTodos" class="btn btn-sm btn-outline-secondary float-right">
-                                Seleccionar Todos
-                            </button>
-                        </h6>
-                        <div id="listaAlumnos" style="max-height: 400px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; border-radius: 5px;">
-                            <div class="text-center py-3 text-muted">Selecciona grupo y período</div>
-                        </div>
-                    </div>
-                    <input type="hidden" name="alumnos_json" id="alumnosJsonInput">
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                    <i class="fas fa-times mr-1"></i> Cancelar
-                </button>
-                <button type="button" id="btnGuardarMasivo" class="btn btn-success" disabled>
-                    <i class="fas fa-save mr-1"></i> Guardar
-                </button>
+                        <input type="hidden" name="alumnos_json" id="alumnosJsonInput">
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                        <i class="fas fa-times mr-1"></i> Cancelar
+                    </button>
+                    <button type="button" id="btnGuardarMasivo" class="btn btn-success" disabled>
+                        <i class="fas fa-save mr-1"></i> Guardar
+                    </button>
+                </div>
             </div>
         </div>
     </div>
-</div>
+    <!-- Modal Reinscripción Masiva Avanzada -->
+    <div class="modal fade" id="modalReinscripcionMasivaAvanzada" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-gradient-primary text-white">
+                    <h5 class="mb-0 font-weight-bold">
+                        <i class="fas fa-sync-alt mr-2"></i>Reinscripción Masiva Avanzada
+                    </h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="formReinscripcionMasivaAvanzada" method="POST"
+                        action="{{ route('historial.store-masivo-avanzado') }}">
+                        @csrf
+
+                        <!-- Origen: de dónde vienen los alumnos -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-light">
+                                <b>🔍 Origen: Alumnos a reinscribir</b>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label>Período Escolar (Origen) <span class="text-danger">*</span></label>
+                                        <select name="id_periodo_origen" id="periodoOrigen" class="form-control"
+                                            required>
+                                            <option value="">-- Selecciona período --</option>
+                                            @foreach ($periodos as $p)
+                                                <option value="{{ $p->id_periodo_escolar }}">{{ $p->nombre }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label>Grupo (Origen) <span class="text-danger">*</span></label>
+                                        <select name="id_grupo_origen" id="grupoOrigen" class="form-control"
+                                            required>
+                                            <option value="">-- Selecciona grupo --</option>
+                                            @foreach ($grupos as $g)
+                                                <option value="{{ $g->id_grupo }}">{{ $g->nombre }} -
+                                                    {{ $g->carrera->nombre ?? 'N/A' }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Destino: a dónde se reinscriben -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-light">
+                                <b>🎯 Destino: Nuevo período de reinscripción</b>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label>Período Escolar (Destino) <span class="text-danger">*</span></label>
+                                        <select name="id_periodo_destino" id="periodoDestino" class="form-control"
+                                            required>
+                                            <option value="">-- Selecciona período --</option>
+                                            @foreach ($periodos as $p)
+                                                <option value="{{ $p->id_periodo_escolar }}">{{ $p->nombre }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label>Grupo (Destino) <span class="text-danger">*</span></label>
+                                        <select name="id_grupo_destino" id="grupoDestino" class="form-control"
+                                            required>
+                                            <option value="">-- Selecciona grupo --</option>
+                                            @foreach ($grupos as $g)
+                                                <option value="{{ $g->id_grupo }}">{{ $g->nombre }} -
+                                                    {{ $g->carrera->nombre ?? 'N/A' }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label>Número de Período (Autorellenado)</label>
+                                        <input type="text" id="numeroPeriodoDestinoDisplay" class="form-control"
+                                            readonly placeholder="Se autorellenará">
+                                        <input type="hidden" name="id_numero_periodo_destino"
+                                            id="id_numero_periodo_destino">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label>Fecha de Inscripción</label>
+                                        <input type="date" name="fecha_inscripcion" class="form-control"
+                                            value="{{ date('Y-m-d') }}">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Alumnos y Materias -->
+                        <div id="contenedorAlumnosAvanzado" style="display: none;">
+                            <h6 class="font-weight-bold mb-3">
+                                <i class="fas fa-user-graduate mr-2"></i>Alumnos del Origen
+                            </h6>
+                            <div id="listaAlumnosAvanzado"
+                                style="max-height: 400px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; border-radius: 5px;">
+                                <div class="text-center py-3 text-muted">Selecciona origen y destino</div>
+                            </div>
+                        </div>
+
+                        <input type="hidden" name="alumnos_json" id="alumnosJsonAvanzado">
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                        <i class="fas fa-times mr-1"></i> Cancelar
+                    </button>
+                    <button type="button" id="btnGuardarAvanzado" class="btn btn-primary" disabled>
+                        <i class="fas fa-save mr-1"></i> Guardar Reinscripciones
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Modal Nueva Reinscripción -->
     <div class="modal fade" id="nuevaReinscripcionModal" tabindex="-1" role="dialog"
@@ -883,23 +998,13 @@
                                         <label class="font-weight-bold">Status Terminación</label>
                                         <select name="id_status_terminacion" class="form-control custom-select">
                                             <option value="">-- Selecciona --</option>
-                                            @foreach ($statusAcademicos as $status)
-                                                <option value="{{ $status->id_status_academico }}">
+                                            @foreach ($historialStatus as $status)
+                                                <option value="{{ $status->id_historial_status }}">
                                                     {{ $status->nombre }}</option>
                                             @endforeach
                                         </select>
                                     </div>
-                                    <div class="col-md-4">
-                                        <label class="font-weight-bold">Estatus Historial</label>
-                                        <select name="id_historial_status" class="form-control custom-select">
-                                            @foreach ($historialStatus as $status)
-                                                <option value="{{ $status->id_historial_status }}"
-                                                    {{ $status->id_historial_status == 1 ? 'selected' : '' }}>
-                                                    {{ $status->nombre }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                    </div>
+
                                 </div>
                             </div>
                         </div>
@@ -923,7 +1028,192 @@
     <script src="{{ asset('libs/jquery/jquery.min.js') }}"></script>
     <script src="{{ asset('libs/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ asset('libs/sbadmin/js/sb-admin-2.min.js') }}"></script>
-    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Datos globales
+            let alumnosOrigen = [];
+            let materiasDestino = [];
+            let alumnosConfigurados = [];
+
+            // Elementos del DOM
+            const periodoOrigen = document.getElementById('periodoOrigen');
+            const grupoOrigen = document.getElementById('grupoOrigen');
+            const periodoDestino = document.getElementById('periodoDestino');
+            const grupoDestino = document.getElementById('grupoDestino');
+            const numeroPeriodoDisplay = document.getElementById('numeroPeriodoDestinoDisplay');
+            const idNumeroPeriodoInput = document.getElementById('id_numero_periodo_destino');
+            const listaAlumnos = document.getElementById('listaAlumnosAvanzado');
+            const contenedorAlumnos = document.getElementById('contenedorAlumnosAvanzado');
+            const btnGuardar = document.getElementById('btnGuardarAvanzado');
+            const form = document.getElementById('formReinscripcionMasivaAvanzada');
+            const alumnosJsonInput = document.getElementById('alumnosJsonAvanzado');
+
+            // Cargar datos cuando cambien origen o destino
+            function cargarDatos() {
+                const idGrupoOrigen = grupoOrigen?.value;
+                const idPeriodoOrigen = periodoOrigen?.value;
+                const idGrupoDestino = grupoDestino?.value;
+                const idPeriodoDestino = periodoDestino?.value;
+
+                if (!idGrupoOrigen || !idPeriodoOrigen || !idGrupoDestino || !idPeriodoDestino) {
+                    listaAlumnos.innerHTML =
+                        '<div class="text-center py-3 text-muted">Selecciona todos los campos</div>';
+                    contenedorAlumnos.style.display = 'none';
+                    return;
+                }
+
+                listaAlumnos.innerHTML =
+                    '<div class="text-center py-3"><div class="spinner-border text-primary"></div></div>';
+
+                // Cargar en paralelo
+                Promise.all([
+                        fetch(`/historial/obtener-alumnos-grupo`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                            },
+                            body: JSON.stringify({
+                                id_grupo: idGrupoOrigen,
+                                id_periodo: idPeriodoOrigen
+                            })
+                        }).then(r => r.json()),
+                        fetch(`/asignaciones/disponibles?grupo=${idGrupoDestino}&periodo=${idPeriodoDestino}`)
+                        .then(r => r.json())
+                    ])
+                    .then(([alumnosRes, materiasRes]) => {
+                        if (!alumnosRes.success || !materiasRes.success) throw new Error('Error al cargar');
+
+                        // Guardar materias del destino
+                        materiasDestino = materiasRes.asignaciones || [];
+                        const idNumeroPeriodo = materiasRes.id_numero_periodo;
+                        idNumeroPeriodoInput.value = idNumeroPeriodo || '';
+                        numeroPeriodoDisplay.value = idNumeroPeriodo ? 'Cargado desde materias' : 'No definido';
+
+                        // Guardar alumnos del origen
+                        alumnosOrigen = alumnosRes.alumnos.map(a => ({
+                            id: a.id,
+                            matricula: a.matricula,
+                            nombre: a.nombre,
+                            selected: true, // Por defecto seleccionado
+                            materias: materiasDestino.map(m => m
+                                .id_asignacion) // Por defecto, todas las materias
+                        }));
+
+                        renderAlumnos();
+                        contenedorAlumnos.style.display = 'block';
+                    })
+                    .catch(err => {
+                        console.error('Error:', err);
+                        listaAlumnos.innerHTML =
+                            '<div class="alert alert-danger text-center">Error al cargar datos</div>';
+                    });
+            }
+
+            function renderAlumnos() {
+                if (alumnosOrigen.length === 0) {
+                    listaAlumnos.innerHTML =
+                        '<div class="text-center py-3 text-muted">No hay alumnos en el origen</div>';
+                    return;
+                }
+
+                let html = '';
+                alumnosOrigen.forEach((alumno, i) => {
+                    html += `
+            <div class="mb-3 p-2 border rounded" style="background: ${alumno.selected ? '#e3f2fd' : '#fff'};">
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" id="alumno_${i}" ${alumno.selected ? 'checked' : ''} onchange="toggleAlumno(${i})">
+                    <label class="form-check-label font-weight-bold" for="alumno_${i}">
+                        ${alumno.nombre} <small>(${alumno.matricula})</small>
+                    </label>
+                </div>
+                <div>
+                    <small class="text-muted">Materias asignadas: ${alumno.materias.length}</small>
+                    <button type="button" class="btn btn-sm btn-outline-primary ml-2" onclick="editarMaterias(${i})">
+                        <i class="fas fa-edit"></i> Editar materias
+                    </button>
+                </div>
+            </div>`;
+                });
+                listaAlumnos.innerHTML = html;
+                validar();
+            }
+
+            // Funciones globales para eventos inline
+            window.toggleAlumno = function(i) {
+                alumnosOrigen[i].selected = !alumnosOrigen[i].selected;
+                validar();
+            };
+
+            window.editarMaterias = function(i) {
+                const alumno = alumnosOrigen[i];
+                const seleccionadas = new Set(alumno.materias);
+
+                let opciones = materiasDestino.map(m => {
+                    const checked = seleccionadas.has(m.id_asignacion) ? 'checked' : '';
+                    return `<label class="d-block"><input type="checkbox" ${checked} onchange="toggleMateria(${i}, ${m.id_asignacion}, this.checked)"> ${m.materia_nombre}</label>`;
+                }).join('');
+
+                const nuevoHtml = `
+            <div class="alert alert-info p-2">
+                <h6>Selecciona materias para ${alumno.nombre}</h6>
+                ${opciones}
+                <button class="btn btn-sm btn-secondary mt-2" onclick="cerrarEdicionMaterias(${i})">Listo</button>
+            </div>
+        `;
+                document.querySelector(`#alumno_${i}`).closest('.mb-3').innerHTML = nuevoHtml;
+            };
+
+            window.toggleMateria = function(i, idAsignacion, checked) {
+                const alumno = alumnosOrigen[i];
+                if (checked) {
+                    if (!alumno.materias.includes(idAsignacion)) {
+                        alumno.materias.push(idAsignacion);
+                    }
+                } else {
+                    alumno.materias = alumno.materias.filter(id => id !== idAsignacion);
+                }
+            };
+
+            window.cerrarEdicionMaterias = function(i) {
+                renderAlumnos();
+            };
+
+            function validar() {
+                const seleccionados = alumnosOrigen.filter(a => a.selected);
+                btnGuardar.disabled = seleccionados.length === 0 || seleccionados.some(a => a.materias.length ===
+                0);
+            }
+
+            // Guardar
+            btnGuardar.addEventListener('click', () => {
+                const seleccionados = alumnosOrigen.filter(a => a.selected);
+                const data = seleccionados.map(a => ({
+                    id_alumno: a.id,
+                    materias: a.materias.slice(0, 8) // Máximo 8
+                }));
+                alumnosJsonInput.value = JSON.stringify(data);
+                form.submit();
+            });
+
+            // Eventos de cambio
+            if (grupoOrigen) grupoOrigen.addEventListener('change', cargarDatos);
+            if (periodoOrigen) periodoOrigen.addEventListener('change', cargarDatos);
+            if (grupoDestino) grupoDestino.addEventListener('change', cargarDatos);
+            if (periodoDestino) periodoDestino.addEventListener('change', cargarDatos);
+
+            // Reset
+            $('#modalReinscripcionMasivaAvanzada').on('hidden.bs.modal', () => {
+                form.reset();
+                alumnosOrigen = [];
+                materiasDestino = [];
+                listaAlumnos.innerHTML =
+                    '<div class="text-center py-3 text-muted">Selecciona todos los campos</div>';
+                contenedorAlumnos.style.display = 'none';
+                btnGuardar.disabled = true;
+            });
+        });
+    </script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Variables globales
@@ -1230,76 +1520,148 @@
             window.toggleAsignacion = toggleAsignacion;
         });
     </script>
-
-    
     <script>
-document.addEventListener('DOMContentLoaded', function () {
-    const periodoSelect = document.getElementById('periodoEscolarMasivo');
-    const grupoSelect = document.getElementById('grupoActualMasivo');
-    const numeroPeriodoDisplay = document.getElementById('numeroPeriodoDisplay');
-    const idNumeroPeriodoInput = document.getElementById('id_numero_periodo_masivo');
-    const listaAlumnos = document.getElementById('listaAlumnos');
-    const contenedorAlumnos = document.getElementById('contenedorAlumnos');
-    const panelConfigRapida = document.getElementById('panelConfigRapida');
-    const btnGuardar = document.getElementById('btnGuardarMasivo');
-    let alumnosCargados = [];
+        window.appData = {
+            statusAcademicos: @json($statusAcademicos)
+        };
+    </script>
 
-    function cargarDatos() {
-        const idGrupo = grupoSelect.value;
-        const idPeriodo = periodoSelect.value;
-        if (!idGrupo || !idPeriodo) {
-            listaAlumnos.innerHTML = '<div class="text-center py-3 text-muted">Selecciona grupo y período</div>';
-            contenedorAlumnos.style.display = 'none';
-            panelConfigRapida.style.display = 'none';
-            return;
-        }
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Inyectar status desde Blade
+            window.appData = {
+                statusAcademicos: @json($statusAcademicos),
+                historialStatus: @json($historialStatus)
+            };
 
-        listaAlumnos.innerHTML = '<div class="text-center py-3"><div class="spinner-border text-info"></div></div>';
+            // Elementos del DOM
+            const periodoSelect = document.getElementById('periodoEscolarMasivo');
+            const grupoSelect = document.getElementById('grupoActualMasivo');
+            const numeroPeriodoDisplay = document.getElementById('numeroPeriodoDisplay');
+            const idNumeroPeriodoInput = document.getElementById('id_numero_periodo_masivo');
+            const listaAlumnos = document.getElementById('listaAlumnos');
+            const contenedorAlumnos = document.getElementById('contenedorAlumnos');
+            const panelConfigRapida = document.getElementById('panelConfigRapida');
+            const btnGuardar = document.getElementById('btnGuardarMasivo');
+            const alumnosJsonInput = document.getElementById('alumnosJsonInput');
+            let alumnosCargados = [];
 
-        Promise.all([
-            fetch(`/historial/obtener-alumnos-grupo`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content },
-                body: JSON.stringify({ id_grupo: idGrupo, id_periodo: idPeriodo })
-            }).then(r => r.json()),
-            fetch(`/historial/obtener-materias-grupo`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content },
-                body: JSON.stringify({ id_grupo: idGrupo, id_periodo: idPeriodo })
-            }).then(r => r.json())
-        ])
-        .then(([alumnosRes, materiasRes]) => {
-            if (!alumnosRes.success || !materiasRes.success) throw new Error('Error al cargar datos');
+            // Cargar datos al cambiar grupo o período
+            function cargarDatos() {
+                const idGrupo = grupoSelect.value;
+                const idPeriodo = periodoSelect.value;
+                if (!idGrupo || !idPeriodo) {
+                    resetearVista();
+                    return;
+                }
 
-            // Extraer id_numero_periodo de la primera materia
-            const idNumeroPeriodo = materiasRes.materias.length > 0 ? materiasRes.materias[0].id_numero_periodo : null;
-            idNumeroPeriodoInput.value = idNumeroPeriodo || '';
-            numeroPeriodoDisplay.value = idNumeroPeriodo ? 'Cargado desde las materias' : 'No definido';
+                listaAlumnos.innerHTML =
+                    '<div class="text-center py-3"><div class="spinner-border text-info"></div></div>';
 
-            // Preparar alumnos con todas las materias
-            const idsMaterias = materiasRes.materias.map(m => m.id);
-            alumnosCargados = alumnosRes.alumnos.map(a => ({
-                ...a,
-                selected: false,
-                id_status_inicio: '',
-                id_status_terminacion: '',
-                materias: idsMaterias // ✅ Todas las materias del período
-            }));
+                Promise.all([
+                        fetch(`/historial/obtener-alumnos-grupo`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                            },
+                            body: JSON.stringify({
+                                id_grupo: idGrupo,
+                                id_periodo: idPeriodo
+                            })
+                        }).then(r => r.json()),
+                        fetch(`/historial/obtener-materias-grupo`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                            },
+                            body: JSON.stringify({
+                                id_grupo: idGrupo,
+                                id_periodo: idPeriodo
+                            })
+                        }).then(r => r.json())
+                    ])
+                    .then(([alumnosRes, materiasRes]) => {
+                        if (!alumnosRes.success || !materiasRes.success) throw new Error('Error al cargar');
 
-            renderAlumnos();
-            contenedorAlumnos.style.display = 'block';
-            panelConfigRapida.style.display = 'block';
-        })
-        .catch(err => {
-            console.error('Error:', err);
-            listaAlumnos.innerHTML = '<div class="alert alert-danger text-center">Error al cargar datos</div>';
-        });
-    }
+                        // ✅ Autorellenar número de período
+                        // ✅ AUTORELLENAR NÚMERO DE PERÍODO con nombre del tipo
+                        const idNumeroPeriodo = materiasRes.materias.length > 0 ?
+                            materiasRes.materias[0].id_numero_periodo :
+                            null;
 
-    function renderAlumnos() {
-        let html = '';
-        alumnosCargados.forEach((a, i) => {
-            html += `
+                        console.log('ID Número Periodo detectado:', idNumeroPeriodo); // Debug
+
+                        if (idNumeroPeriodo) {
+                            idNumeroPeriodoInput.value = idNumeroPeriodo;
+
+                            // Buscar el nombre del tipo de periodo en los numero_periodos disponibles
+                            fetch(`/historial/obtener-tipo-periodo/${idNumeroPeriodo}`)
+                                .then(r => r.json())
+                                .then(data => {
+                                    if (data.success) {
+                                        numeroPeriodoDisplay.value =
+                                        `${data.numero} - ${data.tipo_periodo}`;
+                                    } else {
+                                        numeroPeriodoDisplay.value = `Periodo ${idNumeroPeriodo}`;
+                                    }
+                                })
+                                .catch(() => {
+                                    numeroPeriodoDisplay.value = `Periodo ${idNumeroPeriodo}`;
+                                });
+
+                            console.log('✅ Campo rellenado con:', idNumeroPeriodo);
+                        } else {
+                            idNumeroPeriodoInput.value = '';
+                            numeroPeriodoDisplay.value = 'No detectado';
+                            console.warn('⚠️ No se encontró id_numero_periodo en las materias');
+                        }
+                        // ✅ Cargar alumnos con sus status
+                        alumnosCargados = alumnosRes.alumnos.map(a => ({
+                            id: a.id,
+                            matricula: a.matricula,
+                            nombre: a.nombre,
+                            id_historial: a.id_historial,
+                            status_inicio_nombre: a.status_inicio_nombre,
+                            id_status_terminacion: a.id_status_terminacion || '',
+                            selected: false
+                        }));
+
+                        renderAlumnos();
+                        contenedorAlumnos.style.display = 'block';
+                        panelConfigRapida.style.display = 'block';
+                    })
+                    .catch(err => {
+                        listaAlumnos.innerHTML =
+                            '<div class="alert alert-danger text-center">Error al cargar datos</div>';
+                    });
+            }
+
+            function resetearVista() {
+                listaAlumnos.innerHTML =
+                '<div class="text-center py-3 text-muted">Selecciona grupo y período</div>';
+                contenedorAlumnos.style.display = 'none';
+                panelConfigRapida.style.display = 'none';
+                if (idNumeroPeriodoInput) idNumeroPeriodoInput.value = '';
+                if (numeroPeriodoDisplay) numeroPeriodoDisplay.value = '';
+            }
+
+            // Renderizar alumnos
+            function renderAlumnos() {
+                if (alumnosCargados.length === 0) {
+                    listaAlumnos.innerHTML =
+                        '<div class="text-center py-3 text-muted">No hay alumnos en este grupo</div>';
+                    return;
+                }
+
+                const opcionesTerminacion = window.appData.historialStatus.map(s =>
+                    `<option value="${s.id_historial_status}">${s.nombre}</option>`
+                ).join('');
+
+                let html = '';
+                alumnosCargados.forEach((a, i) => {
+                    html += `
             <div class="mb-2 p-2 border rounded" style="background: ${a.selected ? '#e3f2fd' : '#fff'};">
                 <div class="form-check mb-2">
                     <input class="form-check-input alumno-check" type="checkbox" data-index="${i}" ${a.selected ? 'checked' : ''}>
@@ -1307,100 +1669,108 @@ document.addEventListener('DOMContentLoaded', function () {
                 </div>
                 <div class="row">
                     <div class="col-md-6">
-                        <select class="form-control form-control-sm status-inicio" data-index="${i}" ${!a.selected ? 'disabled' : ''}>
-                            <option value="">-- Status Inicio --</option>
-                            @foreach($statusAcademicos as $status)
-                                <option value="{{ $status->id_status_academico }}" ${a.id_status_inicio == '{{ $status->id_status_academico }}' ? 'selected' : ''}>{{ $status->nombre }}</option>
-                            @endforeach
-                        </select>
+                        <label class="small text-muted">Status Inicio</label>
+                        <input type="text" class="form-control form-control-sm bg-light" value="${a.status_inicio_nombre}" readonly>
                     </div>
                     <div class="col-md-6">
+                        <label class="small text-muted">Status Terminación</label>
                         <select class="form-control form-control-sm status-terminacion" data-index="${i}" ${!a.selected ? 'disabled' : ''}>
-                            <option value="">-- Status Terminación --</option>
-                            @foreach($statusAcademicos as $status)
-                                <option value="{{ $status->id_status_academico }}" ${a.id_status_terminacion == '{{ $status->id_status_academico }}' ? 'selected' : ''}>{{ $status->nombre }}</option>
-                            @endforeach
+                            <option value="">-- Selecciona --</option>
+                            ${opcionesTerminacion}
                         </select>
                     </div>
                 </div>
             </div>`;
-        });
-        listaAlumnos.innerHTML = html;
+                });
+                listaAlumnos.innerHTML = html;
 
-        // Reasignar eventos
-        document.querySelectorAll('.alumno-check').forEach(cb => {
-            cb.addEventListener('change', (e) => {
+                // Restaurar valores previos
+                alumnosCargados.forEach((a, i) => {
+                    if (a.id_status_terminacion) {
+                        const select = document.querySelector(`.status-terminacion[data-index="${i}"]`);
+                        if (select) select.value = a.id_status_terminacion;
+                    }
+                });
+
+                // Reasignar eventos
+                document.querySelectorAll('.alumno-check').forEach(cb => {
+                    cb.addEventListener('change', toggleAlumno);
+                });
+                document.querySelectorAll('.status-terminacion').forEach(sel => {
+                    sel.addEventListener('change', actualizarStatus);
+                });
+            }
+
+            // Manejo de eventos
+            function toggleAlumno(e) {
                 const i = e.target.dataset.index;
                 alumnosCargados[i].selected = e.target.checked;
-                document.querySelector(`.status-inicio[data-index="${i}"]`).disabled = !e.target.checked;
                 document.querySelector(`.status-terminacion[data-index="${i}"]`).disabled = !e.target.checked;
                 validar();
-            });
-        });
-        document.querySelectorAll('.status-inicio, .status-terminacion').forEach(sel => {
-            sel.addEventListener('change', (e) => {
+            }
+
+            function actualizarStatus(e) {
                 const i = e.target.dataset.index;
-                const tipo = e.target.classList.contains('status-inicio') ? 'inicio' : 'terminacion';
-                alumnosCargados[i][`id_status_${tipo}`] = e.target.value;
+                alumnosCargados[i].id_status_terminacion = e.target.value;
+                validar();
+            }
+
+            function validar() {
+                const seleccionados = alumnosCargados.filter(a => a.selected);
+                const validos = seleccionados.filter(a => a.id_status_terminacion);
+                btnGuardar.disabled = validos.length === 0;
+            }
+
+            // Aplicar configuración masiva
+            document.getElementById('btnAplicarRapido')?.addEventListener('click', () => {
+                const terminacion = document.getElementById('statusTerminacionMasivo')?.value;
+                if (!terminacion) return;
+
+                alumnosCargados.forEach(a => {
+                    if (a.selected) a.id_status_terminacion = terminacion;
+                });
+                renderAlumnos();
+            });
+
+            // Seleccionar todos
+            document.getElementById('btnSeleccionarTodos')?.addEventListener('click', () => {
+                const todos = alumnosCargados.every(a => a.selected);
+                alumnosCargados.forEach(a => a.selected = !todos);
+                renderAlumnos();
+                if (document.getElementById('btnSeleccionarTodos')) {
+                    document.getElementById('btnSeleccionarTodos').textContent = !todos ?
+                        'Deseleccionar Todos' : 'Seleccionar Todos';
+                }
                 validar();
             });
+
+            // Guardar
+            btnGuardar?.addEventListener('click', () => {
+                const seleccionados = alumnosCargados.filter(a => a.selected);
+                if (seleccionados.length === 0) return;
+
+                const data = seleccionados.map(a => ({
+                    id_historial: a.id_historial,
+                    id_status_terminacion: a.id_status_terminacion
+                }));
+
+                alumnosJsonInput.value = JSON.stringify(data);
+                document.getElementById('formReinscripcionMasiva').submit();
+            });
+
+            // Eventos
+            grupoSelect?.addEventListener('change', cargarDatos);
+            periodoSelect?.addEventListener('change', cargarDatos);
+
+            // Reset al cerrar
+            $('#modalReinscripcionMasiva').on('hidden.bs.modal', () => {
+                document.getElementById('formReinscripcionMasiva')?.reset();
+                alumnosCargados = [];
+                resetearVista();
+                btnGuardar.disabled = true;
+            });
         });
-    }
-
-    function validar() {
-        const seleccionados = alumnosCargados.filter(a => a.selected);
-        const validos = seleccionados.filter(a => a.id_status_inicio);
-        btnGuardar.disabled = validos.length === 0;
-    }
-
-    // Eventos
-    grupoSelect.addEventListener('change', cargarDatos);
-    periodoSelect.addEventListener('change', cargarDatos);
-
-    // Configuración rápida
-    document.getElementById('btnAplicarRapido').addEventListener('click', () => {
-        const inicio = document.getElementById('statusInicioMasivo').value;
-        const terminacion = document.getElementById('statusTerminacionMasivo').value;
-        alumnosCargados.forEach(a => {
-            if (a.selected) {
-                if (inicio) a.id_status_inicio = inicio;
-                if (terminacion) a.id_status_terminacion = terminacion;
-            }
-        });
-        renderAlumnos();
-    });
-
-    // Seleccionar todos
-    document.getElementById('btnSeleccionarTodos').addEventListener('click', () => {
-        const todos = alumnosCargados.every(a => a.selected);
-        alumnosCargados.forEach(a => a.selected = !todos);
-        renderAlumnos();
-    });
-
-    // Guardar
-    btnGuardar.addEventListener('click', () => {
-        const seleccionados = alumnosCargados.filter(a => a.selected);
-        const data = seleccionados.map(a => ({
-            id_alumno: a.id,
-            id_status_inicio: a.id_status_inicio,
-            id_status_terminacion: a.id_status_terminacion || null,
-            materias: a.materias
-        }));
-        document.getElementById('alumnosJsonInput').value = JSON.stringify(data);
-        document.getElementById('formReinscripcionMasiva').submit();
-    });
-
-    // Reset al cerrar
-    $('#modalReinscripcionMasiva').on('hidden.bs.modal', () => {
-        document.getElementById('formReinscripcionMasiva').reset();
-        alumnosCargados = [];
-        listaAlumnos.innerHTML = '<div class="text-center py-3 text-muted">Selecciona grupo y período</div>';
-        contenedorAlumnos.style.display = 'none';
-        panelConfigRapida.style.display = 'none';
-        btnGuardar.disabled = true;
-    });
-});
-</script>
+    </script>
 </body>
 
 </html>

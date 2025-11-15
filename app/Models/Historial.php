@@ -16,6 +16,8 @@ class Historial extends Model
     protected $fillable = [
         'id_grupo',
         'id_periodo_escolar',
+        'id_grupo_actual',
+    'id_numero_periodo',
         'id_alumno',
         'fecha_inscripcion',
         'id_status_inicio',
@@ -82,7 +84,7 @@ class Historial extends Model
      */
     public function statusTerminacion()
     {
-        return $this->belongsTo(StatusAcademico::class, 'id_status_terminacion', 'id_status_academico');
+        return $this->belongsTo(HistorialStatus::class, 'id_status_terminacion', 'id_historial_status');
     }
 
     /**

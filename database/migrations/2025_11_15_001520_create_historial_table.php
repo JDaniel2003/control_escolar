@@ -17,7 +17,6 @@ return new class extends Migration
             $table->date('fecha_inscripcion')->nullable();
             $table->integer('id_status_inicio')->nullable()->index('id_status_inicio');
             $table->integer('id_status_terminacion')->nullable()->index('id_status_terminacion');
-            $table->integer('id_historial_status')->nullable()->index('id_historial_status');
             $table->integer('id_asignacion_1')->nullable()->index('id_asignacion_1');
             $table->integer('id_asignacion_2')->nullable()->index('id_asignacion_2');
             $table->integer('id_asignacion_3')->nullable()->index('id_asignacion_3');
