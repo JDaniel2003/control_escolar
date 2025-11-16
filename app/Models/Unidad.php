@@ -28,5 +28,9 @@ class Unidad extends Model
     {
         return $this->belongsTo(Materia::class, 'id_materia', 'id_materia');
     }
+    public function evaluaciones()
+    {
+        return $this->hasMany(Evaluacion::class, 'id_unidad', 'id_unidad');
+    }
     
 }

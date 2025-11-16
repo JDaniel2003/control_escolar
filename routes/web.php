@@ -187,3 +187,16 @@ Route::post('/historial/store-masivo-avanzado',
 )->name('historial.store-masivo-avanzado');
 
 Route::get('/calificaciones', [CalificacionController::class, 'index'])->name('calificaciones.index');
+// Rutas de Calificaciones
+Route::middleware(['auth'])->prefix('calificaciones')->name('calificaciones.')->group(function () {
+    Route::get('/', [CalificacionController::class, 'index'])->name('index');
+    Route::get('/materias', [CalificacionController::class, 'obtenerMaterias']);
+    Route::get('/unidades/{idAsignacion}', [CalificacionController::class, 'obtenerUnidades']);
+    Route::get('/evaluaciones/{idUnidad}', [CalificacionController::class, 'obtenerEvaluaciones']);
+    Route::post('/alumnos-grupo', [CalificacionController::class, 'obtenerAlumnosGrupo']);
+    Route::post('/store-masivo', [CalificacionController::class, 'storeMasivo'])->name('store-masivo');
+    Route::post('/matriz-completa', [CalificacionController::class, 'obtenerMatrizCompleta']);
+Route::post('/store-masivo', [CalificacionController::class, 'storeMasivoMatriz'])->name('store-masivo');
+});
+Route::post('/calificaciones/guardar-masivo', [CalificacionController::class, 'storeMasivo'])
+    ->name('calificaciones.storeMasivo');

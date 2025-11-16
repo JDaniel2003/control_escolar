@@ -64,6 +64,17 @@ class Materia extends Model
 {
     return $this->hasMany(Unidad::class, 'id_materia');
 }
+ // NUEVA RELACIÓN: Una materia puede tener varios tipos de evaluación
+    public function tiposEvaluacion()
+    {
+        return $this->hasMany(Evaluacion::class, 'id_materia', 'id_materia');
+    }
+
+    // O si es una relación muchos a muchos (dependiendo de tu estructura)
+    public function evaluaciones()
+    {
+        return $this->hasMany(Evaluacion::class, 'id_materia', 'id_materia');
+    }
 
 
     

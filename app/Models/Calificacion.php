@@ -11,14 +11,15 @@ class Calificacion extends Model
 
     protected $table = 'calificaciones';
     protected $primaryKey = 'id_calificacion';
-    
+     public $timestamps = false;
     protected $fillable = [
         'id_alumno',
         'id_unidad',
         'id_evaluacion',
         'id_asignacion',
         'calificacion',
-        'fecha_registro'
+        'calificacion_especial',
+        'fecha'
     ];
 
     /**

@@ -55,22 +55,16 @@
         </div>
         <div class="collapse navbar-collapse ml-4">
             <ul class="navbar-nav" style="padding-left: 20%;">
-                <li class="nav-item"><a class="nav-link text-white px-3 mr-1" href="{{ route('admin') }}">Inicio</a>
-                </li>
-                <li class="nav-item"><a class="nav-link text-white px-3 mr-1"
-                        href="{{ route('periodos.index') }}">Períodos Escolares</a></li>
-                <li class="nav-item"><a class="nav-link text-white px-3 mr-1"
-                        href="{{ route('carreras.index') }}">Carreras</a></li>
-                <li class="nav-item"><a class="nav-link text-white px-3 mr-1"
-                        href="{{ route('materias.index') }}">Materias</a></li>
-                <li class="nav-item"><a class="nav-link text-white px-3 mr-1" href="{{ route('planes.index') }}">Planes
-                        de estudio</a></li>
-                <li class="nav-item"><a class="nav-link text-white px-3 mr-1"
-                        href="{{ route('alumnos.index') }}">Alumnos</a></li>
-                <li class="nav-item"><a class="nav-link text-white px-3 mr-1"
-                        href="{{ route('asignaciones.index') }}">Asignaciones Docentes</a></li>
-                <li class="nav-item"><a class="nav-link navbar-active-item px-3">Historial</a></li>
-                <li class="nav-item"><a class="nav-link text-white px-3" href="#">Calificaciones</a></li>
+                <li class="nav-item"><a class="nav-link text-white px-3 mr-1" href="{{ route('admin') }}">Inicio</a></li>
+                <li class="nav-item"><a class="nav-link text-white px-3 mr-1" href="{{ route('periodos.index') }}">Períodos Escolares</a></li>
+                <li class="nav-item"><a class="nav-link text-white px-3 mr-1" href="{{ route('carreras.index') }}">Carreras</a></li>
+                <li class="nav-item"><a class="nav-link text-white px-3 mr-1" href="{{ route('materias.index') }}">Materias</a></li>
+                <li class="nav-item"><a class="nav-link text-white px-3 mr-1" href="{{ route('planes.index') }}">Planes de estudio</a></li>
+                <li class="nav-item"><a class="nav-link text-white px-3 mr-1" href="{{ route('alumnos.index') }}">Alumnos</a></li>
+                <li class="nav-item"><a class="nav-link text-white px-3 mr-1" href="{{ route('asignaciones.index') }}">Asignaciones Docentes</a></li>
+                <li class="nav-item"><a class="nav-link navbar-active-item px-3" href="{{ route('historial.index') }}">Historial</a></li>
+                <li class="nav-item"><a class="nav-link text-white px-3 mr-1" href="{{ route('calificaciones.index') }}">Calificaciones</a></li>
+
             </ul>
         </div>
         <div class="position-absolute" style="top: 10px; right: 20px; z-index: 1000;">
