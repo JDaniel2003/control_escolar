@@ -31,6 +31,8 @@ class Historial extends Model
         'id_asignacion_6',
         'id_asignacion_7',
         'id_asignacion_8',
+        'id_asignacion_9',
+        'id_asignacion_10',
     ];
 
     protected $casts = [
@@ -159,6 +161,14 @@ class Historial extends Model
     public function asignacion8()
     {
         return $this->belongsTo(AsignacionDocente::class, 'id_asignacion_8', 'id_asignacion');
+    }
+    public function asignacion9()
+    {
+        return $this->belongsTo(AsignacionDocente::class, 'id_asignacion_9', 'id_asignacion');
+    }
+    public function asignacion10()
+    {
+        return $this->belongsTo(AsignacionDocente::class, 'id_asignacion_10', 'id_asignacion');
     }
 
     // ==================== ACCESSORS & MUTATORS ====================

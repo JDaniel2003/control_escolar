@@ -90,7 +90,7 @@
                     <a class="nav-link text-white px-3" href="{{ route('historial.index') }}">Historial</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link text-white px-3" href="#">Calificaciones</a>
+                    <a class="nav-link text-white px-3" href="{{ route('calificaciones.index') }}">Calificaciones</a>
                 </li>
             </ul>
         </div>

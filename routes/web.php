@@ -12,7 +12,8 @@ use App\Http\Controllers\HistorialController;
 use App\Http\Controllers\CatalogosController;
 use App\Http\Controllers\AsignacionMasivaController;
 use App\Http\Controllers\AsignacionDocenteController;
-
+use App\Http\Controllers\CalificacionController;
+use App\Models\Calificacion;
 
 #----------------------login-----------------------
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
@@ -103,53 +104,13 @@ Route::put('/alumnos/{id}', [AlumnoController::class, 'update'])->name('alumnos.
 Route::delete('/alumnos/{id}', [AlumnoController::class, 'destroy'])->name('alumnos.destroy');
 Route::resource('alumnos', AlumnoController::class);
 
-Route::get('/historial', [HistorialController::class, 'index'])->name('historial');
-Route::get('/historial/create', [HistorialController::class, 'create'])->name('historial.create');
-Route::post('/historial', [HistorialController::class, 'store'])->name('historial.store');
-Route::get('/historial/{id}/edit', [HistorialController::class, 'edit'])->name('historial.edit');
-Route::put('/historial/{id}', [HistorialController::class, 'update'])->name('historial.update');
-Route::delete('/historial/{id}', [HistorialController::class, 'destroy'])->name('historial.destroy');
-Route::resource('historial', HistorialController::class);
-Route::get('/buscar-alumno', [HistorialController::class, 'buscarAlumno'])->name('buscar.alumno');
 
-Route::middleware(['auth'])->group(function () {
-    
-    // ⚠️ IMPORTANTE: Las rutas AJAX deben ir ANTES que las rutas con parámetros
-    Route::get('/buscar-alumno', [HistorialController::class, 'buscarAlumno']);
-    Route::get('/historial/obtener-materias-grupo', [HistorialController::class, 'obtenerMateriasPorGrupo']);
-    Route::get('/historial/obtener-alumnos-grupo', [HistorialController::class, 'obtenerAlumnosGrupo']);
-    Route::get('/historial/reinscripcion-masiva', [HistorialController::class, 'reinscripcionMasiva'])->name('historial.reinscripcion-masiva');
-    
-    Route::get('/historial/materias-por-grupo', [HistorialController::class, 'obtenerMateriasPorGrupo'])
-    ->name('historial.materias-por-grupo');
+//--------------HISTORIAL--------------
+Route::resource('historial', HistorialController::class)->parameters([
+    'historial' => 'historial:id_historial'
+]);
 
-Route::get('/historial/buscar-alumno', [HistorialController::class, 'buscarAlumno'])
-    ->name('historial.buscar-alumno');
 
-    // Rutas para Historial
-Route::prefix('historial')->group(function () {
-    Route::get('/', [HistorialController::class, 'index'])->name('historial.index');
-    Route::get('/create', [HistorialController::class, 'create'])->name('historial.create');
-    Route::post('/', [HistorialController::class, 'store'])->name('historial.store');
-    Route::get('/{historial}', [HistorialController::class, 'show'])->name('historial.show');
-    Route::get('/{historial}/edit', [HistorialController::class, 'edit'])->name('historial.edit');
-    Route::put('/{historial}', [HistorialController::class, 'update'])->name('historial.update');
-    Route::delete('/{historial}', [HistorialController::class, 'destroy'])->name('historial.destroy');
-    
-    // Rutas adicionales para funcionalidades específicas
-    Route::get('/buscar-alumno', [HistorialController::class, 'buscarAlumno'])->name('historial.buscar-alumno');
-    Route::get('/materias-por-grupo', [HistorialController::class, 'obtenerMateriasPorGrupo'])->name('historial.materias-por-grupo');
-    Route::get('/reinscripcion-masiva', [HistorialController::class, 'reinscripcionMasiva'])->name('historial.reinscripcion-masiva');
-    Route::post('/reinscripcion-masiva', [HistorialController::class, 'storeMasivo'])->name('historial.store-masivo');
-    Route::get('/obtener-alumnos-grupo', [HistorialController::class, 'obtenerAlumnosGrupo'])->name('historial.obtener-alumnos-grupo');
-});
-    // Rutas normales
-    Route::get('/historial', [HistorialController::class, 'index'])->name('historial.index');
-    Route::post('/historial', [HistorialController::class, 'store'])->name('historial.store');
-    Route::put('/historial/{historial}', [HistorialController::class, 'update'])->name('historial.update');
-    Route::delete('/historial/{historial}', [HistorialController::class, 'destroy'])->name('historial.destroy');
-    Route::post('/historial/store-masivo', [HistorialController::class, 'storeMasivo'])->name('historial.store-masivo');
-});
 
 Route::middleware(['auth'])->group(function () {
     // Rutas para asignaciones docentes individuales
@@ -199,7 +160,7 @@ Route::get('/test-vista', function() {
 Route::post('/historial/obtener-alumnos-grupo', [HistorialController::class, 'obtenerAlumnosGrupo'])
     ->name('historial.obtener-alumnos-grupo');
 
-// Obtener materias del grupo (NUEVA)
+// Obtener materias del grupo 
 Route::post('/asignaciones/obtener-materias-grupo', [AsignacionDocenteController::class, 'obtenerMateriasGrupo'])
     ->name('asignaciones.obtener-materias-grupo');
 
@@ -224,3 +185,5 @@ Route::get('/historial/obtener-tipo-periodo/{id}', [HistorialController::class, 
 Route::post('/historial/store-masivo-avanzado', 
     [HistorialController::class, 'storeMasivoAvanzado']
 )->name('historial.store-masivo-avanzado');
+
+Route::get('/calificaciones', [CalificacionController::class, 'index'])->name('calificaciones.index');
