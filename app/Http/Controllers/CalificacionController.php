@@ -238,150 +238,142 @@ class CalificacionController extends Controller
         }
 
         $jsonData = $request->input('calificaciones_json');
-        Log::info('JSON recibido:', ['json' => $jsonData]);
-
         $data = json_decode($jsonData, true);
         
         if (json_last_error() !== JSON_ERROR_NONE) {
             Log::error('Error al decodificar JSON:', ['error' => json_last_error_msg()]);
-            return redirect()->back()->withErrors(['error' => 'Error al procesar los datos: ' . json_last_error_msg()]);
+            return redirect()->back()->withErrors(['error' => 'Error al procesar los datos']);
         }
 
-        Log::info('Datos decodificados:', $data);
-        
-        // VALIDACIÓN MÁS ESTRICTA
-        if (!isset($data['id_asignacion']) || empty($data['id_asignacion'])) {
-            Log::error('id_asignacion no está presente o está vacío', ['data' => $data]);
-            return redirect()->back()->withErrors(['error' => 'Falta el ID de asignación']);
-        }
-
-        if (!isset($data['calificaciones']) || !is_array($data['calificaciones']) || count($data['calificaciones']) === 0) {
-            Log::error('calificaciones no está presente, no es array o está vacío', ['data' => $data]);
-            return redirect()->back()->withErrors(['error' => 'No hay calificaciones para guardar']);
+        if (!isset($data['id_asignacion']) || !isset($data['calificaciones']) || 
+            !is_array($data['calificaciones']) || count($data['calificaciones']) === 0) {
+            return redirect()->back()->withErrors(['error' => 'Datos incompletos']);
         }
 
         $calificaciones = $data['calificaciones'];
         $idAsignacion = $data['id_asignacion'];
 
         Log::info('Procesando calificaciones', [
-            'total_calificaciones' => count($calificaciones),
-            'id_asignacion' => $idAsignacion
+            'total' => count($calificaciones),
+            'asignacion' => $idAsignacion
         ]);
 
         DB::beginTransaction();
 
-        $guardadas = 0;
-        $actualizadas = 0;
-        $errores = [];
+        $estadisticas = [
+            'nuevas' => 0,
+            'actualizadas' => 0,
+            'recuperacion' => 0,
+            'extraordinario' => 0,
+            'extraordinario_especial' => 0,
+            'errores' => []
+        ];
 
         foreach ($calificaciones as $index => $cal) {
             try {
-                Log::info("Procesando calificación {$index}:", $cal);
+                // Validar datos requeridos
+                if (!isset($cal['id_alumno']) || !isset($cal['id_unidad']) || 
+                    !isset($cal['id_evaluacion']) || !isset($cal['calificacion'])) {
+                    $estadisticas['errores'][] = "Datos incompletos en registro {$index}";
+                    continue;
+                }
 
-                // Validar datos requeridos de manera más específica
-                $camposRequeridos = ['id_alumno', 'id_unidad', 'id_evaluacion', 'calificacion'];
-                $camposFaltantes = [];
+                $idAlumno = intval($cal['id_alumno']);
+                $idUnidad = intval($cal['id_unidad']);
+                $idEvaluacion = intval($cal['id_evaluacion']);
+                $calificacionNueva = floatval($cal['calificacion']);
+
+                // Validar rango
+                if ($calificacionNueva < 0 || $calificacionNueva > 10) {
+                    $estadisticas['errores'][] = "Calificación fuera de rango para alumno {$idAlumno}";
+                    continue;
+                }
+
+                // Obtener el tipo de evaluación
+                $evaluacion = Evaluacion::find($idEvaluacion);
+                if (!$evaluacion) {
+                    $estadisticas['errores'][] = "Evaluación {$idEvaluacion} no encontrada";
+                    continue;
+                }
+
+                $tipoEvaluacion = strtolower($evaluacion->tipo ?? 'ordinario');
                 
-                foreach ($camposRequeridos as $campo) {
-                    if (!isset($cal[$campo]) || $cal[$campo] === '') {
-                        $camposFaltantes[] = $campo;
+                Log::info("Procesando calificación", [
+                    'alumno' => $idAlumno,
+                    'unidad' => $idUnidad,
+                    'evaluacion' => $idEvaluacion,
+                    'tipo' => $tipoEvaluacion,
+                    'calificacion' => $calificacionNueva
+                ]);
+
+                // 🎯 EXTRAORDINARIO ESPECIAL (Calificación general de la materia)
+                if ($tipoEvaluacion === 'extraordinario_especial') {
+                    $resultado = $this->procesarExtraordinarioEspecial(
+                        $idAlumno, 
+                        $idAsignacion, 
+                        $calificacionNueva
+                    );
+                    
+                    if ($resultado['exito']) {
+                        $estadisticas['extraordinario_especial']++;
+                        Log::info("✅ Extraordinario Especial procesado", $resultado);
+                    } else {
+                        $estadisticas['errores'][] = $resultado['mensaje'];
                     }
-                }
-
-                if (!empty($camposFaltantes)) {
-                    $errores[] = "Datos incompletos en calificación {$index}: faltan " . implode(', ', $camposFaltantes);
-                    Log::warning('Datos incompletos:', ['calificacion' => $cal, 'faltantes' => $camposFaltantes]);
                     continue;
                 }
 
-                // Validar tipos de datos
-                $id_alumno = intval($cal['id_alumno']);
-                $id_unidad = intval($cal['id_unidad']);
-                $id_evaluacion = intval($cal['id_evaluacion']);
-                $calificacion_valor = floatval($cal['calificacion']);
+                // 🎯 EVALUACIONES POR UNIDAD (Ordinario, Recuperación, Extraordinario)
+                $resultado = $this->procesarCalificacionUnidad(
+                    $idAlumno,
+                    $idAsignacion,
+                    $idUnidad,
+                    $idEvaluacion,
+                    $tipoEvaluacion,
+                    $calificacionNueva
+                );
 
-                // Validar rango de calificación
-                if ($calificacion_valor < 0 || $calificacion_valor > 10) {
-                    $errores[] = "Calificación {$calificacion_valor} fuera de rango (0-10) para alumno ID {$id_alumno}";
-                    continue;
-                }
-
-                // VERIFICAR SI LA CALIFICACIÓN YA EXISTE
-                $calificacionExistente = Calificacion::where('id_alumno', $id_alumno)
-                    ->where('id_asignacion', $idAsignacion)
-                    ->where('id_unidad', $id_unidad)
-                    ->where('id_evaluacion', $id_evaluacion)
-                    ->first();
-
-                $dataCalificacion = [
-                    'id_alumno' => $id_alumno,
-                    'id_asignacion' => $idAsignacion,
-                    'id_unidad' => $id_unidad,
-                    'id_evaluacion' => $id_evaluacion,
-                    'calificacion' => $calificacion_valor,
-                    'fecha' => now()->toDateString()
-                ];
-
-                Log::info('Datos a guardar/actualizar:', $dataCalificacion);
-
-                if ($calificacionExistente) {
-                    // ACTUALIZAR EXISTENTE
-                    $calificacionExistente->update($dataCalificacion);
-                    $actualizadas++;
-                    Log::info("✅ Calificación actualizada", [
-                        'id_calificacion' => $calificacionExistente->id_calificacion,
-                        'alumno' => $id_alumno
-                    ]);
+                if ($resultado['exito']) {
+                    switch ($resultado['accion']) {
+                        case 'nueva':
+                            $estadisticas['nuevas']++;
+                            break;
+                        case 'actualizada':
+                            $estadisticas['actualizadas']++;
+                            break;
+                        case 'recuperacion':
+                            $estadisticas['recuperacion']++;
+                            break;
+                        case 'extraordinario':
+                            $estadisticas['extraordinario']++;
+                            break;
+                    }
+                    Log::info("✅ {$resultado['mensaje']}", $resultado['datos']);
                 } else {
-                    // CREAR NUEVA
-                    $nuevaCalif = Calificacion::create($dataCalificacion);
-                    $guardadas++;
-                    Log::info("✅ Calificación creada", [
-                        'id_calificacion' => $nuevaCalif->id_calificacion,
-                        'alumno' => $id_alumno
-                    ]);
+                    $estadisticas['errores'][] = $resultado['mensaje'];
                 }
 
             } catch (\Exception $e) {
-                $errores[] = "Error en calificación {$index} (Alumno ID {$cal['id_alumno']}): {$e->getMessage()}";
-                Log::error("❌ Error guardando calificación", [
-                    'index' => $index,
+                $estadisticas['errores'][] = "Error en alumno {$cal['id_alumno']}: {$e->getMessage()}";
+                Log::error("❌ Error procesando calificación", [
                     'alumno' => $cal['id_alumno'] ?? 'desconocido',
-                    'error' => $e->getMessage(),
-                    'trace' => $e->getTraceAsString()
+                    'error' => $e->getMessage()
                 ]);
             }
         }
 
         DB::commit();
 
-        // CONSTRUIR MENSAJE DE RESULTADO
-        $mensaje = "Proceso completado: ";
-        $partes = [];
-        if ($guardadas > 0) {
-            $partes[] = "{$guardadas} nueva(s)";
-        }
-        if ($actualizadas > 0) {
-            $partes[] = "{$actualizadas} actualizada(s)";
-        }
-        if (empty($partes)) {
-            $mensaje = "No se realizaron cambios";
-        } else {
-            $mensaje .= implode(" y ", $partes);
-        }
+        // Construir mensaje de resultado
+        $mensaje = $this->construirMensajeResultado($estadisticas);
 
-        Log::info('=== Proceso completado ===', [
-            'guardadas' => $guardadas,
-            'actualizadas' => $actualizadas,
-            'errores' => count($errores)
-        ]);
+        Log::info('=== Proceso completado ===', $estadisticas);
 
         $response = redirect()->route('calificaciones.index')->with('success', $mensaje);
 
-        if (count($errores) > 0) {
-            Log::warning('Errores encontrados:', $errores);
+        if (count($estadisticas['errores']) > 0) {
             $response->with('warning', 'Algunos registros tuvieron errores')
-                    ->with('errores_detalle', $errores);
+                     ->with('errores_detalle', $estadisticas['errores']);
         }
 
         return $response;
@@ -391,14 +383,238 @@ class CalificacionController extends Controller
         Log::error('❌ Error crítico en storeMasivo', [
             'error' => $e->getMessage(),
             'line' => $e->getLine(),
-            'file' => $e->getFile(),
             'trace' => $e->getTraceAsString()
         ]);
         
         return redirect()->back()
-            ->withErrors(['error' => 'Error al guardar las calificaciones: ' . $e->getMessage()])
+            ->withErrors(['error' => 'Error al guardar: ' . $e->getMessage()])
             ->withInput();
     }
+}
+
+/**
+ * Procesar calificación por unidad (Ordinario, Recuperación, Extraordinario)
+ */
+private function procesarCalificacionUnidad($idAlumno, $idAsignacion, $idUnidad, $idEvaluacion, $tipoEvaluacion, $calificacionNueva)
+{
+    // Buscar TODAS las calificaciones de esta unidad (para historial completo)
+    $calificacionesExistentes = Calificacion::where('id_alumno', $idAlumno)
+        ->where('id_asignacion', $idAsignacion)
+        ->where('id_unidad', $idUnidad)
+        ->orderBy('fecha', 'desc')
+        ->get();
+
+    // Obtener la última calificación registrada
+    $ultimaCalificacion = $calificacionesExistentes->first();
+    
+    $esAprobatoria = $calificacionNueva >= 6;
+
+    // 📘 CASO 1: Primera calificación (Ordinario)
+    if ($calificacionesExistentes->isEmpty() && $tipoEvaluacion === 'ordinario') {
+        Calificacion::create([
+            'id_alumno' => $idAlumno,
+            'id_asignacion' => $idAsignacion,
+            'id_unidad' => $idUnidad,
+            'id_evaluacion' => $idEvaluacion,
+            'calificacion' => $calificacionNueva,
+            'fecha' => now()->toDateString()
+        ]);
+
+        return [
+            'exito' => true,
+            'accion' => 'nueva',
+            'mensaje' => 'Calificación ordinaria guardada',
+            'datos' => ['alumno' => $idAlumno, 'unidad' => $idUnidad, 'calif' => $calificacionNueva]
+        ];
+    }
+
+    // 📗 CASO 2: Calificación aprobatoria en ordinario - No se modifica
+    if ($ultimaCalificacion && $ultimaCalificacion->calificacion >= 6) {
+        return [
+            'exito' => false,
+            'mensaje' => "Alumno {$idAlumno} ya tiene calificación aprobatoria ({$ultimaCalificacion->calificacion}) en unidad {$idUnidad}"
+        ];
+    }
+
+    // 📙 CASO 3: Recuperación (reprobó en ordinario)
+    if ($tipoEvaluacion === 'recuperacion') {
+        if ($calificacionesExistentes->isEmpty()) {
+            return [
+                'exito' => false,
+                'mensaje' => "No hay calificación ordinaria previa para alumno {$idAlumno}, unidad {$idUnidad}"
+            ];
+        }
+
+        // Verificar que efectivamente reprobó la última evaluación
+        if ($ultimaCalificacion->calificacion >= 6) {
+            return [
+                'exito' => false,
+                'mensaje' => "El alumno {$idAlumno} ya aprobó esta unidad con {$ultimaCalificacion->calificacion}"
+            ];
+        }
+
+        // ✅ CREAR NUEVO REGISTRO para recuperación (mantiene el historial)
+        Calificacion::create([
+            'id_alumno' => $idAlumno,
+            'id_asignacion' => $idAsignacion,
+            'id_unidad' => $idUnidad,
+            'id_evaluacion' => $idEvaluacion,
+            'calificacion' => $calificacionNueva,
+            'fecha' => now()->toDateString()
+        ]);
+
+        return [
+            'exito' => true,
+            'accion' => 'recuperacion',
+            'mensaje' => $esAprobatoria ? 'Aprobado en recuperación (historial guardado)' : 'Reprobó en recuperación (historial guardado)',
+            'datos' => ['alumno' => $idAlumno, 'unidad' => $idUnidad, 'calif' => $calificacionNueva, 'historico' => $calificacionesExistentes->count() + 1]
+        ];
+    }
+
+    // 📕 CASO 4: Extraordinario (reprobó en ordinario y recuperación)
+    if ($tipoEvaluacion === 'extraordinario') {
+        if ($calificacionesExistentes->isEmpty()) {
+            return [
+                'exito' => false,
+                'mensaje' => "No hay calificación previa para alumno {$idAlumno}, unidad {$idUnidad}"
+            ];
+        }
+
+        // Verificar que efectivamente reprobó antes
+        if ($ultimaCalificacion->calificacion >= 6) {
+            return [
+                'exito' => false,
+                'mensaje' => "El alumno {$idAlumno} ya aprobó esta unidad con {$ultimaCalificacion->calificacion}"
+            ];
+        }
+
+        // ✅ CREAR NUEVO REGISTRO para extraordinario (mantiene el historial)
+        Calificacion::create([
+            'id_alumno' => $idAlumno,
+            'id_asignacion' => $idAsignacion,
+            'id_unidad' => $idUnidad,
+            'id_evaluacion' => $idEvaluacion,
+            'calificacion' => $calificacionNueva,
+            'fecha' => now()->toDateString()
+        ]);
+
+        return [
+            'exito' => true,
+            'accion' => 'extraordinario',
+            'mensaje' => $esAprobatoria ? 'Aprobado en extraordinario (historial guardado)' : 'Reprobó en extraordinario (historial guardado)',
+            'datos' => ['alumno' => $idAlumno, 'unidad' => $idUnidad, 'calif' => $calificacionNueva, 'historico' => $calificacionesExistentes->count() + 1]
+        ];
+    }
+
+    // 🔄 CASO 5: Actualizar ordinario si se vuelve a enviar (solo si no ha pasado a recuperación)
+    if ($tipoEvaluacion === 'ordinario' && !$calificacionesExistentes->isEmpty()) {
+        // Solo permitir actualizar si solo hay UN registro (no ha pasado a recuperación/extraordinario)
+        if ($calificacionesExistentes->count() === 1) {
+            $ultimaCalificacion->update([
+                'id_evaluacion' => $idEvaluacion,
+                'calificacion' => $calificacionNueva,
+                'fecha' => now()->toDateString()
+            ]);
+
+            return [
+                'exito' => true,
+                'accion' => 'actualizada',
+                'mensaje' => 'Calificación ordinaria actualizada',
+                'datos' => ['alumno' => $idAlumno, 'unidad' => $idUnidad, 'calif' => $calificacionNueva]
+            ];
+        } else {
+            return [
+                'exito' => false,
+                'mensaje' => "No se puede actualizar ordinario, el alumno ya tiene evaluaciones posteriores (recuperación/extraordinario)"
+            ];
+        }
+    }
+
+    return [
+        'exito' => false,
+        'mensaje' => "Tipo de evaluación '{$tipoEvaluacion}' no reconocido o flujo inválido"
+    ];
+}
+
+/**
+ * Procesar Extraordinario Especial (calificación general de la materia)
+ */
+private function procesarExtraordinarioEspecial($idAlumno, $idAsignacion, $calificacion)
+{
+    // Buscar TODAS las unidades de esta materia
+    $asignacion = AsignacionDocente::with('materia')->find($idAsignacion);
+    if (!$asignacion || !$asignacion->materia) {
+        return ['exito' => false, 'mensaje' => 'Materia no encontrada'];
+    }
+
+    $unidades = Unidad::where('id_materia', $asignacion->materia->id_materia)->get();
+
+    if ($unidades->isEmpty()) {
+        return ['exito' => false, 'mensaje' => 'No hay unidades para esta materia'];
+    }
+
+    // Actualizar TODAS las unidades con la calificación especial
+    foreach ($unidades as $unidad) {
+        $calificacionExistente = Calificacion::where('id_alumno', $idAlumno)
+            ->where('id_asignacion', $idAsignacion)
+            ->where('id_unidad', $unidad->id_unidad)
+            ->first();
+
+        if ($calificacionExistente) {
+            // Actualizar el campo calificacion_especial
+            $calificacionExistente->update([
+                'calificacion_especial' => $calificacion,
+                'fecha' => now()->toDateString()
+            ]);
+        } else {
+            // Si no existe, crear registro con calificación especial
+            Calificacion::create([
+                'id_alumno' => $idAlumno,
+                'id_asignacion' => $idAsignacion,
+                'id_unidad' => $unidad->id_unidad,
+                'id_evaluacion' => 1, // O el ID por defecto que uses
+                'calificacion' => 0,
+                'calificacion_especial' => $calificacion,
+                'fecha' => now()->toDateString()
+            ]);
+        }
+    }
+
+    return [
+        'exito' => true,
+        'mensaje' => 'Extraordinario Especial aplicado a todas las unidades',
+        'unidades_afectadas' => $unidades->count()
+    ];
+}
+
+/**
+ * Construir mensaje de resultado
+ */
+private function construirMensajeResultado($estadisticas)
+{
+    $partes = [];
+    
+    if ($estadisticas['nuevas'] > 0) {
+        $partes[] = "✅ {$estadisticas['nuevas']} nueva(s)";
+    }
+    if ($estadisticas['actualizadas'] > 0) {
+        $partes[] = "🔄 {$estadisticas['actualizadas']} actualizada(s)";
+    }
+    if ($estadisticas['recuperacion'] > 0) {
+        $partes[] = "📗 {$estadisticas['recuperacion']} en recuperación";
+    }
+    if ($estadisticas['extraordinario'] > 0) {
+        $partes[] = "📕 {$estadisticas['extraordinario']} en extraordinario";
+    }
+    if ($estadisticas['extraordinario_especial'] > 0) {
+        $partes[] = "🎓 {$estadisticas['extraordinario_especial']} extraordinario especial";
+    }
+
+    if (empty($partes)) {
+        return "No se realizaron cambios";
+    }
+
+    return "Proceso completado: " . implode(", ", $partes);
 }
     /**
  * Obtener matriz completa de calificaciones
@@ -429,28 +645,53 @@ public function obtenerMatrizCompleta(Request $request)
 
         Log::info('Unidades encontradas', ['total' => $unidades->count()]);
 
-        // Obtener TODAS las evaluaciones disponibles
+        // Función helper para detectar tipo de evaluación por nombre
+        $detectarTipo = function($nombre) {
+            $nombreLower = strtolower($nombre ?? '');
+            
+            if (str_contains($nombreLower, 'especial')) {
+                return 'Extraordinario Especial';
+            } elseif (str_contains($nombreLower, 'extraordinari')) {
+                return 'Extraordinario';
+            } elseif (str_contains($nombreLower, 'recupera') || str_contains($nombreLower, 'recuperación')) {
+                return 'Recuperación';
+            }
+            
+            return 'Ordinario';
+        };
+
+        // Obtener evaluaciones por tipo (sin Extraordinario Especial)
         $todasLasEvaluaciones = Evaluacion::withoutGlobalScopes()
             ->orderBy('id_evaluacion')
             ->get()
-            ->map(function($eval) {
+            ->map(function($eval) use ($detectarTipo) {
                 return [
                     'id_evaluacion' => $eval->id_evaluacion,
                     'nombre' => $eval->nombre,
-                    'porcentaje' => $eval->porcentaje,
-                    'tipo' => $eval->tipo ?? null
+                    'porcentaje' => $eval->porcentaje ?? 0,
+                    'tipo' => $detectarTipo($eval->nombre)
                 ];
             });
 
-        Log::info('Evaluaciones disponibles', ['total' => $todasLasEvaluaciones->count()]);
+        // Separar evaluaciones por tipo
+        $evaluacionesOrdinario = $todasLasEvaluaciones->where('tipo', 'Ordinario')->values();
+        $evaluacionesRecuperacion = $todasLasEvaluaciones->where('tipo', 'Recuperación')->values();
+        $evaluacionesExtraordinario = $todasLasEvaluaciones->where('tipo', 'Extraordinario')->values();
+        $evaluacionEspecial = $todasLasEvaluaciones->firstWhere('tipo', 'Extraordinario Especial');
 
-        // Formatear unidades con las evaluaciones disponibles
-        $unidadesFormateadas = $unidades->map(function($unidad) use ($todasLasEvaluaciones) {
+        Log::info('Evaluaciones por tipo', [
+            'ordinario' => $evaluacionesOrdinario->count(),
+            'recuperacion' => $evaluacionesRecuperacion->count(),
+            'extraordinario' => $evaluacionesExtraordinario->count(),
+            'especial' => $evaluacionEspecial ? 'Disponible' : 'No disponible'
+        ]);
+
+        // Formatear unidades (sin incluir evaluaciones, se asignan automáticamente)
+        $unidadesFormateadas = $unidades->map(function($unidad) {
             return [
                 'id_unidad' => $unidad->id_unidad,
                 'nombre' => "Unidad {$unidad->numero_unidad}: {$unidad->nombre}",
-                'numero_unidad' => $unidad->numero_unidad,
-                'evaluaciones_disponibles' => $todasLasEvaluaciones->toArray()
+                'numero_unidad' => $unidad->numero_unidad
             ];
         });
 
@@ -468,26 +709,114 @@ public function obtenerMatrizCompleta(Request $request)
 
         $alumnos = $historiales
             ->unique('id_alumno')
-            ->map(function($historial) use ($idAsignacion, $unidadesFormateadas) {
+            ->map(function($historial) use (
+                $idAsignacion, 
+                $unidadesFormateadas, 
+                $todasLasEvaluaciones, 
+                $detectarTipo,
+                $evaluacionesOrdinario,
+                $evaluacionesRecuperacion,
+                $evaluacionesExtraordinario,
+                $evaluacionEspecial
+            ) {
                 if (!$historial->alumno) return null;
                 
                 $alumno = $historial->alumno;
                 
-                // Obtener calificaciones existentes
+                // Verificar si tiene calificación especial (Extraordinario Especial de toda la materia)
+                $calificacionEspecial = $historial->calificacion_especial;
+                $tieneEspecial = !is_null($calificacionEspecial);
+                
+                // Obtener calificaciones existentes por unidad
                 $calificacionesExistentes = [];
+                $todasUnidadesReprobadas = true; // Para determinar si aplica Extraordinario Especial
                 
                 foreach ($unidadesFormateadas as $unidad) {
-                    // Buscar si ya tiene calificación en esta unidad
-                    $calif = Calificacion::where('id_alumno', $alumno->id_alumno)
+                    // Buscar TODAS las calificaciones de esta unidad
+                    $calificaciones = Calificacion::with('evaluacion')
+                        ->where('id_alumno', $alumno->id_alumno)
                         ->where('id_asignacion', $idAsignacion)
                         ->where('id_unidad', $unidad['id_unidad'])
-                        ->first();
+                        ->orderBy('id_calificacion', 'desc')
+                        ->get();
                     
-                    if ($calif) {
+                    if ($calificaciones->isNotEmpty()) {
+                        // Construir historial completo
+                        $historialCompleto = $calificaciones->map(function($c) use ($detectarTipo) {
+                            $tipoEval = $detectarTipo($c->evaluacion->nombre ?? '');
+                            return [
+                                'calificacion' => $c->calificacion,
+                                'tipo' => $tipoEval,
+                                'fecha' => $c->created_at,
+                                'id_evaluacion' => $c->id_evaluacion
+                            ];
+                        })->toArray();
+                        
+                        // Jerarquía para seleccionar calificación vigente
+                        $jerarquia = [
+                            'Extraordinario' => 3,
+                            'Recuperación' => 2,
+                            'Ordinario' => 1
+                        ];
+                        
+                        $calificacionVigente = $calificaciones->sortByDesc(function($calif) use ($jerarquia, $detectarTipo) {
+                            $tipoEval = $detectarTipo($calif->evaluacion->nombre ?? '');
+                            $prioridad = $jerarquia[$tipoEval] ?? 0;
+                            return ($prioridad * 100000) + $calif->id_calificacion;
+                        })->first();
+                        
+                        $tipoVigente = $detectarTipo($calificacionVigente->evaluacion->nombre ?? '');
+                        $nombreVigente = $calificacionVigente->evaluacion->nombre ?? 'Evaluación';
+                        
+                        // Determinar siguiente evaluación disponible según jerarquía
+                        $siguienteEvaluacion = null;
+                        $tiposSinCapturar = [];
+                        
+                        $tiposCapturados = collect($historialCompleto)->pluck('tipo')->unique()->toArray();
+                        
+                        if (!in_array('Ordinario', $tiposCapturados)) {
+                            $tiposSinCapturar[] = 'Ordinario';
+                        }
+                        if (!in_array('Recuperación', $tiposCapturados) && $calificacionVigente->calificacion < 6) {
+                            $tiposSinCapturar[] = 'Recuperación';
+                        }
+                        if (!in_array('Extraordinario', $tiposCapturados) && $calificacionVigente->calificacion < 6) {
+                            $tiposSinCapturar[] = 'Extraordinario';
+                        }
+                        
+                        // Determinar próxima evaluación según jerarquía
+                        if (in_array('Ordinario', $tiposSinCapturar)) {
+                            $siguienteEvaluacion = $evaluacionesOrdinario->first();
+                        } elseif ($calificacionVigente->calificacion < 6) {
+                            if (in_array('Recuperación', $tiposSinCapturar)) {
+                                $siguienteEvaluacion = $evaluacionesRecuperacion->first();
+                            } elseif (in_array('Extraordinario', $tiposSinCapturar)) {
+                                $siguienteEvaluacion = $evaluacionesExtraordinario->first();
+                            }
+                        }
+                        
+                        // Si aprobó, no hay más evaluaciones
+                        if ($calificacionVigente->calificacion >= 6) {
+                            $todasUnidadesReprobadas = false;
+                        }
+                        
                         $key = "{$alumno->id_alumno}_{$unidad['id_unidad']}";
                         $calificacionesExistentes[$key] = [
-                            'calificacion' => $calif->calificacion,
-                            'id_evaluacion' => $calif->id_evaluacion
+                            'calificacion' => $calificacionVigente->calificacion,
+                            'id_evaluacion' => $calificacionVigente->id_evaluacion,
+                            'tipo_evaluacion' => $tipoVigente,
+                            'nombre_evaluacion' => $nombreVigente,
+                            'historial_completo' => $historialCompleto,
+                            'siguiente_evaluacion' => $siguienteEvaluacion,
+                            'puede_capturar' => !is_null($siguienteEvaluacion)
+                        ];
+                    } else {
+                        // No tiene calificación, debe empezar con Ordinario
+                        $key = "{$alumno->id_alumno}_{$unidad['id_unidad']}";
+                        $calificacionesExistentes[$key] = [
+                            'calificacion' => null,
+                            'siguiente_evaluacion' => $evaluacionesOrdinario->first(),
+                            'puede_capturar' => true
                         ];
                     }
                 }
@@ -500,7 +829,10 @@ public function obtenerMatrizCompleta(Request $request)
                         ($alumno->datosPersonales->primer_apellido ?? '') . ' ' .
                         ($alumno->datosPersonales->segundo_apellido ?? '')
                     ),
-                    'calificaciones' => $calificacionesExistentes
+                    'calificaciones' => $calificacionesExistentes,
+                    'calificacion_especial' => $calificacionEspecial,
+                    'puede_extraordinario_especial' => $todasUnidadesReprobadas && !$tieneEspecial && $evaluacionEspecial,
+                    'evaluacion_especial' => $evaluacionEspecial
                 ];
             })
             ->filter()
@@ -521,7 +853,8 @@ public function obtenerMatrizCompleta(Request $request)
     } catch (\Exception $e) {
         Log::error('Error en obtenerMatrizCompleta', [
             'error' => $e->getMessage(),
-            'line' => $e->getLine()
+            'line' => $e->getLine(),
+            'trace' => $e->getTraceAsString()
         ]);
         
         return response()->json([
@@ -539,21 +872,27 @@ public function storeMasivoMatriz(Request $request)
     try {
         $data = json_decode($request->calificaciones_json, true);
         
-        if (!isset($data['id_asignacion']) || !isset($data['calificaciones'])) {
-            return redirect()->back()->withErrors(['error' => 'Datos inválidos']);
+        if (!isset($data['id_asignacion'])) {
+            return redirect()->back()->withErrors(['error' => 'Datos inválidos: falta id_asignacion']);
         }
 
         $idAsignacion = $data['id_asignacion'];
-        $calificaciones = $data['calificaciones'];
+        $calificaciones = $data['calificaciones'] ?? [];
+        $calificacionesEspeciales = $data['calificaciones_especiales'] ?? [];
 
         DB::beginTransaction();
 
         $guardadas = 0;
         $actualizadas = 0;
+        $especialesGuardadas = 0;
         $errores = [];
 
+        // ============================================
+        // PROCESAR CALIFICACIONES NORMALES (por unidad)
+        // ============================================
         foreach ($calificaciones as $cal) {
             try {
+                // Verificar si ya existe esta calificación exacta
                 $calificacionExistente = Calificacion::where('id_alumno', $cal['id_alumno'])
                     ->where('id_asignacion', $idAsignacion)
                     ->where('id_unidad', $cal['id_unidad'])
@@ -578,24 +917,96 @@ public function storeMasivoMatriz(Request $request)
                 }
 
             } catch (\Exception $e) {
-                $errores[] = "Error con alumno ID {$cal['id_alumno']}: {$e->getMessage()}";
+                $errores[] = "Error con calificación alumno ID {$cal['id_alumno']}, unidad {$cal['id_unidad']}: {$e->getMessage()}";
+                Log::error('Error guardando calificación', [
+                    'alumno' => $cal['id_alumno'],
+                    'unidad' => $cal['id_unidad'],
+                    'error' => $e->getMessage()
+                ]);
+            }
+        }
+
+        // ============================================
+        // PROCESAR CALIFICACIONES ESPECIALES
+        // (Extraordinario Especial - toda la materia)
+        // ============================================
+        foreach ($calificacionesEspeciales as $especial) {
+            try {
+                // Buscar el historial del alumno en esta asignación
+                $historial = Historial::where('id_alumno', $especial['id_alumno'])
+                    ->where(function($query) use ($idAsignacion) {
+                        for ($i = 1; $i <= 10; $i++) {
+                            $query->orWhere("id_asignacion_$i", $idAsignacion);
+                        }
+                    })
+                    ->first();
+
+                if (!$historial) {
+                    $errores[] = "No se encontró historial para alumno ID {$especial['id_alumno']}";
+                    continue;
+                }
+
+                // Actualizar calificación especial y estatus
+                $historial->update([
+                    'calificacion_especial' => $especial['calificacion_especial'],
+                    'id_evaluacion' => $especial['calificacion_especial'] >= 6 
+                        ? 'Aprobado con Extraordinario Especial' 
+                        : 'Reprobado en Extraordinario Especial'
+                ]);
+
+                $especialesGuardadas++;
+
+                Log::info('Calificación Especial guardada', [
+                    'alumno' => $especial['id_alumno'],
+                    'calificacion' => $especial['calificacion_especial'],
+                    'id_evaluacion' => $especial['id_evaluacion'],
+                ]);
+
+            } catch (\Exception $e) {
+                $errores[] = "Error con calificación especial alumno ID {$especial['id_alumno']}: {$e->getMessage()}";
+                Log::error('Error guardando calificación especial', [
+                    'alumno' => $especial['id_alumno'],
+                    'error' => $e->getMessage()
+                ]);
             }
         }
 
         DB::commit();
 
-        $mensaje = "✅ $guardadas nueva(s), $actualizadas actualizada(s)";
+        // Construir mensaje de éxito
+        $mensajes = [];
+        if ($guardadas > 0) {
+            $mensajes[] = "✅ {$guardadas} calificación(es) nueva(s)";
+        }
+        if ($actualizadas > 0) {
+            $mensajes[] = "🔄 {$actualizadas} calificación(es) actualizada(s)";
+        }
+        if ($especialesGuardadas > 0) {
+            $mensajes[] = "🎓 {$especialesGuardadas} calificación(es) especial(es) guardada(s)";
+        }
+
+        $mensaje = implode(', ', $mensajes);
+        if (empty($mensaje)) {
+            $mensaje = "No se realizaron cambios";
+        }
+
+        if (!empty($errores)) {
+            return redirect()->route('calificaciones.index')
+                ->with('warning', $mensaje)
+                ->with('errores', $errores);
+        }
 
         return redirect()->route('calificaciones.index')
-            ->with('success', $mensaje)
-            ->with('errores', $errores);
+            ->with('success', $mensaje);
 
     } catch (\Exception $e) {
         DB::rollBack();
-        Log::error('Error en storeMasivoMatriz: ' . $e->getMessage());
+        Log::error('Error en storeMasivoMatriz: ' . $e->getMessage(), [
+            'trace' => $e->getTraceAsString()
+        ]);
         
         return redirect()->back()
-            ->withErrors(['error' => 'Error: ' . $e->getMessage()]);
+            ->withErrors(['error' => 'Error al guardar: ' . $e->getMessage()]);
     }
 }
 }
