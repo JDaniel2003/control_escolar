@@ -557,148 +557,177 @@
             background-color: #f8f9fa;
         }
     </style>
-   <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const periodoSelect = document.getElementById('periodoCalificar');
-    const grupoSelect = document.getElementById('grupoCalificar');
-    const materiaSelect = document.getElementById('materiaCalificar');
-    const btnCargar = document.getElementById('btnCargarMatriz');
-    const btnGuardar = document.getElementById('btnGuardarCalificaciones');
-    const btnLimpiar = document.getElementById('btnLimpiarTodo');
-    const contenedor = document.getElementById('contenedorMatriz');
-    const tbody = document.getElementById('bodyMatriz');
-    const filaEvaluaciones = document.getElementById('filaEvaluaciones');
-    const thead = document.querySelector('#tablaCalificaciones thead tr:first-child');
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const periodoSelect = document.getElementById('periodoCalificar');
+            const grupoSelect = document.getElementById('grupoCalificar');
+            const materiaSelect = document.getElementById('materiaCalificar');
+            const btnCargar = document.getElementById('btnCargarMatriz');
+            const btnGuardar = document.getElementById('btnGuardarCalificaciones');
+            const btnLimpiar = document.getElementById('btnLimpiarTodo');
+            const contenedor = document.getElementById('contenedorMatriz');
+            const tbody = document.getElementById('bodyMatriz');
+            const thead = document.querySelector('#tablaCalificaciones thead tr:first-child');
 
-    let datosMatriz = {
-        alumnos: [],
-        unidades: []
-    };
+            let datosMatriz = {
+                alumnos: [],
+                unidades: []
+            };
 
-    // Iconos y colores por tipo de evaluación
-    const tiposEvaluacion = {
-        'ordinario': { icon: '📘', color: '#007bff', label: 'Ordinario' },
-        'recuperación': { icon: '📗', color: '#28a745', label: 'Recuperación' },
-        'recuperacion': { icon: '📗', color: '#28a745', label: 'Recuperación' },
-        'extraordinario': { icon: '📕', color: '#dc3545', label: 'Extraordinario' },
-        'extraordinario_especial': { icon: '🎓', color: '#6f42c1', label: 'Extra. Especial' },
-        'extraordinario especial': { icon: '🎓', color: '#6f42c1', label: 'Extra. Especial' }
-    };
-
-    // Cargar materias
-    function cargarMaterias() {
-        const idGrupo = grupoSelect.value;
-        const idPeriodo = periodoSelect.value;
-
-        if (!idGrupo || !idPeriodo) {
-            materiaSelect.innerHTML = '<option value="">-- Selecciona grupo y período --</option>';
-            materiaSelect.disabled = true;
-            return;
-        }
-
-        materiaSelect.innerHTML = '<option value="">Cargando...</option>';
-        materiaSelect.disabled = true;
-
-        fetch(`/calificaciones/materias?grupo=${idGrupo}&periodo=${idPeriodo}`)
-            .then(r => r.json())
-            .then(data => {
-                if (data.success && data.materias.length > 0) {
-                    materiaSelect.innerHTML = '<option value="">-- Selecciona materia --</option>';
-                    data.materias.forEach(m => {
-                        materiaSelect.innerHTML += `<option value="${m.id_asignacion}">${m.materia} - ${m.docente}</option>`;
-                    });
-                    materiaSelect.disabled = false;
-                } else {
-                    materiaSelect.innerHTML = '<option value="">No hay materias disponibles</option>';
+            // Iconos y colores por tipo de evaluación
+            const tiposEvaluacion = {
+                'ordinario': {
+                    icon: '📘',
+                    color: '#007bff',
+                    label: 'Ordinario'
+                },
+                'recuperación': {
+                    icon: '📗',
+                    color: '#28a745',
+                    label: 'Recuperación'
+                },
+                'recuperacion': {
+                    icon: '📗',
+                    color: '#28a745',
+                    label: 'Recuperación'
+                },
+                'extraordinario': {
+                    icon: '📕',
+                    color: '#dc3545',
+                    label: 'Extraordinario'
+                },
+                'extraordinario_especial': {
+                    icon: '🎓',
+                    color: '#6f42c1',
+                    label: 'Extraordinario Especial'
+                },
+                'extraordinario especial': {
+                    icon: '🎓',
+                    color: '#6f42c1',
+                    label: 'Extraordinario Especial'
                 }
-                validarFormulario();
-            })
-            .catch(err => {
-                console.error(err);
-                materiaSelect.innerHTML = '<option value="">Error al cargar</option>';
-            });
-    }
+            };
 
-    // Cargar matriz completa
-    function cargarMatriz() {
-        const idGrupo = grupoSelect.value;
-        const idPeriodo = periodoSelect.value;
-        const idAsignacion = materiaSelect.value;
+            // Cargar materias
+            function cargarMaterias() {
+                const idGrupo = grupoSelect.value;
+                const idPeriodo = periodoSelect.value;
 
-        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || 
-                         document.querySelector('input[name="_token"]')?.value;
+                if (!idGrupo || !idPeriodo) {
+                    materiaSelect.innerHTML = '<option value="">-- Selecciona grupo y período --</option>';
+                    materiaSelect.disabled = true;
+                    return;
+                }
 
-        if (!csrfToken) {
-            alert('Error: Token CSRF no encontrado. Recarga la página.');
-            return;
-        }
+                materiaSelect.innerHTML = '<option value="">Cargando...</option>';
+                materiaSelect.disabled = true;
 
-        tbody.innerHTML = '<tr><td colspan="100" class="text-center py-4"><div class="spinner-border text-primary"></div><br>Cargando datos...</td></tr>';
-        contenedor.style.display = 'block';
-
-        const materiaText = materiaSelect.options[materiaSelect.selectedIndex].text;
-        document.getElementById('infoMateria').innerHTML = `<span class="badge badge-light">${materiaText}</span>`;
-
-        fetch('/calificaciones/matriz-completa', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': csrfToken,
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify({
-                id_grupo: idGrupo,
-                id_periodo: idPeriodo,
-                id_asignacion: idAsignacion
-            })
-        })
-        .then(response => {
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-            return response.json();
-        })
-        .then(data => {
-            console.log('=== RESPUESTA DEL SERVIDOR ===', data);
-            if (data.success) {
-                datosMatriz.alumnos = data.alumnos;
-                datosMatriz.unidades = data.unidades;
-                renderMatriz();
-            } else {
-                tbody.innerHTML = `<tr><td colspan="100" class="text-center text-danger">Error: ${data.message || 'Error desconocido'}</td></tr>`;
+                fetch(`/calificaciones/materias?grupo=${idGrupo}&periodo=${idPeriodo}`)
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.success && data.materias.length > 0) {
+                            materiaSelect.innerHTML = '<option value="">-- Selecciona materia --</option>';
+                            data.materias.forEach(m => {
+                                materiaSelect.innerHTML +=
+                                    `<option value="${m.id_asignacion}">${m.materia} - ${m.docente}</option>`;
+                            });
+                            materiaSelect.disabled = false;
+                        } else {
+                            materiaSelect.innerHTML = '<option value="">No hay materias disponibles</option>';
+                        }
+                        validarFormulario();
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        materiaSelect.innerHTML = '<option value="">Error al cargar</option>';
+                    });
             }
-        })
-        .catch(err => {
-            console.error('Error completo:', err);
-            tbody.innerHTML = `<tr><td colspan="100" class="text-center text-danger">Error de conexión: ${err.message}</td></tr>`;
-        });
-    }
 
-    // Renderizar matriz
-    function renderMatriz() {
-        if (datosMatriz.alumnos.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="100" class="text-center text-muted py-4">No hay alumnos en este grupo</td></tr>';
-            return;
-        }
+            // Cargar matriz completa
+            function cargarMatriz() {
+                const idGrupo = grupoSelect.value;
+                const idPeriodo = periodoSelect.value;
+                const idAsignacion = materiaSelect.value;
 
-        let headersUnidades = '';
-        datosMatriz.unidades.forEach(unidad => {
-            headersUnidades += `<th class="unidad-header" style="min-width: 200px;">${unidad.nombre}</th>`;
-        });
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ||
+                    document.querySelector('input[name="_token"]')?.value;
 
-        // Agregar columnas adicionales
-        headersUnidades += `<th class="bg-info text-white" style="min-width: 120px;">📊 Promedio</th>`;
-        headersUnidades += `<th class="unidad-header bg-warning" style="min-width: 200px;">🎓 Extraordinario Especial</th>`;
+                if (!csrfToken) {
+                    alert('Error: Token CSRF no encontrado. Recarga la página.');
+                    return;
+                }
 
-        thead.innerHTML = `
+                tbody.innerHTML =
+                    '<tr><td colspan="100" class="text-center py-4"><div class="spinner-border text-primary"></div><br>Cargando datos...</td></tr>';
+                contenedor.style.display = 'block';
+
+                const materiaText = materiaSelect.options[materiaSelect.selectedIndex].text;
+                document.getElementById('infoMateria').innerHTML =
+                    `<span class="badge badge-light">${materiaText}</span>`;
+
+                fetch('/calificaciones/matriz-completa', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': csrfToken,
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            id_grupo: idGrupo,
+                            id_periodo: idPeriodo,
+                            id_asignacion: idAsignacion
+                        })
+                    })
+                    .then(response => {
+                        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log('=== RESPUESTA DEL SERVIDOR ===', data);
+                        if (data.success) {
+                            datosMatriz.alumnos = data.alumnos;
+                            datosMatriz.unidades = data.unidades;
+                            renderMatriz();
+                        } else {
+                            tbody.innerHTML =
+                                `<tr><td colspan="100" class="text-center text-danger">Error: ${data.message || 'Error desconocido'}</td></tr>`;
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Error completo:', err);
+                        tbody.innerHTML =
+                            `<tr><td colspan="100" class="text-center text-danger">Error de conexión: ${err.message}</td></tr>`;
+                    });
+            }
+
+            // Renderizar matriz
+            function renderMatriz() {
+                if (datosMatriz.alumnos.length === 0) {
+                    tbody.innerHTML =
+                        '<tr><td colspan="100" class="text-center text-muted py-4">No hay alumnos en este grupo</td></tr>';
+                    return;
+                }
+
+                let headersUnidades = '';
+                datosMatriz.unidades.forEach(unidad => {
+                    headersUnidades +=
+                        `<th class="unidad-header" style="min-width: 200px;">${unidad.nombre}</th>`;
+                });
+
+                headersUnidades += `<th class="bg-info text-white" style="min-width: 120px;">📊 Promedio</th>`;
+                headersUnidades +=
+                    `<th class="unidad-header bg-warning" style="min-width: 200px;">🎓 Extraordinario Especial</th>`;
+
+                thead.innerHTML = `
             <th style="position: sticky; left: 0; background: #343a40; z-index: 101; min-width: 50px;" class="text-center">#</th>
             <th style="position: sticky; left: 50px; background: #343a40; z-index: 101; min-width: 120px;">Matrícula</th>
             <th style="position: sticky; left: 170px; background: #343a40; z-index: 101; min-width: 250px;">Alumno</th>
             ${headersUnidades}
         `;
-        filaEvaluaciones.innerHTML = '';
 
-        let html = '';
-        datosMatriz.alumnos.forEach((alumno, indexAlumno) => {
-            html += `
+                let html = '';
+                datosMatriz.alumnos.forEach((alumno, indexAlumno) => {
+                    html += `
             <tr>
                 <td class="text-center alumno-cell" style="position: sticky; left: 0; background: white; z-index: 10;">
                     ${indexAlumno + 1}
@@ -710,41 +739,46 @@ document.addEventListener('DOMContentLoaded', function() {
                     ${alumno.nombre}
                 </td>`;
 
-            // Renderizar unidades
-            datosMatriz.unidades.forEach(unidad => {
-                const key = `${alumno.id_alumno}_${unidad.id_unidad}`;
-                const calificacionData = alumno.calificaciones[key];
-                
-                if (!calificacionData) {
-                    html += `<td class="text-center p-2">-</td>`;
-                    return;
-                }
+                    // Renderizar unidades
+                    datosMatriz.unidades.forEach(unidad => {
+                        const key = `${alumno.id_alumno}_${unidad.id_unidad}`;
+                        const calificacionData = alumno.calificaciones[key];
 
-                const calificacion = calificacionData.calificacion;
-                const yaCapturado = calificacion !== null;
-                const esAprobatoria = calificacion >= 6;
-                const puedeCapturar = calificacionData.puede_capturar;
-                const siguienteEval = calificacionData.siguiente_evaluacion;
+                        if (!calificacionData) {
+                            html += `<td class="text-center p-2">-</td>`;
+                            return;
+                        }
 
-                if (yaCapturado) {
-                    const tipoEvaluacion = calificacionData.tipo_evaluacion || 'Ordinario';
-                    const nombreEvaluacion = calificacionData.nombre_evaluacion || 'Evaluación';
-                    const historialCompleto = calificacionData.historial_completo || [];
-                    const tipoKey = tipoEvaluacion.toLowerCase().replace('ó', 'o').replace('ú', 'u');
-                    const tipoEval = tiposEvaluacion[tipoKey] || tiposEvaluacion['ordinario'];
-                    
-                    let tooltipHistorial = '';
-                    if (historialCompleto.length > 1) {
-                        tooltipHistorial = 'Historial:\n' + 
-                            historialCompleto.map((h, i) => `${i + 1}. ${h.tipo}: ${h.calificacion}`).join('\n');
-                    }
-                    
-                    // Si puede capturar siguiente evaluación, mostrar input
-                    if (puedeCapturar && siguienteEval) {
-                        const siguienteTipoKey = siguienteEval.tipo.toLowerCase().replace('ó', 'o').replace('ú', 'u');
-                        const siguienteTipoInfo = tiposEvaluacion[siguienteTipoKey] || tiposEvaluacion['ordinario'];
-                        
-                        html += `
+                        const calificacion = calificacionData.calificacion;
+                        const yaCapturado = calificacion !== null;
+                        const esAprobatoria = calificacion >= 6;
+                        const puedeCapturar = calificacionData.puede_capturar;
+                        const siguienteEval = calificacionData.siguiente_evaluacion;
+
+                        if (yaCapturado) {
+                            const tipoEvaluacion = calificacionData.tipo_evaluacion || 'Ordinario';
+                            const nombreEvaluacion = calificacionData.nombre_evaluacion ||
+                                'Evaluación';
+                            const historialCompleto = calificacionData.historial_completo || [];
+                            const tipoKey = tipoEvaluacion.toLowerCase().replace('ó', 'o').replace(
+                                'ú', 'u');
+                            const tipoEval = tiposEvaluacion[tipoKey] || tiposEvaluacion[
+                                'ordinario'];
+
+                            let tooltipHistorial = '';
+                            if (historialCompleto.length > 1) {
+                                tooltipHistorial = 'Historial:\n' +
+                                    historialCompleto.map((h, i) =>
+                                        `${i + 1}. ${h.tipo}: ${h.calificacion}`).join('\n');
+                            }
+
+                            if (puedeCapturar && siguienteEval) {
+                                const siguienteTipoKey = siguienteEval.tipo.toLowerCase().replace(
+                                    'ó', 'o').replace('ú', 'u');
+                                const siguienteTipoInfo = tiposEvaluacion[siguienteTipoKey] ||
+                                    tiposEvaluacion['ordinario'];
+
+                                html += `
                         <td class="text-center p-2" style="vertical-align: middle;">
                             <div class="d-flex flex-column align-items-center">
                                 <span class="badge mb-2" 
@@ -753,10 +787,10 @@ document.addEventListener('DOMContentLoaded', function() {
                                     Actual: ${calificacion} ${tipoEval.icon}
                                 </span>
                                 ${historialCompleto.length > 1 ? `
-                                <small class="text-muted mb-2" style="font-size: 0.7rem;">
-                                    📋 ${historialCompleto.length} evaluaciones
-                                </small>
-                                ` : ''}
+                                    <small class="text-muted mb-2" style="font-size: 0.7rem;">
+                                        📋 ${historialCompleto.length} evaluaciones
+                                    </small>
+                                    ` : ''}
                                 <hr style="width: 100%; margin: 0.5rem 0; border-top: 1px dashed #ddd;">
                                 <input type="number" 
                                        class="form-control calificacion-input-matriz text-center mt-2" 
@@ -774,9 +808,8 @@ document.addEventListener('DOMContentLoaded', function() {
                                 </small>
                             </div>
                         </td>`;
-                    } else {
-                        // Ya terminó o aprobó
-                        html += `
+                            } else {
+                                html += `
                         <td class="text-center p-2" style="vertical-align: middle;">
                             <div class="d-flex flex-column align-items-center">
                                 <span class="badge mb-1" 
@@ -788,29 +821,30 @@ document.addEventListener('DOMContentLoaded', function() {
                                     ${tipoEval.icon} ${tipoEval.label}
                                 </small>
                                 ${historialCompleto.length > 1 ? `
-                                <small class="text-muted mt-1" style="font-size: 0.7rem;">
-                                    📋 ${historialCompleto.length} evaluaciones
-                                </small>
-                                ` : ''}
+                                    <small class="text-muted mt-1" style="font-size: 0.7rem;">
+                                        📋 ${historialCompleto.length} evaluaciones
+                                    </small>
+                                    ` : ''}
                                 ${esAprobatoria ? `
-                                <small class="text-success mt-1" style="font-size: 0.8rem;">
-                                    ✅ Aprobado
-                                </small>
-                                ` : `
-                                <small class="text-muted mt-1" style="font-size: 0.8rem;">
-                                    ✓ Completado
-                                </small>
-                                `}
+                                    <small class="text-success mt-1" style="font-size: 0.8rem;">
+                                        ✅ Aprobado
+                                    </small>
+                                    ` : `
+                                    <small class="text-muted mt-1" style="font-size: 0.8rem;">
+                                        Sin Oportunidades
+                                    </small>
+                                    `}
                             </div>
                         </td>`;
-                    }
-                } else {
-                    // Sin calificación, mostrar input con evaluación automática
-                    if (puedeCapturar && siguienteEval) {
-                        const tipoKey = siguienteEval.tipo.toLowerCase().replace('ó', 'o').replace('ú', 'u');
-                        const tipoInfo = tiposEvaluacion[tipoKey] || tiposEvaluacion['ordinario'];
-                        
-                        html += `
+                            }
+                        } else {
+                            if (puedeCapturar && siguienteEval) {
+                                const tipoKey = siguienteEval.tipo.toLowerCase().replace('ó', 'o')
+                                    .replace('ú', 'u');
+                                const tipoInfo = tiposEvaluacion[tipoKey] || tiposEvaluacion[
+                                    'ordinario'];
+
+                                html += `
                         <td class="text-center p-2" style="vertical-align: middle;">
                             <input type="number" 
                                    class="form-control calificacion-input-matriz text-center" 
@@ -827,250 +861,298 @@ document.addEventListener('DOMContentLoaded', function() {
                                 ${tipoInfo.icon} ${siguienteEval.tipo}
                             </small>
                         </td>`;
-                    } else {
-                        html += `<td class="text-center p-2 text-muted">Completado</td>`;
-                    }
-                }
-            });
-
-            // Columna de Promedio General (solo cálculo visual)
-            const promedioGeneral = alumno.promedio_general;
-            
-            if (promedioGeneral !== null && promedioGeneral !== undefined && !isNaN(promedioGeneral)) {
-                const esAprobado = promedioGeneral >= 6;
-                html += `
-                <td class="text-center p-2 bg-light" style="vertical-align: middle;">
-                    <span class="badge" style="font-size: 1.2rem; padding: 0.6rem; background: ${esAprobado ? '#17a2b8' : '#6c757d'};">
-                        ${promedioGeneral}
-                    </span>
-                    <small class="d-block mt-1 text-muted" style="font-size: 0.7rem;">
-                        Promedio ${esAprobado ? '✅' : '⚠️'}
-                    </small>
-                </td>`;
-            } else {
-                html += `<td class="text-center p-2 bg-light text-muted" style="font-size: 0.8rem;">Pendiente</td>`;
-            }
-
-            // Columna Extraordinario Especial (solo si cumple condiciones)
-            if (alumno.puede_extraordinario_especial && alumno.evaluacion_especial) {
-                const evalEspecial = alumno.evaluacion_especial;
-                html += `
-                <td class="text-center p-2" style="vertical-align: middle; background: #fff3cd; border-left: 3px solid #dc3545;">
-                    
-                    <input type="number" 
-                           class="form-control calificacion-input-especial text-center" 
-                           data-alumno="${alumno.id_alumno}"
-                           data-evaluacion="${evalEspecial.id_evaluacion}"
-                           min="0" 
-                           max="10" 
-                           step="0.1"
-                           placeholder="Calif."
-                           style="width: 90px; margin: 0 auto; border: 3px solid #dc3545; font-weight: bold;">
-                    <small class="d-block mt-2" style="color: #6f42c1; font-weight: bold; font-size: 0.75rem;">
-                        🎓 ${evalEspecial.nombre}
-                    </small>
-                    <small class="d-block text-danger mt-1" style="font-size: 0.65rem; font-weight: bold;">
-                        📚 Examen de toda la materia
-                    </small>
-                </td>`;
-            } else if (alumno.calificacion_especial !== null) {
-                html += `
-                <td class="text-center p-2 bg-light" style="vertical-align: middle;">
-                    <span class="badge mb-1" 
-                          style="font-size: 1.1rem; padding: 0.5rem; background: ${alumno.calificacion_especial >= 6 ? '#28a745' : '#dc3545'};">
-                        ${alumno.calificacion_especial}
-                    </span>
-                    <small style="color: #6f42c1;">
-                        🎓 Extra. Especial
-                    </small>
-                </td>`;
-            } else {
-                html += `<td class="text-center p-2 bg-light text-muted">-</td>`;
-            }
-
-            html += '</tr>';
-        });
-
-        tbody.innerHTML = html;
-        document.getElementById('totalAlumnos').textContent = datosMatriz.alumnos.length;
-
-        // Eventos para inputs de unidades
-        document.querySelectorAll('.calificacion-input-matriz').forEach(input => {
-            input.addEventListener('input', function() {
-                const valor = parseFloat(this.value);
-                if (this.value && (valor < 0 || valor > 10 || isNaN(valor))) {
-                    this.classList.add('is-invalid');
-                } else {
-                    this.classList.remove('is-invalid');
-                }
-                validarGuardar();
-            });
-
-            input.addEventListener('keydown', function(e) {
-                if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
-                    e.preventDefault();
-                    navegarCelda(this, e.key);
-                }
-            });
-        });
-
-        // Eventos para inputs de Extraordinario Especial
-        document.querySelectorAll('.calificacion-input-especial').forEach(input => {
-            input.addEventListener('input', function() {
-                const valor = parseFloat(this.value);
-                if (this.value && (valor < 0 || valor > 10 || isNaN(valor))) {
-                    this.classList.add('is-invalid');
-                } else {
-                    this.classList.remove('is-invalid');
-                }
-                validarGuardar();
-            });
-        });
-
-        validarGuardar();
-    }
-
-    // Navegación con teclado
-    function navegarCelda(inputActual, tecla) {
-        const inputs = Array.from(document.querySelectorAll('.calificacion-input-matriz'));
-        const indexActual = inputs.indexOf(inputActual);
-        let nuevoIndex = indexActual;
-        const columnas = datosMatriz.unidades.length;
-
-        switch(tecla) {
-            case 'ArrowUp': nuevoIndex = indexActual - columnas; break;
-            case 'ArrowDown': nuevoIndex = indexActual + columnas; break;
-            case 'ArrowLeft': nuevoIndex = indexActual - 1; break;
-            case 'ArrowRight': nuevoIndex = indexActual + 1; break;
-        }
-
-        if (nuevoIndex >= 0 && nuevoIndex < inputs.length) {
-            inputs[nuevoIndex].focus();
-            inputs[nuevoIndex].select();
-        }
-    }
-
-    // Validar formulario
-    function validarFormulario() {
-        const valido = periodoSelect.value && grupoSelect.value && materiaSelect.value;
-        btnCargar.disabled = !valido;
-    }
-
-    // Validar si se puede guardar
-    function validarGuardar() {
-        const inputsUnidades = document.querySelectorAll('.calificacion-input-matriz');
-        const inputsEspeciales = document.querySelectorAll('.calificacion-input-especial');
-        let hayCalificacionesValidas = false;
-
-        inputsUnidades.forEach(input => {
-            if (input.value && !input.classList.contains('is-invalid') && input.dataset.evaluacion) {
-                hayCalificacionesValidas = true;
-            }
-        });
-
-        inputsEspeciales.forEach(input => {
-            if (input.value && !input.classList.contains('is-invalid')) {
-                hayCalificacionesValidas = true;
-            }
-        });
-
-        btnGuardar.disabled = !hayCalificacionesValidas;
-    }
-
-    // Limpiar calificaciones
-    btnLimpiar?.addEventListener('click', function() {
-        if (confirm('¿Estás seguro de limpiar todas las calificaciones no guardadas?')) {
-            document.querySelectorAll('.calificacion-input-matriz, .calificacion-input-especial').forEach(input => {
-                input.value = '';
-                input.classList.remove('is-invalid');
-            });
-            validarGuardar();
-        }
-    });
-
-    // Guardar calificaciones
-    btnGuardar?.addEventListener('click', function() {
-        const calificaciones = [];
-        const calificacionesEspeciales = [];
-
-        // Calificaciones de unidades
-        document.querySelectorAll('.calificacion-input-matriz').forEach(input => {
-            const valor = input.value;
-            if (valor && valor !== '' && !input.classList.contains('is-invalid')) {
-                const evaluacion = input.dataset.evaluacion;
-                if (evaluacion) {
-                    calificaciones.push({
-                        id_alumno: parseInt(input.dataset.alumno),
-                        id_unidad: parseInt(input.dataset.unidad),
-                        id_evaluacion: parseInt(evaluacion),
-                        calificacion: parseFloat(valor)
+                            } else {
+                                html += `<td class="text-center p-2 text-muted">Completado</td>`;
+                            }
+                        }
                     });
+
+                    // Columna de Promedio General (ocultar si ya tiene calificación especial)
+                    const tieneCalifEspecial = alumno.calificacion_especial !== null && alumno
+                        .calificacion_especial !== undefined;
+                    if (tieneCalifEspecial) {
+                        html +=
+                            `<td class="text-center p-2 bg-light text-muted" style="font-size: 0.8rem;">-</td>`;
+                    } else {
+                        const promedioGeneral = alumno.promedio_general;
+                        if (promedioGeneral !== null && promedioGeneral !== undefined && !isNaN(
+                                promedioGeneral)) {
+                            const esAprobado = promedioGeneral >= 6;
+                            html += `
+                    <td class="text-center p-2 bg-light" style="vertical-align: middle;">
+                        <span class="badge" style="font-size: 1.2rem; padding: 0.6rem; background: ${esAprobado ? '#17a2b8' : '#6c757d'};">
+                            ${promedioGeneral}
+                        </span>
+                        <small class="d-block mt-1 text-muted" style="font-size: 0.7rem;">
+                            Promedio ${esAprobado ? '✅' : '⚠️'}
+                        </small>
+                    </td>`;
+                        } else {
+                            html +=
+                                `<td class="text-center p-2 bg-light text-muted" style="font-size: 0.8rem;">Pendiente</td>`;
+                        }
+                    }
+
+
+                    // Columna Extraordinario Especial
+                    const tipoEvalEspecial = tiposEvaluacion['extraordinario_especial'] || {
+                        icon: '🎓',
+                        color: '#6f42c1',
+                        label: 'Extraordinario Especial'
+                    };
+
+                    if (tieneCalifEspecial) {
+                        const esAprob = alumno.calificacion_especial >= 6;
+                        html += `
+                <td class="text-center p-2" style="vertical-align: middle; background: #fff3cd; border-left: 3px solid #6f42c1;">
+                    <div class="d-flex flex-column align-items-center">
+                        <span class="badge mb-1" style="font-size: 1.2rem; padding: 0.6rem; background: ${esAprob ? '#28a745' : '#dc3545'};">
+                            ${alumno.calificacion_especial}
+                        </span>
+                        <small style="color: ${tipoEvalEspecial.color}; font-weight: bold;">
+                            ${tipoEvalEspecial.icon} ${tipoEvalEspecial.label}
+                        </small>
+                        ${esAprob ? `
+                            <small class="text-success mt-1">
+                                <i class="fas fa-check-circle"></i> Aprobado
+                            </small>` : `
+                            <small class="text-danger mt-1">
+                                <i class="fas fa-times-circle"></i> Reprobado
+                            </small>`}
+                        <small class="text-muted mt-1" style="font-size: 0.7rem;">
+                            📚 Calificación general de la materia
+                        </small>
+                    </div>
+                </td>`;
+                    } else {
+                        // Verificar si hay al menos una unidad reprobada en "Extraordinario"
+                        let hayExtraordinarioReprobado = false;
+                        datosMatriz.unidades.forEach(unidad => {
+                            const key = `${alumno.id_alumno}_${unidad.id_unidad}`;
+                            const califData = alumno.calificaciones[key];
+                            if (califData &&
+                                califData.calificacion !== null &&
+                                califData.calificacion < 6 &&
+                                califData.tipo_evaluacion === 'Extraordinario') {
+                                hayExtraordinarioReprobado = true;
+                            }
+                        });
+
+                        if (hayExtraordinarioReprobado && alumno.evaluacion_especial) {
+                            const evalEspecial = alumno.evaluacion_especial;
+                            html += `
+                    <td class="text-center p-2" style="vertical-align: middle; background: #fff3cd; border-left: 3px solid #dc3545;">
+                        <input type="number" 
+                               class="form-control calificacion-input-especial text-center" 
+                               data-alumno="${alumno.id_alumno}"
+                               data-evaluacion="${evalEspecial.id_evaluacion}"
+                               min="0" max="10" step="0.1" placeholder="Calif."
+                               style="width: 90px; margin: 0 auto; border: 3px solid #dc3545; font-weight: bold;">
+                        <small class="d-block mt-2" style="color: #6f42c1; font-weight: bold; font-size: 0.75rem;">
+                            🎓 ${evalEspecial.nombre}
+                        </small>
+                        <small class="d-block text-danger mt-1" style="font-size: 0.65rem; font-weight: bold;">
+                            📚 Examen de toda la materia
+                        </small>
+                    </td>`;
+                        } else {
+                            html += `<td class="text-center p-2 bg-light text-muted">-</td>`;
+                        }
+                    }
+
+                    html += '</tr>';
+                });
+
+                tbody.innerHTML = html;
+                document.getElementById('totalAlumnos').textContent = datosMatriz.alumnos.length;
+
+                // Eventos para inputs de unidades
+                document.querySelectorAll('.calificacion-input-matriz').forEach(input => {
+                    input.addEventListener('input', function() {
+                        const valor = parseFloat(this.value);
+                        if (this.value && (valor < 0 || valor > 10 || isNaN(valor))) {
+                            this.classList.add('is-invalid');
+                        } else {
+                            this.classList.remove('is-invalid');
+                        }
+                        validarGuardar();
+                    });
+
+                    input.addEventListener('keydown', function(e) {
+                        if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+                            e.preventDefault();
+                            navegarCelda(this, e.key);
+                        }
+                    });
+                });
+
+                // Eventos para inputs de Extraordinario Especial
+                document.querySelectorAll('.calificacion-input-especial').forEach(input => {
+                    input.addEventListener('input', function() {
+                        const valor = parseFloat(this.value);
+                        if (this.value && (valor < 0 || valor > 10 || isNaN(valor))) {
+                            this.classList.add('is-invalid');
+                        } else {
+                            this.classList.remove('is-invalid');
+                        }
+                        validarGuardar();
+                    });
+                });
+
+                validarGuardar();
+            }
+
+            // Navegación con teclado
+            function navegarCelda(inputActual, tecla) {
+                const inputs = Array.from(document.querySelectorAll('.calificacion-input-matriz'));
+                const indexActual = inputs.indexOf(inputActual);
+                let nuevoIndex = indexActual;
+                const columnas = datosMatriz.unidades.length;
+
+                switch (tecla) {
+                    case 'ArrowUp':
+                        nuevoIndex = indexActual - columnas;
+                        break;
+                    case 'ArrowDown':
+                        nuevoIndex = indexActual + columnas;
+                        break;
+                    case 'ArrowLeft':
+                        nuevoIndex = indexActual - 1;
+                        break;
+                    case 'ArrowRight':
+                        nuevoIndex = indexActual + 1;
+                        break;
+                }
+
+                if (nuevoIndex >= 0 && nuevoIndex < inputs.length) {
+                    inputs[nuevoIndex].focus();
+                    inputs[nuevoIndex].select();
                 }
             }
-        });
 
-        // Calificaciones especiales (Extraordinario Especial)
-        document.querySelectorAll('.calificacion-input-especial').forEach(input => {
-            const valor = input.value;
-            if (valor && valor !== '' && !input.classList.contains('is-invalid')) {
-                calificacionesEspeciales.push({
-                    id_alumno: parseInt(input.dataset.alumno),
-                    id_evaluacion: parseInt(input.dataset.evaluacion),
-                    calificacion_especial: parseFloat(valor)
-                });
+            // Validar formulario
+            function validarFormulario() {
+                const valido = periodoSelect.value && grupoSelect.value && materiaSelect.value;
+                btnCargar.disabled = !valido;
             }
+
+            // Validar si se puede guardar
+            function validarGuardar() {
+                const inputsUnidades = document.querySelectorAll('.calificacion-input-matriz');
+                const inputsEspeciales = document.querySelectorAll('.calificacion-input-especial');
+                let hayCalificacionesValidas = false;
+
+                inputsUnidades.forEach(input => {
+                    if (input.value && !input.classList.contains('is-invalid') && input.dataset
+                        .evaluacion) {
+                        hayCalificacionesValidas = true;
+                    }
+                });
+
+                inputsEspeciales.forEach(input => {
+                    if (input.value && !input.classList.contains('is-invalid')) {
+                        hayCalificacionesValidas = true;
+                    }
+                });
+
+                btnGuardar.disabled = !hayCalificacionesValidas;
+            }
+
+            // Limpiar calificaciones
+            btnLimpiar?.addEventListener('click', function() {
+                if (confirm('¿Estás seguro de limpiar todas las calificaciones no guardadas?')) {
+                    document.querySelectorAll('.calificacion-input-matriz, .calificacion-input-especial')
+                        .forEach(input => {
+                            input.value = '';
+                            input.classList.remove('is-invalid');
+                        });
+                    validarGuardar();
+                }
+            });
+
+            // Guardar calificaciones
+            btnGuardar?.addEventListener('click', function() {
+                const calificaciones = [];
+                const calificacionesEspeciales = [];
+
+                // Calificaciones de unidades
+                document.querySelectorAll('.calificacion-input-matriz').forEach(input => {
+                    const valor = input.value;
+                    if (valor && valor !== '' && !input.classList.contains('is-invalid')) {
+                        const evaluacion = input.dataset.evaluacion;
+                        if (evaluacion) {
+                            calificaciones.push({
+                                id_alumno: parseInt(input.dataset.alumno),
+                                id_unidad: parseInt(input.dataset.unidad),
+                                id_evaluacion: parseInt(evaluacion),
+                                calificacion: parseFloat(valor)
+                            });
+                        }
+                    }
+                });
+
+                // Calificaciones especiales (Extraordinario Especial)
+                document.querySelectorAll('.calificacion-input-especial').forEach(input => {
+                    const valor = input.value;
+                    if (valor && valor !== '' && !input.classList.contains('is-invalid')) {
+                        calificacionesEspeciales.push({
+                            id_alumno: parseInt(input.dataset.alumno),
+                            id_evaluacion: parseInt(input.dataset.evaluacion),
+                            calificacion_especial: parseFloat(valor)
+                        });
+                    }
+                });
+
+                if (calificaciones.length === 0 && calificacionesEspeciales.length === 0) {
+                    alert('Debes ingresar al menos una calificación');
+                    return;
+                }
+
+                const data = {
+                    id_asignacion: materiaSelect.value,
+                    calificaciones: calificaciones,
+                    calificaciones_especiales: calificacionesEspeciales
+                };
+
+                const inputJson = document.getElementById('calificacionesJsonInput');
+                if (!inputJson) {
+                    alert('ERROR: Input calificacionesJsonInput no encontrado');
+                    return;
+                }
+
+                inputJson.value = JSON.stringify(data);
+                btnGuardar.disabled = true;
+                btnGuardar.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Guardando...';
+
+                const form = document.getElementById('formCalificarGrupo');
+                if (!form) {
+                    alert('ERROR: Formulario no encontrado');
+                    return;
+                }
+
+                form.submit();
+            });
+
+            // Eventos
+            periodoSelect.addEventListener('change', cargarMaterias);
+            grupoSelect.addEventListener('change', cargarMaterias);
+            materiaSelect.addEventListener('change', validarFormulario);
+            btnCargar.addEventListener('click', cargarMatriz);
+
+            // Reset al cerrar modal
+            $('#modalCalificarGrupo').on('hidden.bs.modal', function() {
+                document.getElementById('formCalificarGrupo').reset();
+                tbody.innerHTML = '';
+                contenedor.style.display = 'none';
+                datosMatriz = {
+                    alumnos: [],
+                    unidades: []
+                };
+                btnGuardar.disabled = true;
+                btnGuardar.innerHTML = '<i class="fas fa-save mr-1"></i> Guardar Calificaciones';
+            });
         });
-
-        if (calificaciones.length === 0 && calificacionesEspeciales.length === 0) {
-            alert('Debes ingresar al menos una calificación');
-            return;
-        }
-
-        const data = {
-            id_asignacion: materiaSelect.value,
-            calificaciones: calificaciones,
-            calificaciones_especiales: calificacionesEspeciales
-        };
-
-        console.log('📦 Guardando calificaciones:', data);
-
-        const inputJson = document.getElementById('calificacionesJsonInput');
-        if (!inputJson) {
-            alert('ERROR: Input calificacionesJsonInput no encontrado');
-            return;
-        }
-
-        inputJson.value = JSON.stringify(data);
-
-        btnGuardar.disabled = true;
-        btnGuardar.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Guardando...';
-
-        const form = document.getElementById('formCalificarGrupo');
-        if (!form) {
-            alert('ERROR: Formulario no encontrado');
-            return;
-        }
-
-        form.submit();
-    });
-
-    // Eventos
-    periodoSelect.addEventListener('change', cargarMaterias);
-    grupoSelect.addEventListener('change', cargarMaterias);
-    materiaSelect.addEventListener('change', validarFormulario);
-    btnCargar.addEventListener('click', cargarMatriz);
-
-    // Reset al cerrar modal
-    $('#modalCalificarGrupo').on('hidden.bs.modal', function() {
-        document.getElementById('formCalificarGrupo').reset();
-        tbody.innerHTML = '';
-        contenedor.style.display = 'none';
-        datosMatriz = { alumnos: [], unidades: [] };
-        btnGuardar.disabled = true;
-        btnGuardar.innerHTML = '<i class="fas fa-save mr-1"></i> Guardar Calificaciones';
-    });
-});
-</script>
+    </script>
     <!-- Logout Modal -->
     <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
         aria-hidden="true">
