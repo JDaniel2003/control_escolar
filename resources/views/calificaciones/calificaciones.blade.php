@@ -92,7 +92,8 @@
 
         <div class="position-absolute" style="top: 10px; right: 20px; z-index: 1000;">
             <div class="d-flex align-items-center text-white">
-                <span class="mr-3">{{ Auth::user()->rol->nombre }}</span>
+                <span class="mr-3">{{ optional(Auth::user()->rol)->nombre }}</span>
+
                 <a href="#" class="text-white text-decoration-none logout-link" data-toggle="modal"
                     data-target="#logoutModal">
                     Cerrar Sesión <i class="fas fa-sign-out-alt"></i>
@@ -1156,23 +1157,32 @@
     <!-- Logout Modal -->
     <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
         aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">¿Listo para salir?</h5>
-                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span>
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">¿Listo para salir?</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Selecciona "Cerrar Sesión" si estás listo para finalizar tu sesión actual.
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancelar</button>
+
+                <!-- Botón de cierre de sesión -->
+                <form action="{{ route('logout') }}" method="POST">
+                    @csrf
+                    <button type="submit" class="btn btn-primary">
+                        Cerrar Sesión
                     </button>
-                </div>
-                <div class="modal-body">Selecciona "Cerrar Sesión" si estás listo para finalizar tu sesión actual.
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancelar</button>
-                    <a class="btn btn-primary" href="{{ route('login') }}">Cerrar Sesión</a>
-                </div>
+                </form>
             </div>
         </div>
     </div>
+</div>
+
 
 
     <!-- Bootstrap core JavaScript-->

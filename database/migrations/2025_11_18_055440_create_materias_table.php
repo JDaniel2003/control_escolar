@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('materias', function (Blueprint $table) {
             $table->integer('id_materia', true);
-            $table->string('clave', 10);
             $table->string('nombre', 150);
             $table->integer('id_tipo_competencia')->nullable()->index('id_tipo_competencia');
             $table->integer('id_modalidad')->nullable()->index('id_modalidad');

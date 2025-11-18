@@ -14,11 +14,141 @@ use App\Http\Controllers\AsignacionMasivaController;
 use App\Http\Controllers\AsignacionDocenteController;
 use App\Http\Controllers\CalificacionController;
 use App\Models\Calificacion;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\CoordinadorController;
+use App\Http\Controllers\DocenteController;
+use App\Http\Controllers\EstudianteController;
+
+
+// Redirigir raíz al login
+Route::get('/', function () {
+    return redirect()->route('login');
+});
+
+// Rutas de autenticación
+Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [AuthController::class, 'login.post']);
+
+/*
+|--------------------------------------------------------------------------
+| Rutas Protegidas (Requieren autenticación)
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth'])->group(function () {
+    
+    // Logout (disponible para todos los usuarios autenticados)
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+    
+    // Dashboard general - Redirige según nivel
+    Route::get('/dashboard', function () {
+        $user = auth()->user();
+        
+        // Redirigir según nivel
+        if ($user->hasLevelOrHigher(5)) {
+            return redirect()->route('superadmin.dashboard');
+        } elseif ($user->hasLevelOrHigher(4)) {
+            return redirect()->route('admin.dashboard');
+        } elseif ($user->hasLevelOrHigher(3)) {
+            return redirect()->route('coordinador.dashboard');
+        } elseif ($user->hasLevelOrHigher(2)) {
+            return redirect()->route('docente.dashboard');
+        } else {
+            return redirect()->route('estudiante.dashboard');
+        }
+    })->name('dashboard');
+    
+    /*
+    |--------------------------------------------------------------------------
+    | NIVEL 5: SuperAdmin - Acceso total al sistema
+    |--------------------------------------------------------------------------
+    */
+    Route::middleware(['role.level:5'])->prefix('superadmin')->name('superadmin.')->group(function () {
+        Route::get('/dashboard', [AdminController::class, 'superDashboard'])->name('dashboard');
+        Route::get('/sistema', [AdminController::class, 'sistema'])->name('sistema');
+        Route::get('/roles', [AdminController::class, 'roles'])->name('roles');
+    });
+    
+    /*
+    |--------------------------------------------------------------------------
+    | NIVEL 4: Administrador - Gestión completa de usuarios
+    |--------------------------------------------------------------------------
+    */
+    Route::middleware(['role.level:4'])->prefix('admin')->name('admin.')->group(function () {
+        Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+        Route::get('/usuarios', [AdminController::class, 'usuarios'])->name('usuarios');
+        Route::get('/reportes', [AdminController::class, 'reportes'])->name('reportes');
+        Route::get('/configuracion', [AdminController::class, 'configuracion'])->name('configuracion');
+    });
+    
+    /*
+    |--------------------------------------------------------------------------
+    | NIVEL 3: Coordinador - Gestión académica
+    |--------------------------------------------------------------------------
+    */
+    Route::middleware(['role.level:3'])->prefix('coordinador')->name('coordinador.')->group(function () {
+        Route::get('/dashboard', [CoordinadorController::class, 'dashboard'])->name('dashboard');
+        Route::get('/docentes', [CoordinadorController::class, 'docentes'])->name('docentes');
+        Route::get('/horarios', [CoordinadorController::class, 'horarios'])->name('horarios');
+        Route::get('/asignaciones', [CoordinadorController::class, 'asignaciones'])->name('asignaciones');
+    });
+    
+    /*
+    |--------------------------------------------------------------------------
+    | NIVEL 2: Docente - Gestión de clases y calificaciones
+    |--------------------------------------------------------------------------
+    */
+    Route::middleware(['role.level:2'])->prefix('docente')->name('docente.')->group(function () {
+        Route::get('/dashboard', [DocenteController::class, 'dashboard'])->name('dashboard');
+        Route::get('/materias', [DocenteController::class, 'materias'])->name('materias');
+        Route::get('/estudiantes', [DocenteController::class, 'estudiantes'])->name('estudiantes');
+        Route::get('/calificaciones', [DocenteController::class, 'calificaciones'])->name('calificaciones');
+        Route::get('/asistencias', [DocenteController::class, 'asistencias'])->name('asistencias');
+    });
+    
+    /*
+    |--------------------------------------------------------------------------
+    | NIVEL 1: Estudiante - Vista de información personal
+    |--------------------------------------------------------------------------
+    */
+    Route::middleware(['role.level:1'])->prefix('estudiante')->name('estudiante.')->group(function () {
+        Route::get('/dashboard', [EstudianteController::class, 'dashboard'])->name('dashboard');
+        Route::get('/materias', [EstudianteController::class, 'materias'])->name('materias');
+        Route::get('/calificaciones', [EstudianteController::class, 'calificaciones'])->name('calificaciones');
+        Route::get('/horario', [EstudianteController::class, 'horario'])->name('horario');
+    });
+
+});
+
+
+
 
 #----------------------login-----------------------
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login'])->name('login.post');
-Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+#Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+#.......cerrar sesion
+Route::post('/logout', function () {
+    Auth::logout();
+    Session::flush(); // Limpia toda la sesión
+    return redirect()->route('login');
+})->name('logout');
+
+##============con niveles==============
+Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [AuthController::class, 'login'])->name('login.post');
+
+Route::post('/logout', function () {
+    Auth::logout();
+    Session::flush();
+    return redirect()->route('login');
+})->name('logout');
+#===========================================
+
+
 Route::get('/admin', function () {
     return view('layouts.admin');
 })->name('admin.dashboard')->middleware('auth');
@@ -200,3 +330,5 @@ Route::post('/store-masivo', [CalificacionController::class, 'storeMasivoMatriz'
 });
 Route::post('/calificaciones/guardar-masivo', [CalificacionController::class, 'storeMasivo'])
     ->name('calificaciones.storeMasivo');
+
+

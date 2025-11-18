@@ -835,10 +835,18 @@
     <div class="modal fade" id="nuevaReinscripcionModal" tabindex="-1" role="dialog"
         aria-labelledby="nuevaReinscripcionLabel" aria-hidden="true">
         <div class="modal-dialog modal-xl" role="document">
-            <div class="modal-content">
-                <div class="modal-header bg-gradient-primary text-white">
-                    <h5 class="mb-0"><i class="fas fa-user-graduate mr-2"></i>Nueva Reinscripción</h5>
-                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header modal-header-custom border-0">
+                    <div class="w-100 text-center">
+                        <h5 class="mb-0 font-weight-bold">
+                            👨‍🎓 Nueva Inscripcion o Reinscripcion
+                        </h5>
+                        <p class="m-0 mt-2 mb-0" style="font-size: 0.9rem; opacity: 0.95;">
+                            Inscribe o reinscribe un alumno
+                        </p>
+                    </div>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Cerrar"
+                        style="position: absolute; right: 1.5rem; top: 1.5rem; font-size: 1.8rem; opacity: 0.9;">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>

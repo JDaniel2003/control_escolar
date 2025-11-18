@@ -13,11 +13,10 @@ return [
     |
     */
 
-    'defaults' => [
-        'guard' => env('AUTH_GUARD', 'web'),
-        'passwords' => env('AUTH_PASSWORD_BROKER', 'users'),
-    ],
-
+   'defaults' => [
+    'guard' => 'web',
+    'passwords' => 'usuarios',  // ← usuarios en plural
+],
     /*
     |--------------------------------------------------------------------------
     | Authentication Guards
@@ -36,12 +35,11 @@ return [
     */
 
     'guards' => [
-        'web' => [
-            'driver' => 'session',
-            'provider' => 'users',
-        ],
+    'web' => [
+        'driver' => 'session',
+        'provider' => 'usuarios',  // ← usuarios en plural
     ],
-
+],
     /*
     |--------------------------------------------------------------------------
     | User Providers
@@ -60,16 +58,11 @@ return [
     */
 
     'providers' => [
-        'users' => [
-            'driver' => 'eloquent',
-            'model' => env('AUTH_MODEL', App\Models\Usuario::class),
-        ],
-
-        // 'users' => [
-        //     'driver' => 'database',
-        //     'table' => 'users',
-        // ],
+    'usuarios' => [  // ← Cambia el nombre del provider
+        'driver' => 'eloquent',
+        'model' => App\Models\Usuario::class,  // ← Usa tu modelo Usuario
     ],
+],
 
     /*
     |--------------------------------------------------------------------------
@@ -91,14 +84,13 @@ return [
     */
 
     'passwords' => [
-        'users' => [
-            'provider' => 'users',
-            'table' => env('AUTH_PASSWORD_RESET_TOKEN_TABLE', 'password_reset_tokens'),
-            'expire' => 60,
-            'throttle' => 60,
-        ],
+    'usuarios' => [  // ← Cambia el nombre
+        'provider' => 'usuarios',  // ← Cambia el provider
+        'table' => 'password_reset_tokens',
+        'expire' => 60,
+        'throttle' => 60,
     ],
-
+],
     /*
     |--------------------------------------------------------------------------
     | Password Confirmation Timeout
@@ -110,6 +102,6 @@ return [
     |
     */
 
-    'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 10800),
+    'password_timeout' => 10800,
 
 ];

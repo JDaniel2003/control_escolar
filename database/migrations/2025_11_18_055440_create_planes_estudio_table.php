@@ -15,7 +15,6 @@ return new class extends Migration
             $table->integer('id_plan_estudio', true);
             $table->string('nombre', 100);
             $table->integer('id_carrera')->nullable()->index('id_carrera');
-            $table->enum('vigencia', ['Vigente', 'No vigente']);
             $table->json('datos')->nullable();
         });
     }
