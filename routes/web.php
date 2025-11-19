@@ -20,7 +20,9 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CoordinadorController;
 use App\Http\Controllers\DocenteController;
+use App\Http\Controllers\DocentesController;
 use App\Http\Controllers\EstudianteController;
+use App\Http\Controllers\UserController;
 
 
 // Redirigir raíz al login
@@ -39,14 +41,14 @@ Route::post('/login', [AuthController::class, 'login.post']);
 */
 
 Route::middleware(['auth'])->group(function () {
-    
+
     // Logout (disponible para todos los usuarios autenticados)
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-    
+
     // Dashboard general - Redirige según nivel
     Route::get('/dashboard', function () {
         $user = auth()->user();
-        
+
         // Redirigir según nivel
         if ($user->hasLevelOrHigher(5)) {
             return redirect()->route('superadmin.dashboard');
@@ -60,7 +62,7 @@ Route::middleware(['auth'])->group(function () {
             return redirect()->route('estudiante.dashboard');
         }
     })->name('dashboard');
-    
+
     /*
     |--------------------------------------------------------------------------
     | NIVEL 5: SuperAdmin - Acceso total al sistema
@@ -71,7 +73,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/sistema', [AdminController::class, 'sistema'])->name('sistema');
         Route::get('/roles', [AdminController::class, 'roles'])->name('roles');
     });
-    
+
     /*
     |--------------------------------------------------------------------------
     | NIVEL 4: Administrador - Gestión completa de usuarios
@@ -83,7 +85,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/reportes', [AdminController::class, 'reportes'])->name('reportes');
         Route::get('/configuracion', [AdminController::class, 'configuracion'])->name('configuracion');
     });
-    
+
     /*
     |--------------------------------------------------------------------------
     | NIVEL 3: Coordinador - Gestión académica
@@ -95,7 +97,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/horarios', [CoordinadorController::class, 'horarios'])->name('horarios');
         Route::get('/asignaciones', [CoordinadorController::class, 'asignaciones'])->name('asignaciones');
     });
-    
+
     /*
     |--------------------------------------------------------------------------
     | NIVEL 2: Docente - Gestión de clases y calificaciones
@@ -108,7 +110,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/calificaciones', [DocenteController::class, 'calificaciones'])->name('calificaciones');
         Route::get('/asistencias', [DocenteController::class, 'asistencias'])->name('asistencias');
     });
-    
+
     /*
     |--------------------------------------------------------------------------
     | NIVEL 1: Estudiante - Vista de información personal
@@ -120,7 +122,6 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/calificaciones', [EstudianteController::class, 'calificaciones'])->name('calificaciones');
         Route::get('/horario', [EstudianteController::class, 'horario'])->name('horario');
     });
-
 });
 
 
@@ -220,7 +221,7 @@ Route::resource('unidades', UnidadController::class);
 // Eliminar unidad
 Route::delete('/unidades/{idUnidad}', [MateriaController::class, 'eliminarUnidad'])
     ->name('unidades.eliminar');
-    
+
 
 Route::put('/materias/{idMateria}/unidades/actualizar-todo', [UnidadController::class, 'actualizarTodo'])
     ->name('unidades.actualizarTodo');
@@ -248,13 +249,15 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/asignaciones', [AsignacionDocenteController::class, 'store'])->name('asignaciones.store');
     Route::put('/asignaciones/{asignacione}', [AsignacionDocenteController::class, 'update'])->name('asignaciones.update');
     Route::delete('/asignaciones/{asignacione}', [AsignacionDocenteController::class, 'destroy'])->name('asignaciones.destroy');
-    
+
     // Rutas para asignaciones masivas (¡SIN DUPLICADOS!)
     Route::post('/asignaciones/masiva/store-materias', [AsignacionDocenteController::class, 'storeMasivoMaterias'])
         ->name('asignaciones.masiva.store-materias');
-    
-    Route::get('/asignaciones/masiva/materias-carrera-periodo/{carreraId}/{idNumeroPeriodo}', 
-        [AsignacionDocenteController::class, 'materiasPorCarreraYPeriodo'])
+
+    Route::get(
+        '/asignaciones/masiva/materias-carrera-periodo/{carreraId}/{idNumeroPeriodo}',
+        [AsignacionDocenteController::class, 'materiasPorCarreraYPeriodo']
+    )
         ->name('asignaciones.masiva.materias-carrera-periodo');
 });
 
@@ -262,26 +265,26 @@ Route::middleware(['auth'])->group(function () {
 Route::get('/buscar-alumno', [HistorialController::class, 'buscarAlumno'])->name('buscar.alumno');
 Route::get('/asignaciones/disponibles', [HistorialController::class, 'getAsignacionesDisponibles']);
 Route::middleware(['auth'])->group(function () {
-Route::get('/historial/reinscripcion-masiva', [HistorialController::class, 'reinscripcionMasiva'])
-    ->name('historial.reinscripcion-masiva');
+    Route::get('/historial/reinscripcion-masiva', [HistorialController::class, 'reinscripcionMasiva'])
+        ->name('historial.reinscripcion-masiva');
 
-Route::post('/historial/obtener-alumnos-grupo', [HistorialController::class, 'obtenerAlumnosGrupo'])
-    ->name('historial.obtener-alumnos-grupo');
+    Route::post('/historial/obtener-alumnos-grupo', [HistorialController::class, 'obtenerAlumnosGrupo'])
+        ->name('historial.obtener-alumnos-grupo');
 
-Route::post('/historial/store-masivo', [HistorialController::class, 'storeMasivo'])
-    ->name('historial.store-masivo');
-    });
+    Route::post('/historial/store-masivo', [HistorialController::class, 'storeMasivo'])
+        ->name('historial.store-masivo');
+});
 // Rutas adicionales para historial
 Route::get('/historial/obtener-alumnos-grupo', [HistorialController::class, 'obtenerAlumnosGrupo'])
     ->name('historial.obtener-alumnos-grupo');
-    
+
 Route::get('/historial/obtener-materias-grupo', [HistorialController::class, 'obtenerMateriasPorGrupo'])
     ->name('historial.obtener-materias-grupo');
-Route::get('/test-vista', function() {
+Route::get('/test-vista', function () {
     $periodos = \App\Models\PeriodoEscolar::all();
     $grupos = \App\Models\Grupo::all();
     $statusAcademicos = \App\Models\StatusAcademico::all();
-    
+
     return view('historial.reinscripcion-masiva', compact('periodos', 'grupos', 'statusAcademicos'));
 })->middleware('auth');
 
@@ -293,11 +296,13 @@ Route::post('/historial/obtener-alumnos-grupo', [HistorialController::class, 'ob
 // Obtener materias del grupo 
 Route::post('/asignaciones/obtener-materias-grupo', [AsignacionDocenteController::class, 'obtenerMateriasGrupo'])
     ->name('asignaciones.obtener-materias-grupo');
+Route::get('/docentes-por-carrera/{carreraId}', [AsignacionDocenteController::class, 'getDocentesPorCarrera'])
+    ->name('docentes.por.carrera');
 
 // Guardar reinscripciones masivas
 Route::post('/historial/store-masivo', [HistorialController::class, 'storeMasivo'])
     ->name('historial.store-masivo');
-    // Rutas opcionales para filtrar por grupo (si lo necesitas en el futuro)
+// Rutas opcionales para filtrar por grupo (si lo necesitas en el futuro)
 Route::get('/periodos-grupo', [HistorialController::class, 'getPeriodosPorGrupo'])->name('periodos.por-grupo');
 Route::get('/numeros-periodo-grupo', [HistorialController::class, 'getNumerosPeriodoPorGrupo'])->name('numeros-periodo.por-grupo');
 Route::get('/obtener-numero-periodo', [HistorialController::class, 'obtenerNumeroPeriodoPorGrupo']);
@@ -312,7 +317,8 @@ Route::post('/historial/obtener-alumnos-grupo', [HistorialController::class, 'ob
 Route::post('/historial/obtener-materias-grupo', [HistorialController::class, 'obtenerMateriasGrupo']);
 Route::post('/historial/store-masivo', [HistorialController::class, 'storeMasivo'])->name('historial.store-masivo');
 Route::get('/historial/obtener-tipo-periodo/{id}', [HistorialController::class, 'obtenerTipoPeriodo']);
-Route::post('/historial/store-masivo-avanzado', 
+Route::post(
+    '/historial/store-masivo-avanzado',
     [HistorialController::class, 'storeMasivoAvanzado']
 )->name('historial.store-masivo-avanzado');
 
@@ -326,9 +332,21 @@ Route::middleware(['auth'])->prefix('calificaciones')->name('calificaciones.')->
     Route::post('/alumnos-grupo', [CalificacionController::class, 'obtenerAlumnosGrupo']);
     Route::post('/store-masivo', [CalificacionController::class, 'storeMasivo'])->name('store-masivo');
     Route::post('/matriz-completa', [CalificacionController::class, 'obtenerMatrizCompleta']);
-Route::post('/store-masivo', [CalificacionController::class, 'storeMasivoMatriz'])->name('store-masivo');
+    Route::post('/store-masivo', [CalificacionController::class, 'storeMasivoMatriz'])->name('store-masivo');
 });
 Route::post('/calificaciones/guardar-masivo', [CalificacionController::class, 'storeMasivo'])
     ->name('calificaciones.storeMasivo');
 
 
+Route::resource('docentes', DocentesController::class);
+Route::get('/docentes', [DocentesController::class, 'index'])->name('docente.index');
+
+Route::resource('usuarios', UserController::class);
+// routes/web.php
+Route::get('/docente/asignaciones', [CalificacionController::class, 'misAsignaciones'])
+    ->name('docente.asignaciones');
+
+Route::post('/calificaciones/matriz-completa', [CalificacionController::class, 'obtenerMatrizCompleta'])
+    ->name('calificaciones.matriz.completa');
+    Route::post('/calificaciones/guardar', [CalificacionController::class, 'guardarCalificaciones'])
+    ->name('calificaciones.guardar');

@@ -361,4 +361,26 @@ class AsignacionDocenteController extends Controller
             return response()->json([], 500);
         }
     }
+
+    public function getDocentesPorCarrera($carreraId)
+{
+    try {
+        $docentes = Docente::whereHas('usuario.administracionCarreras', function ($query) use ($carreraId) {
+            $query->where('id_carrera', $carreraId);
+        })
+        ->with(['usuario', 'datosDocentes'])
+        ->get()
+        ->map(function ($docente) {
+            return [
+                'id_docente' => $docente->id_docente,
+                'nombre_completo' => $docente->nombre_completo,
+            ];
+        });
+
+        return response()->json($docentes);
+    } catch (\Exception $e) {
+        Log::error('Error al obtener docentes por carrera:', ['error' => $e->getMessage()]);
+        return response()->json([], 500);
+    }
+}
 }

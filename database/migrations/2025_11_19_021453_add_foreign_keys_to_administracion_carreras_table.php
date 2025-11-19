@@ -12,8 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('administracion_carreras', function (Blueprint $table) {
-            $table->foreign(['id_usuario'], 'administracion_carreras_ibfk_1')->references(['id_usuario'])->on('usuarios')->onUpdate('restrict')->onDelete('restrict');
-            $table->foreign(['id_carrera'], 'administracion_carreras_ibfk_2')->references(['id_carrera'])->on('carreras')->onUpdate('restrict')->onDelete('restrict');
+            $table->foreign(['id_area'], 'administracion_carreras_ibfk_1')->references(['id_area'])->on('areas')->onUpdate('restrict')->onDelete('restrict');
+            $table->foreign(['id_usuario'], 'administracion_carreras_ibfk_2')->references(['id_usuario'])->on('usuarios')->onUpdate('restrict')->onDelete('restrict');
+            $table->foreign(['id_carrera'], 'administracion_carreras_ibfk_3')->references(['id_carrera'])->on('carreras')->onUpdate('restrict')->onDelete('restrict');
         });
     }
 
@@ -25,6 +26,7 @@ return new class extends Migration
         Schema::table('administracion_carreras', function (Blueprint $table) {
             $table->dropForeign('administracion_carreras_ibfk_1');
             $table->dropForeign('administracion_carreras_ibfk_2');
+            $table->dropForeign('administracion_carreras_ibfk_3');
         });
     }
 };

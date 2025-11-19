@@ -35,4 +35,16 @@ public function datosAcademicos()
     {
         return $this->hasMany(Grupo::class, 'id_carrera', 'id_carrera');
     }
+
+    public function docentes()
+{
+    return $this->belongsToMany(
+        \App\Models\Docente::class,
+        'administracion_carreras',
+        'id_carrera',
+        'id_usuario',
+        'id_carrera',
+        'id_usuario'
+    )->withPivot('id_usuario');
+}
 }

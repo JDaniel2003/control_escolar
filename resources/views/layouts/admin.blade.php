@@ -65,35 +65,16 @@
 
         <div class="collapse navbar-collapse ml-4">
             <ul class="navbar-nav" style="padding-left: 20%;">
-                <li class="nav-item"> <!-- bg-success -->
-                    <a class="nav-link navbar-active-item px-3 mr-1">Inicio</a>
+                <li class="nav-item"><a class="nav-link navbar-active-item px-3 mr-1">Inicio</a></li>
+                <li class="nav-item"><a class="nav-link text-white px-3 mr-1" href="{{ route('periodos.index') }}">Períodos Escolares</a></li>
+                <li class="nav-item"><a class="nav-link text-white px-3 mr-1" href="{{ route('carreras.index') }}">Carreras</a></li>
+                <li class="nav-item"><a class="nav-link text-white px-3 mr-1" href="{{ route('materias.index') }}">Materias</a></li>
+                <li class="nav-item"><a class="nav-link text-white px-3 mr-1" href="{{ route('planes.index') }}">Planes de estudio</a></li>
+                <li class="nav-item"><a class="nav-link text-white px-3 mr-1" href="{{ route('alumnos.index') }}">Alumnos</a></li>
+                <li class="nav-item"><a class="nav-link text-white px-3 mr-1" href="{{ route('asignaciones.index') }}">Asignaciones Docentes</a></li>
+                <li class="nav-item"><a class="nav-link text-white px-3" href="{{ route('historial.index') }}">Historial</a></li>
+                <li class="nav-item"><a class="nav-link text-white px-3 mr-1" href="{{ route('calificaciones.index') }}">Calificaciones</a></li>
 
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link  text-white px-3 mr-1" href="{{ route('periodos.index') }}">Períodos
-                        Escolares</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link text-white px-3 mr-1" href="{{ route('carreras.index') }}">Carreras</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link text-white px-3 mr-1" href="{{ route('materias.index') }}">Materias</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link text-white px-3 mr-1" href="{{ route('planes.index') }}">Planes de estudio</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link text-white px-3 mr-1" href="{{ route('alumnos.index') }}">Alumnos</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link text-white px-3 mr-1" href="#">Asignaciones Docentes</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link text-white px-3" href="{{ route('historial.index') }}">Historial</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link text-white px-3" href="#">Calificaciones</a>
-                </li>
             </ul>
         </div>
         <div class="position-absolute" style="top: 10px; right: 20px; z-index: 1000;">
@@ -140,7 +121,7 @@
                                 </div>
 
                                 <!-- DOCENTES -->
-                                <div onclick="window.location.href='{{ route('asignaciones.index') }}'"
+                                <div onclick="window.location.href='{{ route('docente.index') }}'"
                                     class="col-md-6 col-lg-4 mb-4">
                                     <div class="logout-link card border-success h-100"
                                         style="border-width: 3px; border-radius: 25px;">
@@ -151,8 +132,20 @@
                                     </div>
                                 </div>
 
+                                <div onclick="window.location.href='{{ route('usuarios.index') }}'"
+                                    class="col-md-6 col-lg-4 mb-4">
+                                    <div class="logout-link card border-success h-100"
+                                        style="border-width: 3px; border-radius: 25px;">
+                                        <div class="card-body d-flex justify-content-between align-items-center py-4">
+                                            <h5 class="card-title font-weight-bold mb-0">USUARIOS</h5>
+                                            <i class="fas fa-chalkboard-teacher fa-2x text-success"></i>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <!-- CALIFICACIONES -->
-                                <div class="col-md-6 col-lg-4 mb-4">
+                                <div onclick="window.location.href='{{ route('calificaciones.index') }}'"
+                                    class="col-md-6 col-lg-4 mb-4">
                                     <div class="logout-link card border-success h-100"
                                         style="border-width: 3px; border-radius: 25px;">
                                         <div class="card-body d-flex justify-content-between align-items-center py-4">

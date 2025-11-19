@@ -72,4 +72,18 @@ class Usuario extends Authenticatable
             $q->where('nivel', '<', $level);
         });
     }
+
+    public function administracionCarreras()
+{
+    return $this->hasMany(\App\Models\AdministracionCarrera::class, 'id_usuario');
+}
+public function carreras()
+{
+    return $this->belongsToMany(
+        Carrera::class,
+        'administracion_carreras',
+        'id_usuario',
+        'id_carrera'
+    );
+}
 }

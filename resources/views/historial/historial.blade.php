@@ -107,65 +107,10 @@
                             </div>
 
                             <!-- Filtros -->
-                            <div class="container-fluid mb-4 d-flex justify-content-center">
-                                <div class="p-3 border rounded bg-light shadow-sm d-inline-block">
-                                    <form id="filtrosForm" method="GET" action="{{ route('historial.index') }}"
-                                        class="d-flex flex-nowrap align-items-center gap-2">
-                                        <div class="flex-grow-1" style="width: 400px;">
-                                            <input type="text" name="busqueda"
-                                                class="form-control form-control-sm"
-                                                placeholder="🔍 Buscar por nombre o matrícula"
-                                                value="{{ request('busqueda') }}">
-                                        </div>
-                                        <input type="text" name="matricula"
-                                            class="form-control form-control-sm w-auto"
-                                            placeholder="Buscar por matrícula" value="{{ request('matricula') }}">
-                                        <select name="id_periodo_escolar" class="form-control form-control-sm w-auto">
-                                            <option value="">Buscar por período</option>
-                                            @foreach ($periodos as $periodo)
-                                                <option value="{{ $periodo->id_periodo_escolar }}"
-                                                    {{ request('id_periodo_escolar') == $periodo->id_periodo_escolar ? 'selected' : '' }}>
-                                                    {{ $periodo->nombre }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                        <select name="id_grupo" class="form-control form-control-sm w-auto">
-                                            <option value="">Buscar por grupo</option>
-                                            @foreach ($grupos as $grupo)
-                                                <option value="{{ $grupo->id_grupo }}"
-                                                    {{ request('id_grupo') == $grupo->id_grupo ? 'selected' : '' }}>
-                                                    {{ $grupo->nombre }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                        <select name="id_historial_status"
-                                            class="form-control form-control-sm w-auto">
-                                            <option value="">Buscar por estatus</option>
-                                            @foreach ($historialStatus as $status)
-                                                <option value="{{ $status->id_historial_status }}"
-                                                    {{ request('id_historial_status') == $status->id_historial_status ? 'selected' : '' }}>
-                                                    {{ $status->nombre }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                        <select name="mostrar" onchange="this.form.submit()"
-                                            class="form-control form-control-sm w-auto">
-                                            <option value="10" {{ request('mostrar') == 10 ? 'selected' : '' }}>10
-                                            </option>
-                                            <option value="25" {{ request('mostrar') == 25 ? 'selected' : '' }}>25
-                                            </option>
-                                            <option value="50" {{ request('mostrar') == 50 ? 'selected' : '' }}>50
-                                            </option>
-                                            <option value="todo"
-                                                {{ request('mostrar') == 'todo' ? 'selected' : '' }}>Todo</option>
-                                        </select>
-                                        <a href="{{ route('historial.index', ['mostrar' => 'todo']) }}"
-                                            class="btn btn-sm btn-outline-secondary d-flex align-items-center">
-                                            <i class="fas fa-list me-1"></i> Mostrar todo
-                                        </a>
-                                    </form>
+                            <div class="card-header py-3  d-flex justify-content-between align-items-center">
+                                    <input type="text" id="searchInput" class="form-control form-control-sm"
+                                        placeholder="Buscar docentes...">
                                 </div>
-                            </div>
 
                             @if (session('success'))
                                 <div class="alert alert-success">{{ session('success') }}</div>
@@ -173,7 +118,7 @@
 
                             <!-- Tabla de historial -->
                             <div class="table-responsive">
-                                <table class="table table-bordered table-hover text-center" width="100%">
+                                <table class="table table-bordered table-hover text-center" id="teachersTable" width="100%">
                                     <thead class="thead-dark">
                                         <tr>
                                             <th>Alumno</th> {{-- <th>Matrícula</th><th>Período Escolar</th><th>Grupo</th><th>Número Período</th> --}}
@@ -1546,6 +1491,39 @@
     </script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+
+            // ===== BÚSQUEDA EN TABLA =====
+            const searchInput = document.getElementById('searchInput');
+
+if (searchInput) {
+    searchInput.addEventListener('input', function(e) {
+
+        // Normaliza lo que escribe el usuario
+        const searchTerm = e.target.value
+            .toLowerCase()
+            .replace(/\s+/g, ' ')
+            .trim();
+
+        const table = document.getElementById('teachersTable');
+        const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+
+        for (let row of rows) {
+
+            // Normaliza el texto real de la fila
+            const text = row.textContent
+                .toLowerCase()
+                .replace(/\s+/g, ' ')
+                .trim();
+
+            if (text.includes(searchTerm)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        }
+    });
+}
+
             // Variables globales
             let asignacionesSeleccionadas = [];
             let asignacionesDisponibles = [];

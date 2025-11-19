@@ -993,4 +993,100 @@ class CalificacionController extends Controller
                 ->withErrors(['error' => 'Error al guardar: ' . $e->getMessage()]);
         }
     }
+
+    public function misAsignaciones()
+    {
+        // Obtener el ID del docente desde el usuario autenticado
+        $idDocente = auth()->user()->docente->id_docente;
+
+        if (!$idDocente) {
+            return view('docente.asignaciones', ['asignaciones' => collect()])
+                ->with('mensaje', 'No tienes un ID de docente asignado.');
+        }
+
+        // Cargar asignaciones con relaciones
+        $asignaciones = AsignacionDocente::with([
+            'materia',
+            'grupo.periodoEscolar' // ← Usa el nombre EXACTO del método
+        ])
+            ->where('id_docente', $idDocente)
+            ->get()
+            ->map(function ($asignacion) {
+                return [
+                    'id_asignacion' => $asignacion->id_asignacion,
+                    'materia' => $asignacion->materia?->nombre ?? 'Sin materia',
+                    'grupo' => $asignacion->grupo?->nombre ?? 'Sin grupo',
+                    'periodo' => $asignacion->grupo?->periodoEscolar?->nombre ?? 'Sin período',
+                    'id_grupo' => $asignacion->id_grupo,
+                    'id_periodo' => $asignacion->grupo?->periodoEscolar?->id_periodo_escolar
+                ];
+            });
+        return view('docente.asignaciones', compact('asignaciones'));
+    }
+
+    public function guardarCalificaciones(Request $request)
+    {
+        try {
+            $data = json_decode($request->calificaciones_json, true);
+            $idAsignacion = $data['id_asignacion'];
+
+            // 1. Guardar calificaciones normales (por unidad)
+            if (!empty($data['calificaciones'])) {
+                foreach ($data['calificaciones'] as $calif) {
+                    // Solo guardar si tiene id_unidad (calificaciones normales)
+                    if (!empty($calif['id_unidad'])) {
+                        Calificacion::updateOrCreate(
+                            [
+                                'id_alumno' => $calif['id_alumno'],
+                                'id_asignacion' => $idAsignacion,
+                                'id_unidad' => $calif['id_unidad'],
+                                'id_evaluacion' => $calif['id_evaluacion']
+                            ],
+                            [
+                                'calificacion' => $calif['calificacion'],
+                                'calificacion_especial' => null, // ← Asegurar que sea null
+                                'fecha' => now()
+                            ]
+                        );
+                    }
+                }
+            }
+
+            // 2. Guardar calificaciones especiales (SIN id_unidad)
+            if (!empty($data['calificaciones_especiales'])) {
+                foreach ($data['calificaciones_especiales'] as $califEsp) {
+                    // Buscar registro ESPECIAL existente (sin id_unidad)
+                    $califEspecial = Calificacion::where('id_alumno', $califEsp['id_alumno'])
+                        ->where('id_asignacion', $idAsignacion)
+                        ->whereNull('id_unidad') // ← Clave: sin unidad
+                        ->first();
+
+                    if ($califEspecial) {
+                        $califEspecial->calificacion_especial = $califEsp['calificacion_especial'];
+                        $califEspecial->id_evaluacion = $califEsp['id_evaluacion'];
+                        $califEspecial->calificacion = null; // ← Asegurar que sea null
+                        $califEspecial->save();
+                    } else {
+                        Calificacion::create([
+                            'id_alumno' => $califEsp['id_alumno'],
+                            'id_asignacion' => $idAsignacion,
+                            'id_evaluacion' => $califEsp['id_evaluacion'],
+                            'calificacion_especial' => $califEsp['calificacion_especial'],
+                            'calificacion' => null, // ← Clave: null para calif normal
+                            'id_unidad' => null,    // ← Clave: sin unidad
+                            'fecha' => now()
+                        ]);
+                    }
+                }
+            }
+
+            return redirect()->back()->with('success', 'Calificaciones guardadas correctamente.');
+        } catch (\Exception $e) {
+            Log::error('Error al guardar calificaciones:', [
+                'error' => $e->getMessage(),
+                'data' => $request->all()
+            ]);
+            return redirect()->back()->with('error', 'Error al guardar: ' . $e->getMessage());
+        }
+    }
 }

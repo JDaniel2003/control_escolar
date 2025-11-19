@@ -42,4 +42,39 @@ class DatosDocente extends Model
     }
     return null;
 }
+
+ /**
+     * Relación con Género
+     */
+    public function genero()
+    {
+        return $this->belongsTo(Genero::class, 'id_genero', 'id_genero');
+    }
+
+    /**
+     * Relación con Domicilio
+     */
+    public function domicilioDocente()
+    {
+        return $this->belongsTo(DomicilioDocente::class, 'id_domicilio_docente', 'id_domicilio_docente');
+    }
+
+    /**
+     * Obtener nombre completo
+     */
+    public function getNombreCompletoAttribute()
+    {
+        return trim($this->nombre . ' ' . $this->apellido_paterno . ' ' . $this->apellido_materno);
+    }
+
+    /**
+     * Obtener edad calculada desde fecha de nacimiento
+     */
+    public function getEdadCalculadaAttribute()
+    {
+        if ($this->fecha_nacimiento) {
+            return $this->fecha_nacimiento->age;
+        }
+        return $this->edad;
+    }
 }

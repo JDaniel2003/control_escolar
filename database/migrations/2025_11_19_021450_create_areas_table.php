@@ -11,10 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('roles', function (Blueprint $table) {
-            $table->integer('id_rol', true);
-            $table->string('nombre', 50);
-            $table->json('datos')->nullable();
+        Schema::create('areas', function (Blueprint $table) {
+            $table->integer('id_area', true);
+            $table->string('nombre', 150);
         });
     }
 
@@ -23,6 +22,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('roles');
+        Schema::dropIfExists('areas');
     }
 };

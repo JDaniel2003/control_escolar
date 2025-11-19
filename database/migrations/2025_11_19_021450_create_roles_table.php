@@ -11,11 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('administracion_carreras', function (Blueprint $table) {
-            $table->integer('id_administracion_carrera', true);
-            $table->string('nombre', 100);
-            $table->integer('id_usuario')->nullable()->index('id_usuario');
-            $table->integer('id_carrera')->nullable()->index('id_carrera');
+        Schema::create('roles', function (Blueprint $table) {
+            $table->integer('id_rol', true);
+            $table->string('nombre', 50);
+            $table->integer('nivel')->default(1);
             $table->json('datos')->nullable();
         });
     }
@@ -25,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('administracion_carreras');
+        Schema::dropIfExists('roles');
     }
 };

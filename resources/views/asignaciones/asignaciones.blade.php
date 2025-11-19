@@ -405,15 +405,9 @@
                                                         Docente
                                                         <span class="required-asterisk ml-1">*</span>
                                                     </label>
-                                                    <select name="id_docente" class="form-control form-control-custom"
-                                                        required>
-                                                        <option value="">-- Seleccione un docente --</option>
-                                                        @foreach ($docentes as $docente)
-                                                            <option value="{{ $docente->id_docente }}">
-                                                                {{ $docente->nombre_completo }}
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
+                                                    <select name="id_docente" id="docente_nueva" class="form-control form-control-custom" required>
+    <option value="">-- Seleccione un docente --</option>
+</select>
                                                 </div>
                                             </div>
                                             <div class="col-md-6">
@@ -965,6 +959,7 @@
 
     <!-- JavaScript para la funcionalidad de asignaciones -->
     <script>
+        
         $(document).ready(function() {
             // Configuración inicial
             const grupos = @json($grupos);
@@ -974,7 +969,37 @@
             console.log('Grupos cargados:', grupos);
             console.log('Docentes cargados:', docentes);
             console.log('Períodos cargados:', periodos);
+$('#carrera_nueva').change(function() {
+    const carreraId = $(this).val();
 
+    // Cargar grupos
+    cargarGrupos(carreraId, '#grupo_nueva', '#periodo_escolar_nueva_display', '#periodo_escolar_nueva');
+
+    // Limpiar docentes
+    $('#docente_nueva').html('<option value="">-- Seleccione un docente --</option>');
+
+    // Cargar docentes de la carrera
+    if (carreraId) {
+        $.get(`/docentes-por-carrera/${carreraId}`)
+            .done(function(docentes) {
+                docentes.forEach(doc => {
+                    $('#docente_nueva').append(
+                        `<option value="${doc.id_docente}">${doc.nombre_completo}</option>`
+                    );
+                });
+            })
+            .fail(function() {
+                console.error('Error al cargar docentes por carrera');
+                $('#docente_nueva').html('<option value="">Error al cargar docentes</option>');
+            });
+    }
+
+    // También puedes recargar materias si ya hay número de período
+    const numeroPeriodoId = $('#numero_periodo_nueva').val();
+    if (carreraId && numeroPeriodoId) {
+        cargarMateriasIndividual(carreraId, numeroPeriodoId, '#materias-container-nueva');
+    }
+});
             // ========== FUNCIONES COMPARTIDAS ==========
 
             // Función para cargar grupos por carrera y autocompletar período
@@ -1307,89 +1332,103 @@
 
             // Función para cargar materias en modal masivo
             function cargarMateriasMasivas(carreraId, idNumeroPeriodo) {
-                console.log('Cargando materias masivas para carrera:', carreraId, 'período:', idNumeroPeriodo);
+    console.log('Cargando materias masivas para carrera:', carreraId, 'período:', idNumeroPeriodo);
 
-                $('#materias-container').html(
-                    '<div class="text-center"><i class="fas fa-spinner fa-spin fa-2x text-primary"></i><p class="mt-2">Cargando materias...</p></div>'
-                );
+    $('#materias-container').html(
+        '<div class="text-center"><i class="fas fa-spinner fa-spin fa-2x text-primary"></i><p class="mt-2">Cargando materias y docentes...</p></div>'
+    );
 
-                const url =
-                    `{{ url('asignaciones/masiva/materias-carrera-periodo') }}/${carreraId}/${idNumeroPeriodo}`;
-                console.log('URL de petición:', url);
+    const urlMaterias = `/asignaciones/masiva/materias-carrera-periodo/${carreraId}/${idNumeroPeriodo}`;
+    const urlDocentes = `/docentes-por-carrera/${carreraId}`;
 
-                $.ajax({
-                    url: url,
-                    method: 'GET',
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
-                        'Accept': 'application/json'
-                    },
-                    success: function(response) {
-                        console.log('Respuesta recibida:', response);
-                        let html = '';
-
-                        if (response.length === 0) {
-                            html = `
-                            <div class="alert alert-warning">
-                                <i class="fas fa-exclamation-triangle"></i> 
-                                No hay materias para esta carrera y período seleccionados
-                            </div>`;
-                        } else {
-                            const carreraSeleccionada = $('#carrera option:selected').text().trim();
-                            const periodoSeleccionado = $('#numero_periodo option:selected').text()
-                                .trim();
-
-                            html += `
-                            <div class="alert alert-success mb-3">
-                                <i class="fas fa-check-circle"></i> 
-                                Se encontraron ${response.length} materias para ${carreraSeleccionada} - ${periodoSeleccionado}
-                            </div>`;
-
-                            response.forEach((materia) => {
-                                html += `
-                                <div class="materia-item">
-                                    <div class="row align-items-center">
-                                        <div class="col-md-1 text-center">
-                                            <input type="checkbox" name="materias[]" value="${materia.id_materia}" 
-                                                   class="materia-checkbox" style="width: 20px; height: 20px;">
-                                        </div>
-                                        <div class="col-md-5">
-                                            <strong>${materia.nombre}</strong><br>
-                                            <small class="text-muted">Clave: ${materia.clave || 'N/A'}</small><br>
-                                            <small class="text-info">Créditos: ${materia.creditos || 'N/A'} | Horas: ${materia.horas || 'N/A'}</small>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <label class="small mb-1">Docente <span class="text-muted">(seleccione si asignará esta materia)</span></label>
-                                            <select name="docentes[${materia.id_materia}]" class="form-control form-control-sm docente-select">
-                                                <option value="">-- Seleccione un docente --</option>`;
-
-                                docentes.forEach(docente => {
-                                    html +=
-                                        `<option value="${docente.id_docente}">${docente.nombre_completo}</option>`;
-                                });
-
-                                html += `
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
-                            `;
-                            });
-                        }
-
-                        $('#materias-container').html(html);
-                    },
-                    error: function(xhr, status, error) {
-                        console.error('Error al cargar materias:', error);
-                        $('#materias-container').html(`
-                        <div class="alert alert-danger">
-                            <i class="fas fa-times-circle"></i> 
-                            Error al cargar las materias. Por favor, intente nuevamente.
-                        </div>
-                    `);
-                    }
-                });
+    // Ejecutar ambas peticiones en paralelo
+    Promise.all([
+        $.ajax({
+            url: urlMaterias,
+            method: 'GET',
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                'Accept': 'application/json'
             }
+        }),
+        $.ajax({
+            url: urlDocentes,
+            method: 'GET',
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                'Accept': 'application/json'
+            }
+        })
+    ])
+    .then(([materias, docentesFiltrados]) => {
+        console.log('Materias recibidas:', materias);
+        console.log('Docentes filtrados por carrera:', docentesFiltrados);
+
+        let html = '';
+
+        if (materias.length === 0) {
+            html = `
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i> 
+                    No hay materias para esta carrera y período seleccionados
+                </div>`;
+        } else {
+            const carreraSeleccionada = $('#carrera option:selected').text().trim();
+            const periodoSeleccionado = $('#numero_periodo option:selected').text().trim();
+
+            html += `
+                <div class="alert alert-success mb-3">
+                    <i class="fas fa-check-circle"></i> 
+                    Se encontraron ${materias.length} materias para ${carreraSeleccionada} - ${periodoSeleccionado}
+                </div>`;
+
+            materias.forEach((materia) => {
+                html += `
+                <div class="materia-item">
+                    <div class="row align-items-center">
+                        <div class="col-md-1 text-center">
+                            <input type="checkbox" name="materias[]" value="${materia.id_materia}" 
+                                   class="materia-checkbox" style="width: 20px; height: 20px;">
+                        </div>
+                        <div class="col-md-5">
+                            <strong>${materia.nombre}</strong><br>
+                            <small class="text-muted">Clave: ${materia.clave || 'N/A'}</small><br>
+                            <small class="text-info">Créditos: ${materia.creditos || 'N/A'} | Horas: ${materia.horas || 'N/A'}</small>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="small mb-1">Docente <span class="text-muted">(seleccione si asignará esta materia)</span></label>
+                            <select name="docentes[${materia.id_materia}]" class="form-control form-control-sm docente-select">
+                                <option value="">-- Seleccione un docente --</option>`;
+
+                // ✅ Usamos docentesFiltrados (solo de la carrera)
+                if (Array.isArray(docentesFiltrados) && docentesFiltrados.length > 0) {
+                    docentesFiltrados.forEach(docente => {
+                        html += `<option value="${docente.id_docente}">${docente.nombre_completo}</option>`;
+                    });
+                } else {
+                    html += `<option disabled>Sin docentes disponibles</option>`;
+                }
+
+                html += `
+                            </select>
+                        </div>
+                    </div>
+                </div>`;
+            });
+        }
+
+        $('#materias-container').html(html);
+    })
+    .catch((error) => {
+        console.error('Error al cargar materias o docentes:', error);
+        $('#materias-container').html(`
+            <div class="alert alert-danger">
+                <i class="fas fa-times-circle"></i> 
+                Error al cargar los datos. Por favor, intente nuevamente.
+            </div>
+        `);
+    });
+}
 
             // Seleccionar/Deseleccionar todas en modal masivo
             $('#selectAll').click(function() {

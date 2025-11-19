@@ -61,6 +61,7 @@ class Grupo extends Model
             'id_periodo_escolar' // Local key on historial table
         );
     }
+ 
 
     /**
      * Scope para grupos por carrera
@@ -144,7 +145,14 @@ class Grupo extends Model
     return $this->belongsTo(NumeroPeriodo::class, 'id_numero_periodo');
 }
 
-public function periodoEscolar()
+// Relación con PeriodoEscolar
+    public function periodoEscolar()
+    {
+        return $this->belongsTo(PeriodoEscolar::class, 'periodo');
+    }
+
+    // Alias para usar en el controlador (opcional pero recomendado)
+    public function periodo()
 {
     return $this->belongsTo(PeriodoEscolar::class, 'periodo', 'id_periodo_escolar');
 }

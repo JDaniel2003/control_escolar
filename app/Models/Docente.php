@@ -43,5 +43,17 @@ class Docente extends Model
     }
     return $this->usuario?->username ?? 'Docente sin nombre';
 }
+
+public function carreras()
+{
+    return $this->belongsToMany(
+        \App\Models\Carrera::class,
+        'administracion_carreras',
+        'id_usuario',
+        'id_carrera',
+        'id_usuario',
+        'id_carrera'
+    );
+}
     
 }
