@@ -234,6 +234,25 @@
                                                         <small class="text-danger">{{ $message }}</small>
                                                     @enderror
                                                 </div>
+                                                <div class="col-md-3 mb-2">
+                                                    <label
+                                                        class="form-label-custom small mb-1">Título/Abreviatura</label>
+                                                    <select name="datos_docentes[id_abreviatura]"
+                                                        class="form-control form-control-sm">
+                                                        <option value="">-- Sin título --</option>
+                                                        @foreach ($abreviaturas as $abreviatura)
+                                                            <option value="{{ $abreviatura->id_abreviatura }}"
+                                                                {{ old('datos_docentes.id_abreviatura') == $abreviatura->id_abreviatura ? 'selected' : '' }}>
+                                                                {{ $abreviatura->abreviatura }} -
+                                                                {{ $abreviatura->nombre }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                    <small class="text-muted">Ej: Dr., Mtro., Ing.</small>
+                                                    @error('datos_docentes.id_abreviatura')
+                                                        <small class="text-danger">{{ $message }}</small>
+                                                    @enderror
+                                                </div>
                                                 <div class="col-md-4 mb-2">
                                                     <label class="form-label-custom small mb-1">N° Seguridad
                                                         Social</label>
@@ -268,15 +287,6 @@
                                                         value="{{ old('datos_docentes.telefono') }}"
                                                         placeholder="10 dígitos" required>
                                                     @error('datos_docentes.telefono')
-                                                        <small class="text-danger">{{ $message }}</small>
-                                                    @enderror
-                                                </div>
-                                                <div class="col-md-3 mb-2">
-                                                    <label class="form-label-custom small mb-1">Datos Adicionales
-                                                        (JSON)</label>
-                                                    <textarea name="datos_docentes[datos]" class="form-control form-control-sm" rows="1"
-                                                        placeholder='{"titulo": "..."}'>{{ old('datos_docentes.datos') }}</textarea>
-                                                    @error('datos_docentes.datos')
                                                         <small class="text-danger">{{ $message }}</small>
                                                     @enderror
                                                 </div>
@@ -469,6 +479,56 @@
                                             </div>
                                         </div>
                                     </div>
+                                </div>
+                                <hr>
+
+                                <h6 class="text-primary mb-2">
+                                    <i class="fas fa-user-plus"></i> Crear Usuario para el Docente (Opcional)
+                                </h6>
+
+                                <div class="row">
+                                    <div class="col-md-4 mb-2">
+                                        <label class="form-label-custom small mb-1">Nombre de Usuario</label>
+                                        <input type="text" name="usuario[username]"
+                                            class="form-control form-control-sm"
+                                            value="{{ old('usuario.username') }}" placeholder="Ej: jlopez123">
+                                        @error('usuario.username')
+                                            <small class="text-danger">{{ $message }}</small>
+                                        @enderror
+                                    </div>
+
+                                    <div class="col-md-4 mb-2">
+                                        <label class="form-label-custom small mb-1">Contraseña</label>
+                                        <input type="password" name="usuario[password]"
+                                            class="form-control form-control-sm" placeholder="Contraseña">
+                                        @error('usuario.password')
+                                            <small class="text-danger">{{ $message }}</small>
+                                        @enderror
+                                    </div>
+
+                                    <div class="col-md-4 mb-2">
+                                        <label class="form-label-custom small mb-1">Confirmar Contraseña</label>
+                                        <input type="password" name="usuario[password_confirmation]"
+                                            class="form-control form-control-sm" placeholder="Confirmar contraseña">
+                                    </div>
+                                </div>
+
+
+                                <div class="col-md-4 mb-2">
+                                    <label class="form-label-custom small mb-1">Rol del Usuario</label>
+                                    <select name="usuario[id_rol]" class="form-control form-control-sm">
+                                        <option value="">-- Selecciona un rol --</option>
+                                        @foreach ($roles as $rol)
+                                            <option value="{{ $rol->id_rol }}"
+                                                {{ old('usuario.id_rol', 3) == $rol->id_rol ? 'selected' : '' }}>
+                                                {{ $rol->nombre }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <small class="text-muted">Por defecto: Docente</small>
+                                    @error('usuario.id_rol')
+                                        <small class="text-danger">{{ $message }}</small>
+                                    @enderror
                                 </div>
                             </div>
 

@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('nombre', 100)->nullable();
             $table->string('apellido_paterno', 50)->nullable();
             $table->string('apellido_materno', 50)->nullable();
+            $table->integer('id_abreviatura')->nullable()->index('fk_docente_abreviatura');
             $table->integer('edad')->nullable();
             $table->integer('id_genero')->nullable()->index('id_genero');
             $table->date('fecha_nacimiento')->nullable();

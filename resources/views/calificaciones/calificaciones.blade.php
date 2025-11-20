@@ -175,16 +175,19 @@
                                             </thead>
                                             <tbody>
                                                 @forelse ($calificaciones as $calificacion)
-                                                    @php
-                                                        $calif = $calificacion->calificacion;
-                                                        if ($calif >= 8) {
-                                                            $clase = 'calificacion-alta';
-                                                        } elseif ($calif >= 6) {
-                                                            $clase = 'calificacion-media';
-                                                        } else {
-                                                            $clase = 'calificacion-baja';
-                                                        }
-                                                    @endphp
+                                                   @php
+    // Si existe calificación especial, usar esa
+    $calif = $calificacion->calificacion_especial ?? $calificacion->calificacion;
+
+    if ($calif >= 8) {
+        $clase = 'calificacion-alta';
+    } elseif ($calif >= 7) {
+        $clase = 'calificacion-media';
+    } else {
+        $clase = 'calificacion-baja';
+    }
+@endphp
+
                                                     <tr class="text-center">
                                                         <td>
                                                             {{ optional($calificacion->alumno->datosPersonales)->nombres ?? 'N/A' }}
@@ -200,7 +203,8 @@
                                                         <td class="{{ $clase }}">
                                                             {{ number_format($calificacion->calificacion_especial, 1) }}
                                                         </td>
-                                                        <td>{{ $calificacion->fecha_registro ? \Carbon\Carbon::parse($calificacion->fecha_registro)->format('d/m/Y') : 'N/A' }}
+                                                        <td>{{ $calificacion->fecha }}</td>
+
                                                         </td>
                                                         <td>
                                                             @if ($calif >= 6)
@@ -384,98 +388,6 @@
             </div>
         </div>
     </div>
-
-    <style>
-        .modal-fullscreen {
-            max-width: 100%;
-            margin: 0;
-        }
-
-        .modal-fullscreen .modal-content {
-            height: 100vh;
-            border: 0;
-            border-radius: 0;
-        }
-
-        #tablaCalificaciones {
-            font-size: 0.85rem;
-        }
-
-        #tablaCalificaciones th {
-            white-space: nowrap;
-            padding: 0.5rem;
-            text-align: center;
-            vertical-align: middle;
-        }
-
-        #tablaCalificaciones td {
-            padding: 0.25rem;
-            vertical-align: middle;
-        }
-
-        .alumno-cell {
-            position: sticky;
-            left: 0;
-            background: white;
-            z-index: 10;
-            font-weight: 500;
-        }
-
-        .matricula-cell {
-            position: sticky;
-            left: 50px;
-            background: white;
-            z-index: 10;
-        }
-
-        .nombre-cell {
-            position: sticky;
-            left: 170px;
-            background: white;
-            z-index: 10;
-        }
-
-        .calificacion-input-matriz {
-            width: 70px;
-            text-align: center;
-            font-weight: bold;
-            padding: 0.25rem;
-            border: 1px solid #dee2e6;
-        }
-
-        .calificacion-input-matriz:focus {
-            background-color: #fff3cd;
-            border-color: #28a745;
-        }
-
-        .calificacion-input-matriz.is-invalid {
-            border-color: #dc3545;
-            background-color: #f8d7da;
-        }
-
-        .calificacion-input-matriz[readonly] {
-            background-color: #e9ecef;
-            cursor: not-allowed;
-        }
-
-        .unidad-header {
-            background-color: #17a2b8 !important;
-            color: white !important;
-            font-weight: bold;
-        }
-
-        .evaluacion-header {
-            background-color: #6c757d !important;
-            color: white !important;
-            font-size: 0.75rem;
-        }
-
-        tr:hover .alumno-cell,
-        tr:hover .matricula-cell,
-        tr:hover .nombre-cell {
-            background-color: #f8f9fa;
-        }
-    </style>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const periodoSelect = document.getElementById('periodoCalificar');
@@ -658,160 +570,167 @@
                     ${alumno.nombre}
                 </td>`;
 
+                    // Verificar si reprobó algún Extraordinario
+                    let reproboExtraordinario = false;
+                    Object.values(alumno.calificaciones).forEach(calif => {
+                        if (calif.tipo_evaluacion === 'Extraordinario' && 
+                            calif.calificacion !== null && 
+                            calif.calificacion < 6) {
+                            reproboExtraordinario = true;
+                        }
+                    });
+
                     // Renderizar unidades
                     datosMatriz.unidades.forEach(unidad => {
                         const key = `${alumno.id_alumno}_${unidad.id_unidad}`;
                         const calificacionData = alumno.calificaciones[key];
+                        const tieneCalifEspecial = alumno.calificacion_especial !== null && alumno.calificacion_especial !== undefined;
 
                         if (!calificacionData) {
-                            html += `<td class="text-center p-2">-</td>`;
+                            // Si tiene calificación especial o reprobó extraordinario, mostrar "Bloqueado"
+                            html += (tieneCalifEspecial || reproboExtraordinario)
+                                ? `<td class="text-center p-2 text-muted">🔒 Bloqueado</td>`
+                                : `<td class="text-center p-2">-</td>`;
                             return;
                         }
 
                         const calificacion = calificacionData.calificacion;
                         const yaCapturado = calificacion !== null;
                         const esAprobatoria = calificacion >= 6;
-                        const puedeCapturar = calificacionData.puede_capturar;
+                        const puedeCapturar = calificacionData.puede_capturar && !tieneCalifEspecial && !reproboExtraordinario;
                         const siguienteEval = calificacionData.siguiente_evaluacion;
 
                         if (yaCapturado) {
                             const tipoEvaluacion = calificacionData.tipo_evaluacion || 'Ordinario';
-                            const nombreEvaluacion = calificacionData.nombre_evaluacion ||
-                                'Evaluación';
+                            const nombreEvaluacion = calificacionData.nombre_evaluacion || 'Evaluación';
                             const historialCompleto = calificacionData.historial_completo || [];
-                            const tipoKey = tipoEvaluacion.toLowerCase().replace('ó', 'o').replace(
-                                'ú', 'u');
-                            const tipoEval = tiposEvaluacion[tipoKey] || tiposEvaluacion[
-                                'ordinario'];
-
+                            const tipoKey = tipoEvaluacion.toLowerCase().replace('ó', 'o').replace('ú', 'u');
+                            const tipoEval = tiposEvaluacion[tipoKey] || tiposEvaluacion['ordinario'];
+                            
                             let tooltipHistorial = '';
                             if (historialCompleto.length > 1) {
-                                tooltipHistorial = 'Historial:\n' +
-                                    historialCompleto.map((h, i) =>
-                                        `${i + 1}. ${h.tipo}: ${h.calificacion}`).join('\n');
+                                tooltipHistorial = 'Historial:\n' + 
+                                    historialCompleto.map((h, i) => `${i + 1}. ${h.tipo}: ${h.calificacion}`).join('\n');
                             }
-
+                            
+                            // Si puede capturar y hay siguiente evaluación (y no está bloqueado)
                             if (puedeCapturar && siguienteEval) {
-                                const siguienteTipoKey = siguienteEval.tipo.toLowerCase().replace(
-                                    'ó', 'o').replace('ú', 'u');
-                                const siguienteTipoInfo = tiposEvaluacion[siguienteTipoKey] ||
-                                    tiposEvaluacion['ordinario'];
-
+                                const siguienteTipoKey = siguienteEval.tipo.toLowerCase().replace('ó', 'o').replace('ú', 'u');
+                                const siguienteTipoInfo = tiposEvaluacion[siguienteTipoKey] || tiposEvaluacion['ordinario'];
+                                
                                 html += `
-                        <td class="text-center p-2" style="vertical-align: middle;">
-                            <div class="d-flex flex-column align-items-center">
-                                <span class="badge mb-2" 
-                                      style="font-size: 0.9rem; padding: 0.4rem; background: ${esAprobatoria ? '#28a745' : '#dc3545'}; cursor: help;"
-                                      ${tooltipHistorial ? `title="${tooltipHistorial.replace(/"/g, '&quot;')}"` : ''}>
-                                    Actual: ${calificacion} ${tipoEval.icon}
-                                </span>
-                                ${historialCompleto.length > 1 ? `
-                                    <small class="text-muted mb-2" style="font-size: 0.7rem;">
-                                        📋 ${historialCompleto.length} evaluaciones
-                                    </small>
-                                    ` : ''}
-                                <hr style="width: 100%; margin: 0.5rem 0; border-top: 1px dashed #ddd;">
-                                <input type="number" 
-                                       class="form-control calificacion-input-matriz text-center mt-2" 
-                                       data-alumno="${alumno.id_alumno}"
-                                       data-unidad="${unidad.id_unidad}"
-                                       data-evaluacion="${siguienteEval.id_evaluacion}"
-                                       data-tipoeval="${siguienteTipoKey}"
-                                       min="0" 
-                                       max="10" 
-                                       step="0.1"
-                                       placeholder="Nueva calif."
-                                       style="width: 100px; margin: 0 auto;">
-                                <small class="text-muted mt-1" style="color: ${siguienteTipoInfo.color};">
-                                    ${siguienteTipoInfo.icon} ${siguienteEval.tipo}
-                                </small>
-                            </div>
-                        </td>`;
+                                <td class="text-center p-2" style="vertical-align: middle;">
+                                    <div class="d-flex flex-column align-items-center">
+                                        <span class="badge mb-2" 
+                                              style="font-size: 0.9rem; padding: 0.4rem; background: ${esAprobatoria ? '#28a745' : '#dc3545'}; cursor: help;"
+                                              ${tooltipHistorial ? `title="${tooltipHistorial.replace(/"/g, '&quot;')}"` : ''}>
+                                            Actual: ${calificacion} ${tipoEval.icon}
+                                        </span>
+                                        ${historialCompleto.length > 1 ? `
+                                        <small class="text-muted mb-2" style="font-size: 0.7rem;">
+                                            📋 ${historialCompleto.length} evaluaciones
+                                        </small>
+                                        ` : ''}
+                                        <hr style="width: 100%; margin: 0.5rem 0; border-top: 1px dashed #ddd;">
+                                        <input type="number" 
+                                               class="form-control calificacion-input-matriz text-center mt-2" 
+                                               data-alumno="${alumno.id_alumno}"
+                                               data-unidad="${unidad.id_unidad}"
+                                               data-evaluacion="${siguienteEval.id_evaluacion}"
+                                               data-tipoeval="${siguienteTipoKey}"
+                                               min="0" 
+                                               max="10" 
+                                               step="0.1"
+                                               placeholder="Nueva calif."
+                                               style="width: 100px; margin: 0 auto;">
+                                        <small class="text-muted mt-1" style="color: ${siguienteTipoInfo.color};">
+                                            ${siguienteTipoInfo.icon} ${siguienteEval.tipo}
+                                        </small>
+                                    </div>
+                                </td>`;
                             } else {
                                 html += `
-                        <td class="text-center p-2" style="vertical-align: middle;">
-                            <div class="d-flex flex-column align-items-center">
-                                <span class="badge mb-1" 
-                                      style="font-size: 1.1rem; padding: 0.5rem; background: ${esAprobatoria ? '#28a745' : '#dc3545'}; cursor: help;"
-                                      ${tooltipHistorial ? `title="${tooltipHistorial.replace(/"/g, '&quot;')}"` : ''}>
-                                    ${calificacion}
-                                </span>
-                                <small style="color: ${tipoEval.color};">
-                                    ${tipoEval.icon} ${tipoEval.label}
-                                </small>
-                                ${historialCompleto.length > 1 ? `
-                                    <small class="text-muted mt-1" style="font-size: 0.7rem;">
-                                        📋 ${historialCompleto.length} evaluaciones
-                                    </small>
-                                    ` : ''}
-                                ${esAprobatoria ? `
-                                    <small class="text-success mt-1" style="font-size: 0.8rem;">
-                                        ✅ Aprobado
-                                    </small>
-                                    ` : `
-                                    <small class="text-muted mt-1" style="font-size: 0.8rem;">
-                                        Sin Oportunidades
-                                    </small>
-                                    `}
-                            </div>
-                        </td>`;
+                                <td class="text-center p-2" style="vertical-align: middle;">
+                                    <div class="d-flex flex-column align-items-center">
+                                        <span class="badge mb-1" 
+                                              style="font-size: 1.1rem; padding: 0.5rem; background: ${esAprobatoria ? '#28a745' : '#dc3545'}; cursor: help;"
+                                              ${tooltipHistorial ? `title="${tooltipHistorial.replace(/"/g, '&quot;')}"` : ''}>
+                                            ${calificacion}
+                                        </span>
+                                        <small style="color: ${tipoEval.color};">
+                                            ${tipoEval.icon} ${tipoEval.label}
+                                        </small>
+                                        ${historialCompleto.length > 1 ? `
+                                        <small class="text-muted mt-1" style="font-size: 0.7rem;">
+                                            📋 ${historialCompleto.length} evaluaciones
+                                        </small>
+                                        ` : ''}
+                                        ${esAprobatoria ? `
+                                        <small class="text-success mt-1" style="font-size: 0.8rem;">
+                                            ✅ Aprobado
+                                        </small>
+                                        ` : (tipoEvaluacion === 'Extraordinario' ? `
+                                        <small class="text-danger mt-1" style="font-size: 0.8rem;">
+                                            ❌ Reprobado
+                                        </small>
+                                        ` : `
+                                        <small class="text-muted mt-1" style="font-size: 0.8rem;">
+                                            Sin Oportunidades
+                                        </small>
+                                        `)}
+                                    </div>
+                                </td>`;
                             }
                         } else {
+                            // Sin calificación aún
                             if (puedeCapturar && siguienteEval) {
-                                const tipoKey = siguienteEval.tipo.toLowerCase().replace('ó', 'o')
-                                    .replace('ú', 'u');
-                                const tipoInfo = tiposEvaluacion[tipoKey] || tiposEvaluacion[
-                                    'ordinario'];
-
+                                const tipoKey = siguienteEval.tipo.toLowerCase().replace('ó', 'o').replace('ú', 'u');
+                                const tipoInfo = tiposEvaluacion[tipoKey] || tiposEvaluacion['ordinario'];
+                                
                                 html += `
-                        <td class="text-center p-2" style="vertical-align: middle;">
-                            <input type="number" 
-                                   class="form-control calificacion-input-matriz text-center" 
-                                   data-alumno="${alumno.id_alumno}"
-                                   data-unidad="${unidad.id_unidad}"
-                                   data-evaluacion="${siguienteEval.id_evaluacion}"
-                                   data-tipoeval="${tipoKey}"
-                                   min="0" 
-                                   max="10" 
-                                   step="0.1"
-                                   placeholder="0.0"
-                                   style="width: 100px; margin: 0 auto;">
-                            <small class="text-muted mt-1" style="color: ${tipoInfo.color};">
-                                ${tipoInfo.icon} ${siguienteEval.tipo}
-                            </small>
-                        </td>`;
+                                <td class="text-center p-2" style="vertical-align: middle;">
+                                    <input type="number" 
+                                           class="form-control calificacion-input-matriz text-center" 
+                                           data-alumno="${alumno.id_alumno}"
+                                           data-unidad="${unidad.id_unidad}"
+                                           data-evaluacion="${siguienteEval.id_evaluacion}"
+                                           data-tipoeval="${tipoKey}"
+                                           min="0" 
+                                           max="10" 
+                                           step="0.1"
+                                           placeholder="0.0"
+                                           style="width: 100px; margin: 0 auto;">
+                                    <small class="text-muted mt-1" style="color: ${tipoInfo.color};">
+                                        ${tipoInfo.icon} ${siguienteEval.tipo}
+                                    </small>
+                                </td>`;
                             } else {
-                                html += `<td class="text-center p-2 text-muted">Completado</td>`;
+                                html += `<td class="text-center p-2 text-muted">${(tieneCalifEspecial || reproboExtraordinario) ? '🔒 Bloqueado' : 'Completado'}</td>`;
                             }
                         }
                     });
 
-                    // Columna de Promedio General (ocultar si ya tiene calificación especial)
-                    const tieneCalifEspecial = alumno.calificacion_especial !== null && alumno
-                        .calificacion_especial !== undefined;
+                    // Columna de Promedio General
+                    const tieneCalifEspecial = alumno.calificacion_especial !== null && alumno.calificacion_especial !== undefined;
                     if (tieneCalifEspecial) {
-                        html +=
-                            `<td class="text-center p-2 bg-light text-muted" style="font-size: 0.8rem;">-</td>`;
+                        html += `<td class="text-center p-2 bg-light text-muted" style="font-size: 0.8rem;">-</td>`;
                     } else {
                         const promedioGeneral = alumno.promedio_general;
-                        if (promedioGeneral !== null && promedioGeneral !== undefined && !isNaN(
-                                promedioGeneral)) {
+                        if (promedioGeneral !== null && promedioGeneral !== undefined && !isNaN(promedioGeneral)) {
                             const esAprobado = promedioGeneral >= 6;
                             html += `
-                    <td class="text-center p-2 bg-light" style="vertical-align: middle;">
-                        <span class="badge" style="font-size: 1.2rem; padding: 0.6rem; background: ${esAprobado ? '#17a2b8' : '#6c757d'};">
-                            ${promedioGeneral}
-                        </span>
-                        <small class="d-block mt-1 text-muted" style="font-size: 0.7rem;">
-                            Promedio ${esAprobado ? '✅' : '⚠️'}
-                        </small>
-                    </td>`;
+                            <td class="text-center p-2 bg-light" style="vertical-align: middle;">
+                                <span class="badge" style="font-size: 1.2rem; padding: 0.6rem; background: ${esAprobado ? '#17a2b8' : '#6c757d'};">
+                                    ${promedioGeneral}
+                                </span>
+                                <small class="d-block mt-1 text-muted" style="font-size: 0.7rem;">
+                                    Promedio ${esAprobado ? '✅' : '⚠️'}
+                                </small>
+                            </td>`;
                         } else {
-                            html +=
-                                `<td class="text-center p-2 bg-light text-muted" style="font-size: 0.8rem;">Pendiente</td>`;
+                            html += `<td class="text-center p-2 bg-light text-muted" style="font-size: 0.8rem;">Pendiente</td>`;
                         }
                     }
-
 
                     // Columna Extraordinario Especial
                     const tipoEvalEspecial = tiposEvaluacion['extraordinario_especial'] || {
@@ -823,28 +742,55 @@
                     if (tieneCalifEspecial) {
                         const esAprob = alumno.calificacion_especial >= 6;
                         html += `
-                <td class="text-center p-2" style="vertical-align: middle; background: #fff3cd; border-left: 3px solid #6f42c1;">
-                    <div class="d-flex flex-column align-items-center">
-                        <span class="badge mb-1" style="font-size: 1.2rem; padding: 0.6rem; background: ${esAprob ? '#28a745' : '#dc3545'};">
-                            ${alumno.calificacion_especial}
-                        </span>
-                        <small style="color: ${tipoEvalEspecial.color}; font-weight: bold;">
-                            ${tipoEvalEspecial.icon} ${tipoEvalEspecial.label}
-                        </small>
-                        ${esAprob ? `
-                            <small class="text-success mt-1">
-                                <i class="fas fa-check-circle"></i> Aprobado
-                            </small>` : `
-                            <small class="text-danger mt-1">
-                                <i class="fas fa-times-circle"></i> Reprobado
-                            </small>`}
-                        <small class="text-muted mt-1" style="font-size: 0.7rem;">
-                            📚 Calificación general de la materia
-                        </small>
-                    </div>
-                </td>`;
+                        <td class="text-center p-2" style="vertical-align: middle; background: #fff3cd; border-left: 3px solid #6f42c1;">
+                            <div class="d-flex flex-column align-items-center">
+                                <span class="badge mb-1" style="font-size: 1.2rem; padding: 0.6rem; background: ${esAprob ? '#28a745' : '#dc3545'};">
+                                    ${alumno.calificacion_especial}
+                                </span>
+                                <small style="color: ${tipoEvalEspecial.color}; font-weight: bold;">
+                                    ${tipoEvalEspecial.icon} ${tipoEvalEspecial.label}
+                                </small>
+                                ${esAprob ? `
+                                    <small class="text-success mt-1">
+                                        <i class="fas fa-check-circle"></i> Aprobado
+                                    </small>` : `
+                                    <small class="text-danger mt-1">
+                                        <i class="fas fa-times-circle"></i> Reprobado
+                                    </small>`}
+                                <small class="text-muted mt-1" style="font-size: 0.7rem;">
+                                    📚 Calificación general de la materia
+                                </small>
+                            </div>
+                        </td>`;
+                    } else if (reproboExtraordinario) {
+                        // Si reprobó extraordinario, HABILITAR Extraordinario Especial
+                        if (alumno.evaluacion_especial) {
+                            const evalEspecial = alumno.evaluacion_especial;
+                            html += `
+                            <td class="text-center p-2" style="vertical-align: middle; background: #fff3cd; border-left: 3px solid #dc3545;">
+                                <div class="d-flex flex-column align-items-center mb-2">
+                                    <span class="badge badge-danger mb-2" style="font-size: 0.85rem;">
+                                        ⚠️ Reprobó Extraordinario
+                                    </span>
+                                </div>
+                                <input type="number" 
+                                       class="form-control calificacion-input-especial text-center" 
+                                       data-alumno="${alumno.id_alumno}"
+                                       data-evaluacion="${evalEspecial.id_evaluacion}"
+                                       min="0" max="10" step="0.1" placeholder="Calif."
+                                       style="width: 90px; margin: 0 auto; border: 3px solid #dc3545; font-weight: bold;">
+                                <small class="d-block mt-2" style="color: #6f42c1; font-weight: bold; font-size: 0.75rem;">
+                                    🎓 ${evalEspecial.nombre}
+                                </small>
+                                <small class="d-block text-danger mt-1" style="font-size: 0.65rem; font-weight: bold;">
+                                    📚 Última oportunidad - Examen completo
+                                </small>
+                            </td>`;
+                        } else {
+                            html += `<td class="text-center p-2 bg-light text-muted">-</td>`;
+                        }
                     } else {
-                        // Verificar si hay al menos una unidad reprobada en "Extraordinario"
+                        // Verificar si hay al menos una unidad reprobada en "Extraordinario" (pero no todas)
                         let hayExtraordinarioReprobado = false;
                         datosMatriz.unidades.forEach(unidad => {
                             const key = `${alumno.id_alumno}_${unidad.id_unidad}`;
@@ -857,23 +803,24 @@
                             }
                         });
 
-                        if (hayExtraordinarioReprobado && alumno.evaluacion_especial) {
+                        // Solo permitir captura si tiene evaluación especial y NO ha reprobado todos los extraordinarios
+                        if (hayExtraordinarioReprobado && alumno.evaluacion_especial && !reproboExtraordinario) {
                             const evalEspecial = alumno.evaluacion_especial;
                             html += `
-                    <td class="text-center p-2" style="vertical-align: middle; background: #fff3cd; border-left: 3px solid #dc3545;">
-                        <input type="number" 
-                               class="form-control calificacion-input-especial text-center" 
-                               data-alumno="${alumno.id_alumno}"
-                               data-evaluacion="${evalEspecial.id_evaluacion}"
-                               min="0" max="10" step="0.1" placeholder="Calif."
-                               style="width: 90px; margin: 0 auto; border: 3px solid #dc3545; font-weight: bold;">
-                        <small class="d-block mt-2" style="color: #6f42c1; font-weight: bold; font-size: 0.75rem;">
-                            🎓 ${evalEspecial.nombre}
-                        </small>
-                        <small class="d-block text-danger mt-1" style="font-size: 0.65rem; font-weight: bold;">
-                            📚 Examen de toda la materia
-                        </small>
-                    </td>`;
+                            <td class="text-center p-2" style="vertical-align: middle; background: #fff3cd; border-left: 3px solid #dc3545;">
+                                <input type="number" 
+                                       class="form-control calificacion-input-especial text-center" 
+                                       data-alumno="${alumno.id_alumno}"
+                                       data-evaluacion="${evalEspecial.id_evaluacion}"
+                                       min="0" max="10" step="0.1" placeholder="Calif."
+                                       style="width: 90px; margin: 0 auto; border: 3px solid #dc3545; font-weight: bold;">
+                                <small class="d-block mt-2" style="color: #6f42c1; font-weight: bold; font-size: 0.75rem;">
+                                    🎓 ${evalEspecial.nombre}
+                                </small>
+                                <small class="d-block text-danger mt-1" style="font-size: 0.65rem; font-weight: bold;">
+                                    📚 Examen de toda la materia
+                                </small>
+                            </td>`;
                         } else {
                             html += `<td class="text-center p-2 bg-light text-muted">-</td>`;
                         }
@@ -962,8 +909,7 @@
                 let hayCalificacionesValidas = false;
 
                 inputsUnidades.forEach(input => {
-                    if (input.value && !input.classList.contains('is-invalid') && input.dataset
-                        .evaluacion) {
+                    if (input.value && !input.classList.contains('is-invalid') && input.dataset.evaluacion) {
                         hayCalificacionesValidas = true;
                     }
                 });
@@ -980,11 +926,10 @@
             // Limpiar calificaciones
             btnLimpiar?.addEventListener('click', function() {
                 if (confirm('¿Estás seguro de limpiar todas las calificaciones no guardadas?')) {
-                    document.querySelectorAll('.calificacion-input-matriz, .calificacion-input-especial')
-                        .forEach(input => {
-                            input.value = '';
-                            input.classList.remove('is-invalid');
-                        });
+                    document.querySelectorAll('.calificacion-input-matriz, .calificacion-input-especial').forEach(input => {
+                        input.value = '';
+                        input.classList.remove('is-invalid');
+                    });
                     validarGuardar();
                 }
             });

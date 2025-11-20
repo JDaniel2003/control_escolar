@@ -5948,6 +5948,15 @@ a.close.disabled {
     max-width: 1140px;
   }
 }
+.modal-fullscreen {
+            max-width: 90%;
+            margin: 0;
+        }
+        .modal-fullscreen .modal-content {
+            height: 100vh;
+            border: 0;
+            border-radius: 0;
+        }
 
 .tooltip {
   position: absolute;

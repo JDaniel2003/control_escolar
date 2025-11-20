@@ -22,20 +22,16 @@ class UserController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'username' => 'required|unique:users,username',
-            'email' => 'required|email|unique:users,email',
+            'username' => 'required|unique:usuarios,username',
             'password' => 'required|min:8|confirmed',
-            'id_rol' => 'required|exists:rols,id_rol',
-            'activo' => 'required|boolean'
+            'id_rol' => 'required|exists:roles,id_rol'
         ]);
 
         try {
             Usuario::create([
                 'username' => $request->username,
-                'email' => $request->email,
                 'password' => Hash::make($request->password),
-                'id_rol' => $request->id_rol,
-                'activo' => $request->activo
+                'id_rol' => $request->id_rol
             ]);
 
             return redirect()->route('usuarios.index')->with('success', 'Usuario creado exitosamente');

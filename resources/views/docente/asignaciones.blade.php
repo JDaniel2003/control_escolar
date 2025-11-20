@@ -8,152 +8,196 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Mis Asignaciones - Calificaciones</title>
 
-    <!-- Custom fonts -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"
-        type="text/css">
-    <link
-        href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
-        rel="stylesheet">
-
-    <!-- Bootstrap 4 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <style>
-        .unidad-header {
-            min-width: 200px;
-        }
-
-        .alumno-cell,
-        .matricula-cell,
-        .nombre-cell {
-            position: sticky;
-            z-index: 10;
-            background: white;
-        }
-
-        .alumno-cell {
-            left: 0;
-            min-width: 50px;
-        }
-
-        .matricula-cell {
-            left: 50px;
-            min-width: 120px;
-        }
-
-        .nombre-cell {
-            left: 170px;
-            min-width: 250px;
-        }
-
-        .is-invalid {
-            border-color: #dc3545 !important;
-        }
-    </style>
+    <!-- Custom fonts for this template-->
+    <link href="{{ asset('libs/fontawesome/css/all.min.css') }}" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+    <link rel="icon" type="image/png" href="{{ asset('libs/sbadmin/img/up_logo.png') }}">
+    <!-- Custom styles for this template-->
+    <link href="{{ asset('libs/sbadmin/css/sb-admin-2.min.css') }}" rel="stylesheet">
 </head>
 
-<body class="bg-light">
+<body id="page-top">
+    <!-- Top Header -->
+    <div class="bg-danger text-white1 text-center py-2">
+        <div class="d-flex justify-content-between align-items-center px-4">
 
-    <div class="container-fluid mt-4">
-        <div class="row">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-header bg-primary text-white">
-                        <h4 class="mb-0">
-                            <i class="fas fa-chalkboard-teacher"></i> Mis Asignaciones
-                        </h4>
-                    </div>
-                    <div class="card-body">
-                        @if ($asignaciones->isEmpty())
-                            <div class="alert alert-info text-center">
-                                <i class="fas fa-info-circle fa-2x mb-3"></i>
-                                <h5>No tienes asignaciones registradas</h5>
-                                <p>Comunícate con el coordinador para asignarte materias.</p>
-                            </div>
-                        @else
-                            <div class="table-responsive">
-                                <table class="table table-hover table-striped">
-                                    <thead class="thead-dark">
-                                        <tr>
-                                            <th>Materia</th>
-                                            <th>Grupo</th>
-                                            <th>Período</th>
-                                            <th class="text-center">Acciones</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach ($asignaciones as $asignacion)
-                                            <tr>
-                                                <td><strong>{{ $asignacion['materia'] }}</strong></td>
-                                                <td>{{ $asignacion['grupo'] }}</td>
-                                                <td>{{ $asignacion['periodo'] }}</td>
-                                                <td class="text-center">
-                                                    <button class="btn btn-success btn-sm calificar-btn"
-                                                        data-id-asignacion="{{ $asignacion['id_asignacion'] }}"
-                                                        data-id-grupo="{{ $asignacion['id_grupo'] }}"
-                                                        data-id-periodo="{{ $asignacion['id_periodo'] }}"
-                                                        data-materia="{{ $asignacion['materia'] }}"
-                                                        data-grupo="{{ $asignacion['grupo'] }}">
-                                                        <i class="fas fa-edit"></i> Calificar
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
-                        @endif
-                    </div>
+            <h4 class="mb-0" style="text-align: center;">SISTEMA DE CONTROL ESCOLAR</h4>
+
+        </div>
+    </div>
+
+    <!-- Logout Modal-->
+    <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">¿Listo para salir?</h5>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">Selecciona "Cerrar Sesión" si estás listo para finalizar tu sesión actual.</div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancelar</button>
+                    <a class="btn btn-primary" href="{{ route('login') }}">Cerrar Sesión</a>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dangerb">
+        <div class="d-flex align-items-center">
+            <div style="width: 300px; height: 120px; ">
+                <img src="{{ asset('libs/sbadmin/img/upn.png') }}" alt="Logo"
+                    style="width: 100%; height: 100%; object-fit: cover;">
+            </div>
+        </div>
+
+        <div class="collapse navbar-collapse ml-4">
+            <ul class="navbar-nav" style="padding-left: 20%;">
+                <li class="nav-item">
+                    <a class="nav-link text-white px-3 mr-1" href="{{ route('docente.dashboard') }}">Inicio</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link navbar-active-item px-3 mr-1" href="#">Mis Asignaciones</a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="position-absolute" style="top: 10px; right: 20px; z-index: 1000;">
+            <div class="d-flex align-items-center text-white">
+                <span class="mr-3 small">{{ Auth::user()->rol->nombre }}</span>
+                <a href="#" class="text-white text-decoration-none logout-link" data-toggle="modal" data-target="#logoutModal">
+                    Cerrar Sesión <i class="fas fa-sign-out-alt ml-1"></i>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Wrapper -->
+    <div id="wrapper">
+        <!-- Content Wrapper -->
+        <div id="content-wrapper" class="d-flex flex-column">
+            <!-- Main Content -->
+            <div id="content">
+                <!-- Begin Page Content -->
+                <div class="container-fluid py-4">
+                    
+                    <!-- Page Heading -->
+                    
+                        <h1 class="text-danger text-center mb-5"
+                            style="font-size: 2.5rem; font-family: 'Arial Black', Verdana, sans-serif; font-weight: bold;">
+                            Mis Asignaciones
+                        </h1>
+
+                    <!-- Content Row -->
+                    <div class="row">
+                        <div class="col-10">
+                            <!-- Asignaciones Card -->
+                            
+                               
+                                <div class="card-body1">
+                                    @if ($asignaciones->isEmpty())
+                                        <div class="alert alert-info border-left-info" role="alert">
+                                            <div class="text-center py-3">
+                                                <i class="fas fa-info-circle fa-3x mb-3 text-info"></i>
+                                                <h5 class="font-weight-bold">No tienes asignaciones registradas</h5>
+                                                <p class="mb-0">Comunícate con el coordinador para asignarte materias.</p>
+                                            </div>
+                                        </div>
+                                    @else
+                                        <div class="table-responsive">
+                                            <table class="table table-bordered table-hover" id="dataTable" width="100%" cellspacing="0">
+                                                <thead class="thead-dark text-center">
+                                                    <tr>
+                                                        <th class="text-center"><i class="fas fa-book mr-1"></i>Materia</th>
+                                                        <th class="text-center"><i class="fas fa-users mr-1"></i>Grupo</th>
+                                                        <th class="text-center"><i class="fas fa-calendar-alt mr-1"></i>Período</th>
+                                                        <th class="text-center"><i class="fas fa-cogs mr-1"></i>Acciones</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach ($asignaciones as $asignacion)
+                                                        <tr class="text-center">
+                                                            <td>{{ $asignacion['materia'] }}</td>
+                                                            <td>{{ $asignacion['grupo'] }}</td>
+                                                            <td>{{ $asignacion['periodo'] }}</td>
+                                                            <td>
+                                                                <button class="btn btn-success btn-sm shadow-sm calificar-btn"
+                                                                    data-id-asignacion="{{ $asignacion['id_asignacion'] }}"
+                                                                    data-id-grupo="{{ $asignacion['id_grupo'] }}"
+                                                                    data-id-periodo="{{ $asignacion['id_periodo'] }}"
+                                                                    data-materia="{{ $asignacion['materia'] }}"
+                                                                    data-grupo="{{ $asignacion['grupo'] }}">
+                                                                    <i class="fas fa-edit mr-1"></i>Calificar
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                    @endforeach
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    @endif
+                                </div>
+                        </div>
+                    </div>
+
+                </div>
+                <!-- /.container-fluid -->
+            </div>
+            <!-- End of Main Content -->
+        </div>
+        <!-- End of Content Wrapper -->
+    </div>
+    <!-- End of Page Wrapper -->
+
     <!-- Modal para calificar -->
     <div class="modal fade" id="modalCalificar" tabindex="-1" role="dialog">
-        <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-dialog modal-fullscreen" role="document">
             <div class="modal-content">
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title">
-                        <i class="fas fa-graduation-cap"></i>
+                <div class="modal-header">
+                    <h5 class="mb-0 font-weight-bold">
+                        <i class="fas fa-graduation-cap mr-2"></i>
                         <span id="tituloModal">Calificar Materia</span>
                     </h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body p-3">
                     <form id="formCalificarGrupo" method="POST" action="{{ route('calificaciones.guardar') }}">
                         @csrf
                         <input type="hidden" id="calificacionesJsonInput" name="calificaciones_json">
 
-                        <div class="row mb-3">
+                        <!-- Filtros -->
+                        <div class="row mb-4">
                             <div class="col-md-4">
-                                <label>Período</label>
-                                <select id="periodoCalificar" class="form-control" disabled>
+                                <label class="font-weight-bold text-gray-700 small">Período</label>
+                                <select id="periodoCalificar" class="form-control form-control-sm" disabled>
                                     <option value="">Selecciona período</option>
                                 </select>
                             </div>
                             <div class="col-md-4">
-                                <label>Grupo</label>
-                                <select id="grupoCalificar" class="form-control" disabled>
+                                <label class="font-weight-bold text-gray-700 small">Grupo</label>
+                                <select id="grupoCalificar" class="form-control form-control-sm" disabled>
                                     <option value="">Selecciona grupo</option>
                                 </select>
                             </div>
                             <div class="col-md-4">
-                                <label>Materia</label>
-                                <select id="materiaCalificar" class="form-control" disabled>
+                                <label class="font-weight-bold text-gray-700 small">Materia</label>
+                                <select id="materiaCalificar" class="form-control form-control-sm" disabled>
                                     <option value="">Selecciona materia</option>
                                 </select>
                             </div>
                         </div>
 
+                        <!-- Contenedor de la matriz -->
                         <div id="contenedorMatriz" style="display: none;">
-                            <div class="alert alert-info">
-                                <i class="fas fa-info-circle"></i>
-                                <span id="infoMateria">Cargando materia...</span>
-                                <span class="float-right badge badge-pill badge-secondary" id="totalAlumnos">0
-                                    alumnos</span>
+                            <div class="alert alert-info border-left-info">
+                                <i class="fas fa-info-circle mr-2"></i>
+                                <span id="infoMateria" class="font-weight-bold">Cargando materia...</span>
+                                <span class="float-right badge badge-primary badge-pill" id="totalAlumnos">0 alumnos</span>
                             </div>
 
                             <div class="table-responsive">
@@ -163,9 +207,9 @@
                                     </thead>
                                     <tbody id="bodyMatriz">
                                         <tr>
-                                            <td colspan="100" class="text-center py-4">
-                                                <div class="spinner-border text-primary"></div>
-                                                <br>Cargando alumnos...
+                                            <td colspan="100" class="text-center py-5">
+                                                <div class="spinner-border text-primary" role="status"></div>
+                                                <p class="mt-3 text-gray-600">Cargando alumnos...</p>
                                             </td>
                                         </tr>
                                     </tbody>
@@ -174,30 +218,33 @@
                         </div>
                     </form>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                        <i class="fas fa-times"></i> Cerrar
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary btn-sm shadow-sm" data-dismiss="modal">
+                        <i class="fas fa-times mr-1"></i>Cerrar
                     </button>
-                    <button type="button" class="btn btn-warning" id="btnLimpiarTodo">
-                        <i class="fas fa-broom"></i> Limpiar
+                    <button type="button" class="btn btn-warning btn-sm shadow-sm" id="btnLimpiarTodo">
+                        <i class="fas fa-broom mr-1"></i>Limpiar
                     </button>
-                    <button type="button" class="btn btn-primary" id="btnCargarMatriz">
-                        <i class="fas fa-sync-alt"></i> Cargar Matriz
+                    <button type="button" class="btn btn-primary btn-sm shadow-sm" id="btnCargarMatriz">
+                        <i class="fas fa-sync-alt mr-1"></i>Cargar Matriz
                     </button>
-                    <button type="submit" class="btn btn-success" id="btnGuardarCalificaciones" disabled>
-                        <i class="fas fa-save"></i> Guardar Calificaciones
+                    <button type="submit" class="btn btn-success btn-sm shadow-sm" id="btnGuardarCalificaciones" disabled>
+                        <i class="fas fa-save mr-1"></i>Guardar Calificaciones
                     </button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Bootstrap 4 JS -->
-    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Bootstrap core JavaScript-->
+    <script src="{{ asset('libs/jquery/jquery.min.js') }}"></script>
+    <script src="{{ asset('libs/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+
+    <!-- Custom scripts for all pages-->
+    <script src="{{ asset('libs/sbadmin/js/sb-admin-2.min.js') }}"></script>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        $(document).ready(function() {
             // Variables globales
             let datosMatriz = {
                 alumnos: [],
@@ -206,119 +253,88 @@
 
             // Iconos y colores por tipo de evaluación
             const tiposEvaluacion = {
-                'ordinario': {
-                    icon: '📘',
-                    color: '#007bff',
-                    label: 'Ordinario'
-                },
-                'recuperación': {
-                    icon: '📗',
-                    color: '#28a745',
-                    label: 'Recuperación'
-                },
-                'recuperacion': {
-                    icon: '📗',
-                    color: '#28a745',
-                    label: 'Recuperación'
-                },
-                'extraordinario': {
-                    icon: '📕',
-                    color: '#dc3545',
-                    label: 'Extraordinario'
-                },
-                'extraordinario_especial': {
-                    icon: '🎓',
-                    color: '#6f42c1',
-                    label: 'Extraordinario Especial'
-                },
-                'extraordinario especial': {
-                    icon: '🎓',
-                    color: '#6f42c1',
-                    label: 'Extraordinario Especial'
-                }
+                'ordinario': { icon: '📘', color: '#4e73df', label: 'Ordinario' },
+                'recuperación': { icon: '📗', color: '#1cc88a', label: 'Recuperación' },
+                'recuperacion': { icon: '📗', color: '#1cc88a', label: 'Recuperación' },
+                'extraordinario': { icon: '📕', color: '#e74a3b', label: 'Extraordinario' },
+                'extraordinario_especial': { icon: '🎓', color: '#6f42c1', label: 'Extraordinario Especial' },
+                'extraordinario especial': { icon: '🎓', color: '#6f42c1', label: 'Extraordinario Especial' }
             };
 
             // Evento para botón "Calificar"
-            document.addEventListener('click', function(e) {
-                if (e.target.closest('.calificar-btn')) {
-                    const btn = e.target.closest('.calificar-btn');
-                    const datosModal = {
-                        id_asignacion: btn.dataset.idAsignacion,
-                        id_grupo: btn.dataset.idGrupo,
-                        id_periodo: btn.dataset.idPeriodo,
-                        materia: btn.dataset.materia,
-                        grupo: btn.dataset.grupo
-                    };
+            $(document).on('click', '.calificar-btn', function(e) {
+                e.preventDefault();
+                
+                const datosModal = {
+                    id_asignacion: $(this).data('id-asignacion'),
+                    id_grupo: $(this).data('id-grupo'),
+                    id_periodo: $(this).data('id-periodo'),
+                    materia: $(this).data('materia'),
+                    grupo: $(this).data('grupo')
+                };
 
-                    // Actualizar título
-                    document.getElementById('tituloModal').textContent =
-                        `Calificar: ${datosModal.materia} - ${datosModal.grupo}`;
+                console.log('Datos del modal:', datosModal);
 
-                    // Llenar selects
-                    document.getElementById('periodoCalificar').innerHTML =
-                        `<option value="${datosModal.id_periodo}" selected>${datosModal.id_periodo}</option>`;
-                    document.getElementById('grupoCalificar').innerHTML =
-                        `<option value="${datosModal.id_grupo}" selected>${datosModal.grupo}</option>`;
-                    document.getElementById('materiaCalificar').innerHTML =
-                        `<option value="${datosModal.id_asignacion}" selected>${datosModal.materia}</option>`;
+                // Actualizar título
+                $('#tituloModal').text(`Calificar: ${datosModal.materia} - ${datosModal.grupo}`);
+                
+                // Llenar selects
+                $('#periodoCalificar').html(`<option value="${datosModal.id_periodo}" selected>${datosModal.id_periodo}</option>`);
+                $('#grupoCalificar').html(`<option value="${datosModal.id_grupo}" selected>${datosModal.grupo}</option>`);
+                $('#materiaCalificar').html(`<option value="${datosModal.id_asignacion}" selected>${datosModal.materia}</option>`);
 
-                    // Mostrar modal
-                    $('#modalCalificar').modal('show');
-                }
+                // Mostrar modal
+                $('#modalCalificar').modal('show');
             });
 
             // Cargar matriz
-            document.getElementById('btnCargarMatriz').addEventListener('click', function() {
-                const idGrupo = document.getElementById('grupoCalificar').value;
-                const idPeriodo = document.getElementById('periodoCalificar').value;
-                const idAsignacion = document.getElementById('materiaCalificar').value;
-                const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+            $('#btnCargarMatriz').on('click', function() {
+                const idGrupo = $('#grupoCalificar').val();
+                const idPeriodo = $('#periodoCalificar').val();
+                const idAsignacion = $('#materiaCalificar').val();
+                const csrfToken = $('meta[name="csrf-token"]').attr('content');
 
                 if (!idGrupo || !idPeriodo || !idAsignacion) {
                     alert('Faltan datos para cargar la matriz');
                     return;
                 }
 
-                const tbody = document.getElementById('bodyMatriz');
-                tbody.innerHTML =
-                    '<tr><td colspan="100" class="text-center py-4"><div class="spinner-border text-primary"></div><br>Cargando datos...</td></tr>';
-                document.getElementById('contenedorMatriz').style.display = 'block';
+                const tbody = $('#bodyMatriz');
+                tbody.html('<tr><td colspan="100" class="text-center py-4"><div class="spinner-border text-primary"></div><br>Cargando datos...</td></tr>');
+                $('#contenedorMatriz').show();
 
-                fetch('/calificaciones/matriz-completa', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': csrfToken,
-                            'Accept': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            id_grupo: idGrupo,
-                            id_periodo: idPeriodo,
-                            id_asignacion: idAsignacion
-                        })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
+                $.ajax({
+                    url: '/calificaciones/matriz-completa',
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json'
+                    },
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        id_grupo: idGrupo,
+                        id_periodo: idPeriodo,
+                        id_asignacion: idAsignacion
+                    }),
+                    success: function(data) {
                         if (data.success) {
                             datosMatriz.alumnos = data.alumnos;
                             datosMatriz.unidades = data.unidades;
                             renderMatriz();
                         } else {
-                            tbody.innerHTML =
-                                `<tr><td colspan="100" class="text-center text-danger">${data.message || 'Error desconocido'}</td></tr>`;
+                            tbody.html(`<tr><td colspan="100" class="text-center text-danger">${data.message || 'Error desconocido'}</td></tr>`);
                         }
-                    })
-                    .catch(err => {
-                        tbody.innerHTML =
-                            `<tr><td colspan="100" class="text-center text-danger">Error: ${err.message}</td></tr>`;
-                    });
+                    },
+                    error: function(xhr, status, error) {
+                        tbody.html(`<tr><td colspan="100" class="text-center text-danger">Error: ${error}</td></tr>`);
+                    }
+                });
             });
 
             // Renderizar matriz
             function renderMatriz() {
                 if (datosMatriz.alumnos.length === 0) {
-                    document.getElementById('bodyMatriz').innerHTML =
-                        '<tr><td colspan="100" class="text-center text-muted py-4">No hay alumnos en este grupo</td></tr>';
+                    $('#bodyMatriz').html('<tr><td colspan="100" class="text-center text-muted py-4">No hay alumnos en este grupo</td></tr>');
                     return;
                 }
 
@@ -329,115 +345,145 @@
                 headersUnidades += `<th class="bg-info text-white">📊 Promedio</th>`;
                 headersUnidades += `<th class="unidad-header bg-warning">🎓 Extraordinario Especial</th>`;
 
-                document.querySelector('#tablaCalificaciones thead tr').innerHTML = `
-            <th class="text-center">#</th>
-            <th>Matrícula</th>
-            <th>Alumno</th>
-            ${headersUnidades}
-        `;
+                $('#tablaCalificaciones thead tr').html(`
+                    <th class="text-center">#</th>
+                    <th>Matrícula</th>
+                    <th>Alumno</th>
+                    ${headersUnidades}
+                `);
 
                 let html = '';
                 datosMatriz.alumnos.forEach((alumno, indexAlumno) => {
                     html += `<tr>
-                <td class="text-center alumno-cell">${indexAlumno + 1}</td>
-                <td class="matricula-cell"><strong>${alumno.matricula}</strong></td>
-                <td class="nombre-cell">${alumno.nombre}</td>`;
+                        <td class="text-center alumno-cell">${indexAlumno + 1}</td>
+                        <td class="matricula-cell"><strong>${alumno.matricula}</strong></td>
+                        <td class="nombre-cell">${alumno.nombre}</td>`;
+
+                    // Verificar si reprobó algún Extraordinario
+                    let reproboExtraordinario = false;
+                    Object.values(alumno.calificaciones).forEach(calif => {
+                        if (calif.tipo_evaluacion === 'Extraordinario' && 
+                            calif.calificacion !== null && 
+                            calif.calificacion < 6) {
+                            reproboExtraordinario = true;
+                        }
+                    });
 
                     // Renderizar unidades
                     datosMatriz.unidades.forEach(unidad => {
                         const key = `${alumno.id_alumno}_${unidad.id_unidad}`;
                         const calificacionData = alumno.calificaciones[key];
+                        const tieneCalifEspecial = alumno.calificacion_especial !== null && alumno.calificacion_especial !== undefined;
 
                         if (!calificacionData) {
-                            html += '<td class="text-center p-2">-</td>';
+                            // Si tiene calificación especial o reprobó extraordinario, mostrar "Bloqueado"
+                            html += (tieneCalifEspecial || reproboExtraordinario)
+                                ? '<td class="text-center p-2 text-muted">🔒 Bloqueado</td>'
+                                : '<td class="text-center p-2">-</td>';
                             return;
                         }
 
                         const calificacion = calificacionData.calificacion;
                         const yaCapturado = calificacion !== null;
                         const esAprobatoria = calificacion >= 6;
-                        const puedeCapturar = calificacionData.puede_capturar;
+                        const puedeCapturar = calificacionData.puede_capturar && !tieneCalifEspecial && !reproboExtraordinario;
                         const siguienteEval = calificacionData.siguiente_evaluacion;
 
                         if (yaCapturado) {
                             const tipoEvaluacion = calificacionData.tipo_evaluacion || 'Ordinario';
-                            const tipoKey = tipoEvaluacion.toLowerCase().replace('ó', 'o').replace(
-                                'ú', 'u');
-                            const tipoEval = tiposEvaluacion[tipoKey] || tiposEvaluacion[
-                                'ordinario'];
+                            const historialCompleto = calificacionData.historial_completo || [];
+                            const tipoKey = tipoEvaluacion.toLowerCase().replace('ó', 'o').replace('ú', 'u');
+                            const tipoEval = tiposEvaluacion[tipoKey] || tiposEvaluacion['ordinario'];
+
+                            let tooltipHistorial = '';
+                            if (historialCompleto.length > 1) {
+                                tooltipHistorial = 'Historial: ' + 
+                                    historialCompleto.map((h, i) => `${i + 1}. ${h.tipo}: ${h.calificacion}`).join(', ');
+                            }
 
                             if (puedeCapturar && siguienteEval) {
-                                const siguienteTipoKey = siguienteEval.tipo.toLowerCase().replace(
-                                    'ó', 'o').replace('ú', 'u');
-                                const siguienteTipoInfo = tiposEvaluacion[siguienteTipoKey] ||
-                                    tiposEvaluacion['ordinario'];
+                                const siguienteTipoKey = siguienteEval.tipo.toLowerCase().replace('ó', 'o').replace('ú', 'u');
+                                const siguienteTipoInfo = tiposEvaluacion[siguienteTipoKey] || tiposEvaluacion['ordinario'];
 
                                 html += `
-                        <td class="text-center p-2" style="vertical-align: middle;">
-                            <div class="d-flex flex-column align-items-center">
-                                <span class="badge mb-2" style="font-size: 0.9rem; padding: 0.4rem; background: ${esAprobatoria ? '#28a745' : '#dc3545'};">
-                                    Actual: ${calificacion} ${tipoEval.icon}
-                                </span>
-                                <hr style="width: 100%; margin: 0.5rem 0; border-top: 1px dashed #ddd;">
-                                <input type="number" class="form-control calificacion-input-matriz text-center mt-2" 
-                                       data-alumno="${alumno.id_alumno}"
-                                       data-unidad="${unidad.id_unidad}"
-                                       data-evaluacion="${siguienteEval.id_evaluacion}"
-                                       data-tipoeval="${siguienteTipoKey}"
-                                       min="0" max="10" step="0.1" placeholder="Nueva calif."
-                                       style="width: 100px; margin: 0 auto;">
-                                <small class="text-muted mt-1" style="color: ${siguienteTipoInfo.color};">
-                                    ${siguienteTipoInfo.icon} ${siguienteEval.tipo}
-                                </small>
-                            </div>
-                        </td>`;
+                                    <td class="text-center p-2" style="vertical-align: middle;">
+                                        <div class="d-flex flex-column align-items-center">
+                                            <span class="badge mb-2" 
+                                                  style="font-size: 0.9rem; padding: 0.4rem; background: ${esAprobatoria ? '#1cc88a' : '#e74a3b'};"
+                                                  ${tooltipHistorial ? `title="${tooltipHistorial}"` : ''}>
+                                                Actual: ${calificacion} ${tipoEval.icon}
+                                            </span>
+                                            ${historialCompleto.length > 1 ? `
+                                            <small class="text-muted mb-2" style="font-size: 0.7rem;">
+                                                📋 ${historialCompleto.length} evaluaciones
+                                            </small>
+                                            ` : ''}
+                                            <hr style="width: 100%; margin: 0.5rem 0; border-top: 1px dashed #ddd;">
+                                            <input type="number" class="form-control calificacion-input-matriz text-center mt-2" 
+                                                   data-alumno="${alumno.id_alumno}"
+                                                   data-unidad="${unidad.id_unidad}"
+                                                   data-evaluacion="${siguienteEval.id_evaluacion}"
+                                                   data-tipoeval="${siguienteTipoKey}"
+                                                   min="0" max="10" step="0.1" placeholder="Nueva calif."
+                                                   style="width: 100px; margin: 0 auto;">
+                                            <small class="text-muted mt-1" style="color: ${siguienteTipoInfo.color};">
+                                                ${siguienteTipoInfo.icon} ${siguienteEval.tipo}
+                                            </small>
+                                        </div>
+                                    </td>`;
                             } else {
                                 html += `
-                        <td class="text-center p-2" style="vertical-align: middle;">
-                            <div class="d-flex flex-column align-items-center">
-                                <span class="badge mb-1" style="font-size: 1.1rem; padding: 0.5rem; background: ${esAprobatoria ? '#28a745' : '#dc3545'};">
-                                    ${calificacion}
-                                </span>
-                                <small style="color: ${tipoEval.color};">
-                                    ${tipoEval.icon} ${tipoEval.label}
-                                </small>
-                                ${esAprobatoria ? `
-                                    <small class="text-success mt-1" style="font-size: 0.8rem;">✅ Aprobado</small>
-                                    ` : `
-                                    <small class="text-muted mt-1" style="font-size: 0.8rem;">Sin Oportunidades</small>
-                                    `}
-                            </div>
-                        </td>`;
+                                    <td class="text-center p-2" style="vertical-align: middle;">
+                                        <div class="d-flex flex-column align-items-center">
+                                            <span class="badge mb-1" 
+                                                  style="font-size: 1.1rem; padding: 0.5rem; background: ${esAprobatoria ? '#1cc88a' : '#e74a3b'};"
+                                                  ${tooltipHistorial ? `title="${tooltipHistorial}"` : ''}>
+                                                ${calificacion}
+                                            </span>
+                                            <small style="color: ${tipoEval.color};">
+                                                ${tipoEval.icon} ${tipoEval.label}
+                                            </small>
+                                            ${historialCompleto.length > 1 ? `
+                                            <small class="text-muted mt-1" style="font-size: 0.7rem;">
+                                                📋 ${historialCompleto.length} evaluaciones
+                                            </small>
+                                            ` : ''}
+                                            ${esAprobatoria ? `
+                                                <small class="text-success mt-1" style="font-size: 0.8rem;">✅ Aprobado</small>
+                                                ` : (tipoEvaluacion === 'Extraordinario' ? `
+                                                <small class="text-danger mt-1" style="font-size: 0.8rem;">❌ Reprobado</small>
+                                                ` : `
+                                                <small class="text-muted mt-1" style="font-size: 0.8rem;">Sin Oportunidades</small>
+                                                `)}
+                                        </div>
+                                    </td>`;
                             }
                         } else {
                             if (puedeCapturar && siguienteEval) {
-                                const tipoKey = siguienteEval.tipo.toLowerCase().replace('ó', 'o')
-                                    .replace('ú', 'u');
-                                const tipoInfo = tiposEvaluacion[tipoKey] || tiposEvaluacion[
-                                    'ordinario'];
+                                const tipoKey = siguienteEval.tipo.toLowerCase().replace('ó', 'o').replace('ú', 'u');
+                                const tipoInfo = tiposEvaluacion[tipoKey] || tiposEvaluacion['ordinario'];
 
                                 html += `
-                        <td class="text-center p-2" style="vertical-align: middle;">
-                            <input type="number" class="form-control calificacion-input-matriz text-center" 
-                                   data-alumno="${alumno.id_alumno}"
-                                   data-unidad="${unidad.id_unidad}"
-                                   data-evaluacion="${siguienteEval.id_evaluacion}"
-                                   data-tipoeval="${tipoKey}"
-                                   min="0" max="10" step="0.1" placeholder="0.0"
-                                   style="width: 100px; margin: 0 auto;">
-                            <small class="text-muted mt-1" style="color: ${tipoInfo.color};">
-                                ${tipoInfo.icon} ${siguienteEval.tipo}
-                            </small>
-                        </td>`;
+                                    <td class="text-center p-2" style="vertical-align: middle;">
+                                        <input type="number" class="form-control calificacion-input-matriz text-center" 
+                                               data-alumno="${alumno.id_alumno}"
+                                               data-unidad="${unidad.id_unidad}"
+                                               data-evaluacion="${siguienteEval.id_evaluacion}"
+                                               data-tipoeval="${tipoKey}"
+                                               min="0" max="10" step="0.1" placeholder="0.0"
+                                               style="width: 100px; margin: 0 auto;">
+                                        <small class="text-muted mt-1" style="color: ${tipoInfo.color};">
+                                            ${tipoInfo.icon} ${siguienteEval.tipo}
+                                        </small>
+                                    </td>`;
                             } else {
-                                html += '<td class="text-center p-2 text-muted">Completado</td>';
+                                html += `<td class="text-center p-2 text-muted">${(tieneCalifEspecial || reproboExtraordinario) ? '🔒 Bloqueado' : 'Completado'}</td>`;
                             }
                         }
                     });
 
-                    // Promedio (ocultar si tiene calificación especial)
-                    const tieneCalifEspecial = alumno.calificacion_especial !== null && alumno
-                        .calificacion_especial !== undefined;
+                    // Promedio
+                    const tieneCalifEspecial = alumno.calificacion_especial !== null && alumno.calificacion_especial !== undefined;
                     if (tieneCalifEspecial) {
                         html += '<td class="text-center p-2 bg-light text-muted">-</td>';
                     } else {
@@ -445,72 +491,93 @@
                         if (promedioGeneral !== null && !isNaN(promedioGeneral)) {
                             const esAprobado = promedioGeneral >= 6;
                             html += `
-                    <td class="text-center p-2 bg-light" style="vertical-align: middle;">
-                        <span class="badge" style="font-size: 1.2rem; padding: 0.6rem; background: ${esAprobado ? '#17a2b8' : '#6c757d'};">
-                            ${promedioGeneral}
-                        </span>
-                        <small class="d-block mt-1 text-muted" style="font-size: 0.7rem;">
-                            Promedio ${esAprobado ? '✅' : '⚠️'}
-                        </small>
-                    </td>`;
+                                <td class="text-center p-2 bg-light" style="vertical-align: middle;">
+                                    <span class="badge" style="font-size: 1.2rem; padding: 0.6rem; background: ${esAprobado ? '#36b9cc' : '#858796'};">
+                                        ${promedioGeneral}
+                                    </span>
+                                    <small class="d-block mt-1 text-muted" style="font-size: 0.7rem;">
+                                        Promedio ${esAprobado ? '✅' : '⚠️'}
+                                    </small>
+                                </td>`;
                         } else {
                             html += '<td class="text-center p-2 bg-light text-muted">Pendiente</td>';
                         }
                     }
 
                     // Extraordinario Especial
-                    const tipoEvalEspecial = tiposEvaluacion['extraordinario_especial'] || {
-                        icon: '🎓',
-                        color: '#6f42c1',
-                        label: 'Extraordinario Especial'
-                    };
+                    const tipoEvalEspecial = tiposEvaluacion['extraordinario_especial'] || { icon: '🎓', color: '#6f42c1', label: 'Extraordinario Especial' };
+                    
                     if (tieneCalifEspecial) {
                         const esAprob = alumno.calificacion_especial >= 6;
                         html += `
-                <td class="text-center p-2" style="vertical-align: middle; background: #fff3cd; border-left: 3px solid #6f42c1;">
-                    <div class="d-flex flex-column align-items-center">
-                        <span class="badge mb-1" style="font-size: 1.2rem; padding: 0.6rem; background: ${esAprob ? '#28a745' : '#dc3545'};">
-                            ${alumno.calificacion_especial}
-                        </span>
-                        <small style="color: ${tipoEvalEspecial.color}; font-weight: bold;">
-                            ${tipoEvalEspecial.icon} ${tipoEvalEspecial.label}
-                        </small>
-                        ${esAprob ? `
-                            <small class="text-success mt-1"><i class="fas fa-check-circle"></i> Aprobado</small>
-                            ` : `
-                            <small class="text-danger mt-1"><i class="fas fa-times-circle"></i> Reprobado</small>
-                            `}
-                        <small class="text-muted mt-1" style="font-size: 0.7rem;">📚 Calificación general</small>
-                    </div>
-                </td>`;
+                            <td class="text-center p-2" style="vertical-align: middle; background: #fff3cd; border-left: 3px solid #6f42c1;">
+                                <div class="d-flex flex-column align-items-center">
+                                    <span class="badge mb-1" style="font-size: 1.2rem; padding: 0.6rem; background: ${esAprob ? '#1cc88a' : '#e74a3b'};">
+                                        ${alumno.calificacion_especial}
+                                    </span>
+                                    <small style="color: ${tipoEvalEspecial.color}; font-weight: bold;">
+                                        ${tipoEvalEspecial.icon} ${tipoEvalEspecial.label}
+                                    </small>
+                                    ${esAprob ? `
+                                        <small class="text-success mt-1"><i class="fas fa-check-circle"></i> Aprobado</small>
+                                        ` : `
+                                        <small class="text-danger mt-1"><i class="fas fa-times-circle"></i> Reprobado</small>
+                                        `}
+                                    <small class="text-muted mt-1" style="font-size: 0.7rem;">📚 Calificación general</small>
+                                </div>
+                            </td>`;
+                    } else if (reproboExtraordinario) {
+                        // Si reprobó extraordinario, HABILITAR Extraordinario Especial
+                        if (alumno.evaluacion_especial) {
+                            const evalEspecial = alumno.evaluacion_especial;
+                            html += `
+                                <td class="text-center p-2" style="vertical-align: middle; background: #fff3cd; border-left: 3px solid #e74a3b;">
+                                    <div class="d-flex flex-column align-items-center mb-2">
+                                        <span class="badge badge-danger mb-2" style="font-size: 0.85rem;">
+                                            ⚠️ Reprobó Extraordinario
+                                        </span>
+                                    </div>
+                                    <input type="number" class="form-control calificacion-input-especial text-center" 
+                                           data-alumno="${alumno.id_alumno}"
+                                           data-evaluacion="${evalEspecial.id_evaluacion}"
+                                           min="0" max="10" step="0.1" placeholder="Calif."
+                                           style="width: 90px; margin: 0 auto; border: 3px solid #e74a3b; font-weight: bold;">
+                                    <small class="d-block mt-2" style="color: #6f42c1; font-weight: bold; font-size: 0.75rem;">
+                                        🎓 ${evalEspecial.nombre}
+                                    </small>
+                                    <small class="d-block text-danger mt-1" style="font-size: 0.65rem; font-weight: bold;">
+                                        📚 Última oportunidad - Examen completo
+                                    </small>
+                                </td>`;
+                        } else {
+                            html += '<td class="text-center p-2 bg-light text-muted">-</td>';
+                        }
                     } else {
                         let hayExtraordinarioReprobado = false;
                         datosMatriz.unidades.forEach(unidad => {
                             const key = `${alumno.id_alumno}_${unidad.id_unidad}`;
                             const califData = alumno.calificaciones[key];
-                            if (califData && califData.calificacion !== null &&
-                                califData.calificacion < 6 && califData.tipo_evaluacion ===
-                                'Extraordinario') {
+                            if (califData && califData.calificacion !== null && califData.calificacion < 6 && califData.tipo_evaluacion === 'Extraordinario') {
                                 hayExtraordinarioReprobado = true;
                             }
                         });
 
-                        if (hayExtraordinarioReprobado && alumno.evaluacion_especial) {
+                        if (hayExtraordinarioReprobado && alumno.evaluacion_especial && !reproboExtraordinario) {
                             const evalEspecial = alumno.evaluacion_especial;
                             html += `
-                    <td class="text-center p-2" style="vertical-align: middle; background: #fff3cd; border-left: 3px solid #dc3545;">
-                        <input type="number" class="form-control calificacion-input-especial text-center" 
-                               data-alumno="${alumno.id_alumno}"
-                               data-evaluacion="${evalEspecial.id_evaluacion}"
-                               min="0" max="10" step="0.1" placeholder="Calif."
-                               style="width: 90px; margin: 0 auto; border: 3px solid #dc3545; font-weight: bold;">
-                        <small class="d-block mt-2" style="color: #6f42c1; font-weight: bold; font-size: 0.75rem;">
-                            🎓 ${evalEspecial.nombre}
-                        </small>
-                        <small class="d-block text-danger mt-1" style="font-size: 0.65rem; font-weight: bold;">
-                            📚 Examen de toda la materia
-                        </small>
-                    </td>`;
+                                <td class="text-center p-2" style="vertical-align: middle; background: #fff3cd; border-left: 3px solid #e74a3b;">
+                                    <input type="number" class="form-control calificacion-input-especial text-center" 
+                                           data-alumno="${alumno.id_alumno}"
+                                           data-evaluacion="${evalEspecial.id_evaluacion}"
+                                           min="0" max="10" step="0.1" placeholder="Calif."
+                                           style="width: 90px; margin: 0 auto; border: 3px solid #e74a3b; font-weight: bold;">
+                                    <small class="d-block mt-2" style="color: #6f42c1; font-weight: bold; font-size: 0.75rem;">
+                                        🎓 ${evalEspecial.nombre}
+                                    </small>
+                                    <small class="d-block text-danger mt-1" style="font-size: 0.65rem; font-weight: bold;">
+                                        📚 Examen de toda la materia
+                                    </small>
+                                </td>`;
                         } else {
                             html += '<td class="text-center p-2 bg-light text-muted">-</td>';
                         }
@@ -519,65 +586,60 @@
                     html += '</tr>';
                 });
 
-                document.getElementById('bodyMatriz').innerHTML = html;
-                document.getElementById('totalAlumnos').textContent = datosMatriz.alumnos.length;
+                $('#bodyMatriz').html(html);
+                $('#totalAlumnos').text(datosMatriz.alumnos.length + ' alumnos');
 
                 // Eventos para inputs
-                document.querySelectorAll('.calificacion-input-matriz, .calificacion-input-especial').forEach(
-                    input => {
-                        input.addEventListener('input', function() {
-                            const valor = parseFloat(this.value);
-                            this.classList.toggle('is-invalid', this.value && (valor < 0 || valor >
-                                10 || isNaN(valor)));
-                            validarGuardar();
-                        });
-                    });
+                $('.calificacion-input-matriz, .calificacion-input-especial').on('input', function() {
+                    const valor = parseFloat($(this).val());
+                    const esInvalido = $(this).val() && (valor < 0 || valor > 10 || isNaN(valor));
+                    $(this).toggleClass('is-invalid', esInvalido);
+                    validarGuardar();
+                });
 
                 validarGuardar();
             }
 
             // Validar guardar
             function validarGuardar() {
-                const inputsValidos = Array.from(document.querySelectorAll(
-                        '.calificacion-input-matriz, .calificacion-input-especial'))
-                    .some(input => input.value && !input.classList.contains('is-invalid'));
-                document.getElementById('btnGuardarCalificaciones').disabled = !inputsValidos;
+                const inputsValidos = $('.calificacion-input-matriz, .calificacion-input-especial').toArray().some(input => {
+                    return $(input).val() && !$(input).hasClass('is-invalid');
+                });
+                $('#btnGuardarCalificaciones').prop('disabled', !inputsValidos);
             }
 
             // Limpiar
-            document.getElementById('btnLimpiarTodo').addEventListener('click', function() {
+            $('#btnLimpiarTodo').on('click', function() {
                 if (confirm('¿Limpiar calificaciones no guardadas?')) {
-                    document.querySelectorAll('.calificacion-input-matriz, .calificacion-input-especial')
-                        .forEach(input => {
-                            input.value = '';
-                            input.classList.remove('is-invalid');
-                        });
+                    $('.calificacion-input-matriz, .calificacion-input-especial').val('').removeClass('is-invalid');
                     validarGuardar();
                 }
             });
 
             // Guardar
-            document.getElementById('btnGuardarCalificaciones').addEventListener('click', function() {
+            $('#btnGuardarCalificaciones').on('click', function(e) {
+                e.preventDefault();
+                
                 const calificaciones = [];
                 const calificacionesEspeciales = [];
 
-                document.querySelectorAll('.calificacion-input-matriz').forEach(input => {
-                    if (input.value && !input.classList.contains('is-invalid')) {
+                $('.calificacion-input-matriz').each(function() {
+                    if ($(this).val() && !$(this).hasClass('is-invalid')) {
                         calificaciones.push({
-                            id_alumno: parseInt(input.dataset.alumno),
-                            id_unidad: parseInt(input.dataset.unidad),
-                            id_evaluacion: parseInt(input.dataset.evaluacion),
-                            calificacion: parseFloat(input.value)
+                            id_alumno: parseInt($(this).data('alumno')),
+                            id_unidad: parseInt($(this).data('unidad')),
+                            id_evaluacion: parseInt($(this).data('evaluacion')),
+                            calificacion: parseFloat($(this).val())
                         });
                     }
                 });
 
-                document.querySelectorAll('.calificacion-input-especial').forEach(input => {
-                    if (input.value && !input.classList.contains('is-invalid')) {
+                $('.calificacion-input-especial').each(function() {
+                    if ($(this).val() && !$(this).hasClass('is-invalid')) {
                         calificacionesEspeciales.push({
-                            id_alumno: parseInt(input.dataset.alumno),
-                            id_evaluacion: parseInt(input.dataset.evaluacion),
-                            calificacion_especial: parseFloat(input.value)
+                            id_alumno: parseInt($(this).data('alumno')),
+                            id_evaluacion: parseInt($(this).data('evaluacion')),
+                            calificacion_especial: parseFloat($(this).val())
                         });
                     }
                 });
@@ -588,33 +650,25 @@
                 }
 
                 const data = {
-                    id_asignacion: document.getElementById('materiaCalificar').value,
+                    id_asignacion: $('#materiaCalificar').val(),
                     calificaciones: calificaciones,
                     calificaciones_especiales: calificacionesEspeciales
                 };
 
-                document.getElementById('calificacionesJsonInput').value = JSON.stringify(data);
-                this.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Guardando...';
-                this.disabled = true;
-                document.getElementById('formCalificarGrupo').submit();
+                $('#calificacionesJsonInput').val(JSON.stringify(data));
+                $(this).html('<i class="fas fa-spinner fa-spin mr-1"></i> Guardando...').prop('disabled', true);
+                $('#formCalificarGrupo').submit();
             });
 
             // Reset al cerrar modal
             $('#modalCalificar').on('hidden.bs.modal', function() {
-                document.getElementById('formCalificarGrupo').reset();
-                document.getElementById('bodyMatriz').innerHTML = '';
-                document.getElementById('contenedorMatriz').style.display = 'none';
-                datosMatriz = {
-                    alumnos: [],
-                    unidades: []
-                };
-                document.getElementById('btnGuardarCalificaciones').disabled = true;
-                document.getElementById('btnGuardarCalificaciones').innerHTML =
-                    '<i class="fas fa-save mr-1"></i> Guardar Calificaciones';
+                $('#formCalificarGrupo')[0].reset();
+                $('#bodyMatriz').empty();
+                $('#contenedorMatriz').hide();
+                datosMatriz = { alumnos: [], unidades: [] };
+                $('#btnGuardarCalificaciones').prop('disabled', true).html('<i class="fas fa-save mr-1"></i> Guardar Calificaciones');
             });
         });
     </script>
-
 </body>
-
 </html>

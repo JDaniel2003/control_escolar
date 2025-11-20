@@ -20,61 +20,67 @@ class HistorialController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
-    {
-        // Iniciamos la consulta base con relaciones
-        $query = Alumno::with(['datosPersonales', 'datosAcademicos', 'statusAcademico', 'generaciones']);
+    public function index(Request $request) 
+{
+    // 🔹 Consulta base con relaciones
+    $query = Alumno::with(['datosPersonales', 'datosAcademicos', 'statusAcademico', 'generaciones'])
+        ->orderByDesc('id_alumno');
 
-        // 🔹 Filtro general (por matrícula o nombre)
-        if ($request->filled('busqueda')) {
-            $busqueda = $request->busqueda;
-
-            $query->where(function ($q) use ($busqueda) {
-                $q->whereHas('datosAcademicos', function ($q2) use ($busqueda) {
-                    $q2->where('matricula', 'LIKE', '%' . $busqueda . '%');
-                })
-                    ->orWhereHas('datosPersonales', function ($q3) use ($busqueda) {
-                        $q3->where('nombres', 'LIKE', '%' . $busqueda . '%')
-                            ->orWhere('primer_apellido', 'LIKE', '%' . $busqueda . '%')
-                            ->orWhere('segundo_apellido', 'LIKE', '%' . $busqueda . '%');
-                    });
-            });
-        }
-        $historial = Historial::with([
-            'alumno',
-            'historialStatus',
-            'statusInicio',
-            'statusTerminacion',
-            'asignacion1',
-            'asignacion2',
-            'asignacion3',
-            'asignacion4',
-            'asignacion5',
-            'asignacion6',
-            'asignacion7',
-            'asignacion8',
-            'asignacion9',
-            'asignacion10'
-        ])->get();
-
-        // Obtener datos para el modal
-        $alumnos = Alumno::all();
-        $periodos = \App\Models\PeriodoEscolar::all(); // Asegúrate de tener este modelo
-        $grupos = \App\Models\Grupo::with(['carrera', 'turno'])->get();
-        $numerosPeriodo = \App\Models\NumeroPeriodo::with('tipoPeriodo')->get();
-        $statusAcademicos = StatusAcademico::all();
-        $historialStatus = HistorialStatus::all();
-
-        return view('historial.historial', compact(
-            'historial',
-            'alumnos',
-            'periodos',
-            'grupos',
-            'numerosPeriodo',
-            'statusAcademicos',
-            'historialStatus'
-        ));
+    // 🔹 Obtener valor de mostrar (SIEMPRE verificar si existe)
+    $mostrar = $request->has('mostrar') ? $request->get('mostrar') : '10';
+    
+    // 🔹 Aplicar paginación o mostrar todo
+    if ($mostrar === "todo") {
+        $alumnos = $query->get(); // sin paginar
+    } else {
+        // Asegurar que sea un número válido
+        $perPage = is_numeric($mostrar) ? (int)$mostrar : 10;
+        $alumnos = $query->paginate($perPage)->appends($request->all());
     }
+
+    // 🔹 Historial con relaciones (PAGINADO)
+    $queryHistorial = Historial::with([
+        'alumno.datosPersonales', 
+        'historialStatus', 
+        'statusInicio', 
+        'statusTerminacion',
+        'asignacion1.materia', 
+        'asignacion2.materia', 
+        'asignacion3.materia', 
+        'asignacion4.materia', 
+        'asignacion5.materia',
+        'asignacion6.materia', 
+        'asignacion7.materia', 
+        'asignacion8.materia', 
+        'asignacion9.materia', 
+        'asignacion10.materia'
+    ])->orderByDesc('id_historial');
+    
+    // Aplicar la misma lógica de paginación
+    if ($mostrar === "todo") {
+        $historial = $queryHistorial->get();
+    } else {
+        $perPage = is_numeric($mostrar) ? (int)$mostrar : 10;
+        $historial = $queryHistorial->paginate($perPage)->appends($request->all());
+    }
+
+    // 🔹 Datos para selects y modal
+    $periodos = \App\Models\PeriodoEscolar::all();
+    $grupos = \App\Models\Grupo::with(['carrera', 'turno'])->get();
+    $numerosPeriodo = \App\Models\NumeroPeriodo::with('tipoPeriodo')->get();
+    $statusAcademicos = StatusAcademico::all();
+    $historialStatus = HistorialStatus::all();
+
+    return view('historial.historial', compact(
+        'alumnos', 
+        'historial', 
+        'periodos', 
+        'grupos', 
+        'numerosPeriodo', 
+        'statusAcademicos', 
+        'historialStatus'
+    ));
+}
 
     /**
      * Obtener asignaciones disponibles basado en grupo y período

@@ -55,15 +55,24 @@
         </div>
         <div class="collapse navbar-collapse ml-4">
             <ul class="navbar-nav" style="padding-left: 20%;">
-                <li class="nav-item"><a class="nav-link text-white px-3 mr-1" href="{{ route('admin') }}">Inicio</a></li>
-                <li class="nav-item"><a class="nav-link text-white px-3 mr-1" href="{{ route('periodos.index') }}">Períodos Escolares</a></li>
-                <li class="nav-item"><a class="nav-link text-white px-3 mr-1" href="{{ route('carreras.index') }}">Carreras</a></li>
-                <li class="nav-item"><a class="nav-link text-white px-3 mr-1" href="{{ route('materias.index') }}">Materias</a></li>
-                <li class="nav-item"><a class="nav-link text-white px-3 mr-1" href="{{ route('planes.index') }}">Planes de estudio</a></li>
-                <li class="nav-item"><a class="nav-link text-white px-3 mr-1" href="{{ route('alumnos.index') }}">Alumnos</a></li>
-                <li class="nav-item"><a class="nav-link text-white px-3 mr-1" href="{{ route('asignaciones.index') }}">Asignaciones Docentes</a></li>
-                <li class="nav-item"><a class="nav-link navbar-active-item px-3" href="{{ route('historial.index') }}">Historial</a></li>
-                <li class="nav-item"><a class="nav-link text-white px-3 mr-1" href="{{ route('calificaciones.index') }}">Calificaciones</a></li>
+                <li class="nav-item"><a class="nav-link text-white px-3 mr-1" href="{{ route('admin') }}">Inicio</a>
+                </li>
+                <li class="nav-item"><a class="nav-link text-white px-3 mr-1"
+                        href="{{ route('periodos.index') }}">Períodos Escolares</a></li>
+                <li class="nav-item"><a class="nav-link text-white px-3 mr-1"
+                        href="{{ route('carreras.index') }}">Carreras</a></li>
+                <li class="nav-item"><a class="nav-link text-white px-3 mr-1"
+                        href="{{ route('materias.index') }}">Materias</a></li>
+                <li class="nav-item"><a class="nav-link text-white px-3 mr-1" href="{{ route('planes.index') }}">Planes
+                        de estudio</a></li>
+                <li class="nav-item"><a class="nav-link text-white px-3 mr-1"
+                        href="{{ route('alumnos.index') }}">Alumnos</a></li>
+                <li class="nav-item"><a class="nav-link text-white px-3 mr-1"
+                        href="{{ route('asignaciones.index') }}">Asignaciones Docentes</a></li>
+                <li class="nav-item"><a class="nav-link navbar-active-item px-3"
+                        href="{{ route('historial.index') }}">Historial</a></li>
+                <li class="nav-item"><a class="nav-link text-white px-3 mr-1"
+                        href="{{ route('calificaciones.index') }}">Calificaciones</a></li>
 
             </ul>
         </div>
@@ -107,10 +116,39 @@
                             </div>
 
                             <!-- Filtros -->
-                            <div class="card-header py-3  d-flex justify-content-between align-items-center">
-                                    <input type="text" id="searchInput" class="form-control form-control-sm"
-                                        placeholder="Buscar docentes...">
+                            <div class="card-header border-bottom justify-content-between"
+                                style="padding: 0.75rem 1.25rem;">
+                                <div class="container mb-4 d-flex ">
+                                    <div class="p-3 border rounded bg-light d-inline-block shadow-sm">
+                                        <form id="filtrosForm" method="GET" action="{{ route('historial.index') }}" class="d-flex flex-wrap gap-2 align-items-center">
+                                            <div style="width: 500px;">
+                                                <input type="text" id="searchInput"
+                                                    class="form-control form-control-sm border-secondary"
+                                                    placeholder="🔍 Buscar">
+                                            </div>
+                                            <select name="mostrar" onchange="this.form.submit()"
+                                            class="form-control form-control-sm w-auto">
+                                            <option value="10" {{ request('mostrar') == 10 ? 'selected' : '' }}>10
+                                            </option>
+                                            <option value="13" {{ request('mostrar') == 13 ? 'selected' : '' }}>13
+                                            </option>
+                                            <option value="25" {{ request('mostrar') == 25 ? 'selected' : '' }}>25
+                                            </option>
+                                            <option value="50" {{ request('mostrar') == 50 ? 'selected' : '' }}>50
+                                            </option>
+                                            <option value="todo"
+                                                {{ request('mostrar') == 'todo' ? 'selected' : '' }}>Todo</option>
+                                        </select>
+                                        <a href="{{ route('historial.index', ['mostrar' => 'todo']) }}"
+                                            class="btn btn-sm btn-outline-secondary d-flex align-items-center">
+                                            <i class="fas fa-list me-1"></i> Mostrar todo
+                                        </a>
+                                        </form>    
+                                    </div>
+                                    
                                 </div>
+                                
+                            </div>
 
                             @if (session('success'))
                                 <div class="alert alert-success">{{ session('success') }}</div>
@@ -118,7 +156,8 @@
 
                             <!-- Tabla de historial -->
                             <div class="table-responsive">
-                                <table class="table table-bordered table-hover text-center" id="teachersTable" width="100%">
+                                <table class="table table-bordered table-hover text-center" id="teachersTable"
+                                    width="100%">
                                     <thead class="thead-dark">
                                         <tr>
                                             <th>Alumno</th> {{-- <th>Matrícula</th><th>Período Escolar</th><th>Grupo</th><th>Número Período</th> --}}
@@ -191,10 +230,6 @@
                                     </tbody>
                                 </table>
                             </div>
-
-                            @if ($historial instanceof \Illuminate\Pagination\LengthAwarePaginator)
-                                <div class="d-flex justify-content-center mt-4">{{ $historial->links() }}</div>
-                            @endif
                         </div>
                     </div>
                 </div>
@@ -550,47 +585,48 @@
                                     </h6>
                                 </div>
                                 <div class="card-body1">
-                                <div class="row ">
-                                    <div class="col-md-6">
-                                        <label class="font-weight-bold">Período Escolar <span
-                                                class="text-danger">*</span></label>
-                                        <select name="id_periodo_escolar" id="periodoEscolarMasivo"
-                                            class="form-control" required>
-                                            <option value="">-- Selecciona un período --</option>
-                                            @foreach ($periodos as $periodo)
-                                                <option value="{{ $periodo->id_periodo_escolar }}">
-                                                    {{ $periodo->nombre }}
-                                                </option>
-                                            @endforeach
-                                        </select>
+                                    <div class="row ">
+                                        <div class="col-md-6">
+                                            <label class="font-weight-bold">Período Escolar <span
+                                                    class="text-danger">*</span></label>
+                                            <select name="id_periodo_escolar" id="periodoEscolarMasivo"
+                                                class="form-control" required>
+                                                <option value="">-- Selecciona un período --</option>
+                                                @foreach ($periodos as $periodo)
+                                                    <option value="{{ $periodo->id_periodo_escolar }}">
+                                                        {{ $periodo->nombre }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="font-weight-bold">Grupo <span
+                                                    class="text-danger">*</span></label>
+                                            <select name="id_grupo_actual" id="grupoActualMasivo"
+                                                class="form-control" required>
+                                                <option value="">-- Selecciona un grupo --</option>
+                                                @foreach ($grupos as $grupo)
+                                                    <option value="{{ $grupo->id_grupo }}">
+                                                        {{ $grupo->nombre }} - {{ $grupo->carrera->nombre ?? 'N/A' }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
                                     </div>
-                                    <div class="col-md-6">
-                                        <label class="font-weight-bold">Grupo <span
-                                                class="text-danger">*</span></label>
-                                        <select name="id_grupo_actual" id="grupoActualMasivo" class="form-control"
-                                            required>
-                                            <option value="">-- Selecciona un grupo --</option>
-                                            @foreach ($grupos as $grupo)
-                                                <option value="{{ $grupo->id_grupo }}">
-                                                    {{ $grupo->nombre }} - {{ $grupo->carrera->nombre ?? 'N/A' }}
-                                                </option>
-                                            @endforeach
-                                        </select>
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label class="font-weight-bold">Número de Periodo</label>
+                                            <input type="text" id="numeroPeriodoDisplay" class="form-control"
+                                                readonly placeholder="Se autorellenará">
+                                            <input type="hidden" name="id_numero_periodo"
+                                                id="id_numero_periodo_masivo">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="font-weight-bold">Fecha de Inscripción</label>
+                                            <input type="date" name="fecha_inscripcion" class="form-control"
+                                                value="{{ date('Y-m-d') }}">
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="row mb-3">
-                                    <div class="col-md-6">
-                                        <label class="font-weight-bold">Número de Periodo</label>
-                                        <input type="text" id="numeroPeriodoDisplay" class="form-control" readonly
-                                            placeholder="Se autorellenará">
-                                        <input type="hidden" name="id_numero_periodo" id="id_numero_periodo_masivo">
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="font-weight-bold">Fecha de Inscripción</label>
-                                        <input type="date" name="fecha_inscripcion" class="form-control"
-                                            value="{{ date('Y-m-d') }}">
-                                    </div>
-                                </div>
                                 </div>
                             </div>
                             <!-- Panel de configuración rápida -->
@@ -648,7 +684,7 @@
     <div class="modal fade" id="modalReinscripcionMasivaAvanzada" tabindex="-1" role="dialog">
         <div class="modal-dialog modal-xl" role="document">
             <div class="modal-content border-0 shadow-lg">
-               <div class="modal-header modal-header-custom border-0">
+                <div class="modal-header modal-header-custom border-0">
                     <div class="w-100 text-center">
                         <h5 class="mb-0 font-weight-bold">
                             👨‍🎓 Reinscripción Masiva de alumnos
@@ -666,101 +702,101 @@
                     <form id="formReinscripcionMasivaAvanzada" method="POST"
                         action="{{ route('historial.store-masivo-avanzado') }}">
                         @csrf
-<div class="form-container p-4 bg-white rounded shadow-sm border">
-                        <!-- Origen: de dónde vienen los alumnos -->
-                        <div class="card shadow mb-2 border-0">
-                            <div class="card-header py-3  text-white card-header-custom">
-                            <h6 class="m-0 font-weight-bold">
-                                🔍 Período Escolar y Grupo Anterior</b>
-                            </h6>
-                            </div>
-                            <div class="card-body1">
-                                <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <label>Período Escolar (Origen) <span class="text-danger">*</span></label>
-                                        <select name="id_periodo_origen" id="periodoOrigen" class="form-control"
-                                            required>
-                                            <option value="">-- Selecciona período --</option>
-                                            @foreach ($periodos as $p)
-                                                <option value="{{ $p->id_periodo_escolar }}">{{ $p->nombre }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <label>Grupo (Origen) <span class="text-danger">*</span></label>
-                                        <select name="id_grupo_origen" id="grupoOrigen" class="form-control"
-                                            required>
-                                            <option value="">-- Selecciona grupo --</option>
-                                            @foreach ($grupos as $g)
-                                                <option value="{{ $g->id_grupo }}">{{ $g->nombre }} -
-                                                    {{ $g->carrera->nombre ?? 'N/A' }}</option>
-                                            @endforeach
-                                        </select>
+                        <div class="form-container p-4 bg-white rounded shadow-sm border">
+                            <!-- Origen: de dónde vienen los alumnos -->
+                            <div class="card shadow mb-2 border-0">
+                                <div class="card-header py-3  text-white card-header-custom">
+                                    <h6 class="m-0 font-weight-bold">
+                                        🔍 Período Escolar y Grupo Anterior</b>
+                                    </h6>
+                                </div>
+                                <div class="card-body1">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label>Período Escolar (Origen) <span class="text-danger">*</span></label>
+                                            <select name="id_periodo_origen" id="periodoOrigen" class="form-control"
+                                                required>
+                                                <option value="">-- Selecciona período --</option>
+                                                @foreach ($periodos as $p)
+                                                    <option value="{{ $p->id_periodo_escolar }}">{{ $p->nombre }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label>Grupo (Origen) <span class="text-danger">*</span></label>
+                                            <select name="id_grupo_origen" id="grupoOrigen" class="form-control"
+                                                required>
+                                                <option value="">-- Selecciona grupo --</option>
+                                                @foreach ($grupos as $g)
+                                                    <option value="{{ $g->id_grupo }}">{{ $g->nombre }} -
+                                                        {{ $g->carrera->nombre ?? 'N/A' }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <!-- Destino: a dónde se reinscriben -->
-                        <div class="card shadow mb-2 border-0">
-                            <div class="card-header py-3  text-white card-header-custom">
-                            <h6 class="m-0 font-weight-bold">
-                                🎯 Destino: Nuevo período de reinscripción</b>
-                            </h6>
-                            </div>
-                            <div class="card-body1">
-                                <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <label>Período Escolar (Destino) <span class="text-danger">*</span></label>
-                                        <select name="id_periodo_destino" id="periodoDestino" class="form-control"
-                                            required>
-                                            <option value="">-- Selecciona período --</option>
-                                            @foreach ($periodos as $p)
-                                                <option value="{{ $p->id_periodo_escolar }}">{{ $p->nombre }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <label>Grupo (Destino) <span class="text-danger">*</span></label>
-                                        <select name="id_grupo_destino" id="grupoDestino" class="form-control"
-                                            required>
-                                            <option value="">-- Selecciona grupo --</option>
-                                            @foreach ($grupos as $g)
-                                                <option value="{{ $g->id_grupo }}">{{ $g->nombre }} -
-                                                    {{ $g->carrera->nombre ?? 'N/A' }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <label>Número de Período (Autorellenado)</label>
-                                        <input type="text" id="numeroPeriodoDestinoDisplay" class="form-control"
-                                            readonly placeholder="Se autorellenará">
-                                        <input type="hidden" name="id_numero_periodo_destino"
-                                            id="id_numero_periodo_destino">
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <label>Fecha de Inscripción</label>
-                                        <input type="date" name="fecha_inscripcion" class="form-control"
-                                            value="{{ date('Y-m-d') }}">
+                            <!-- Destino: a dónde se reinscriben -->
+                            <div class="card shadow mb-2 border-0">
+                                <div class="card-header py-3  text-white card-header-custom">
+                                    <h6 class="m-0 font-weight-bold">
+                                        🎯 Destino: Nuevo período de reinscripción</b>
+                                    </h6>
+                                </div>
+                                <div class="card-body1">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label>Período Escolar (Destino) <span class="text-danger">*</span></label>
+                                            <select name="id_periodo_destino" id="periodoDestino"
+                                                class="form-control" required>
+                                                <option value="">-- Selecciona período --</option>
+                                                @foreach ($periodos as $p)
+                                                    <option value="{{ $p->id_periodo_escolar }}">{{ $p->nombre }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label>Grupo (Destino) <span class="text-danger">*</span></label>
+                                            <select name="id_grupo_destino" id="grupoDestino" class="form-control"
+                                                required>
+                                                <option value="">-- Selecciona grupo --</option>
+                                                @foreach ($grupos as $g)
+                                                    <option value="{{ $g->id_grupo }}">{{ $g->nombre }} -
+                                                        {{ $g->carrera->nombre ?? 'N/A' }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label>Número de Período (Autorellenado)</label>
+                                            <input type="text" id="numeroPeriodoDestinoDisplay"
+                                                class="form-control" readonly placeholder="Se autorellenará">
+                                            <input type="hidden" name="id_numero_periodo_destino"
+                                                id="id_numero_periodo_destino">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label>Fecha de Inscripción</label>
+                                            <input type="date" name="fecha_inscripcion" class="form-control"
+                                                value="{{ date('Y-m-d') }}">
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <!-- Alumnos y Materias -->
-                        <div id="contenedorAlumnosAvanzado" style="display: none;">
-                            <h6 class="font-weight-bold mb-3">
-                                <i class="fas fa-user-graduate mr-2"></i>Alumnos del Origen
-                            </h6>
-                            <div id="listaAlumnosAvanzado"
-                                style="max-height: 400px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; border-radius: 5px;">
-                                <div class="text-center py-3 text-muted">Selecciona origen y destino</div>
+                            <!-- Alumnos y Materias -->
+                            <div id="contenedorAlumnosAvanzado" style="display: none;">
+                                <h6 class="font-weight-bold mb-3">
+                                    <i class="fas fa-user-graduate mr-2"></i>Alumnos del Origen
+                                </h6>
+                                <div id="listaAlumnosAvanzado"
+                                    style="max-height: 400px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; border-radius: 5px;">
+                                    <div class="text-center py-3 text-muted">Selecciona origen y destino</div>
+                                </div>
                             </div>
-                        </div>
 
-                        <input type="hidden" name="alumnos_json" id="alumnosJsonAvanzado">
+                            <input type="hidden" name="alumnos_json" id="alumnosJsonAvanzado">
                         </div>
                     </form>
                 </div>
@@ -1495,34 +1531,34 @@
             // ===== BÚSQUEDA EN TABLA =====
             const searchInput = document.getElementById('searchInput');
 
-if (searchInput) {
-    searchInput.addEventListener('input', function(e) {
+            if (searchInput) {
+                searchInput.addEventListener('input', function(e) {
 
-        // Normaliza lo que escribe el usuario
-        const searchTerm = e.target.value
-            .toLowerCase()
-            .replace(/\s+/g, ' ')
-            .trim();
+                    // Normaliza lo que escribe el usuario
+                    const searchTerm = e.target.value
+                        .toLowerCase()
+                        .replace(/\s+/g, ' ')
+                        .trim();
 
-        const table = document.getElementById('teachersTable');
-        const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+                    const table = document.getElementById('teachersTable');
+                    const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
 
-        for (let row of rows) {
+                    for (let row of rows) {
 
-            // Normaliza el texto real de la fila
-            const text = row.textContent
-                .toLowerCase()
-                .replace(/\s+/g, ' ')
-                .trim();
+                        // Normaliza el texto real de la fila
+                        const text = row.textContent
+                            .toLowerCase()
+                            .replace(/\s+/g, ' ')
+                            .trim();
 
-            if (text.includes(searchTerm)) {
-                row.style.display = '';
-            } else {
-                row.style.display = 'none';
+                        if (text.includes(searchTerm)) {
+                            row.style.display = '';
+                        } else {
+                            row.style.display = 'none';
+                        }
+                    }
+                });
             }
-        }
-    });
-}
 
             // Variables globales
             let asignacionesSeleccionadas = [];

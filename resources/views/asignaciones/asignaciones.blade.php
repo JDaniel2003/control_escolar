@@ -257,7 +257,7 @@
                                             @forelse ($asignaciones as $asignacion)
                                                 <tr class="text-center">
                                                     <td>
-                                                        {{ $asignacion->docente->nombre_completo ?? 'N/A' }}
+                                                        {{ $asignacion->docente->datosDocentes->load('abreviatura')->nombre_con_abreviatura ?? 'N/A' }}
                                                     </td>
                                                     <td>{{ $asignacion->materia->nombre ?? 'N/A' }}</td>
                                                     <td>{{ $asignacion->grupo->nombre ?? 'N/A' }}</td>

@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::table('datos_docentes', function (Blueprint $table) {
             $table->foreign(['id_domicilio_docente'], 'datos_docentes_ibfk_1')->references(['id_domicilio_docente'])->on('domicilios_docentes')->onUpdate('restrict')->onDelete('restrict');
             $table->foreign(['id_genero'], 'datos_docentes_ibfk_2')->references(['id_genero'])->on('generos')->onUpdate('restrict')->onDelete('restrict');
+            $table->foreign(['id_abreviatura'], 'fk_docente_abreviatura')->references(['id_abreviatura'])->on('abreviaturas')->onUpdate('restrict')->onDelete('restrict');
         });
     }
 
@@ -25,6 +26,7 @@ return new class extends Migration
         Schema::table('datos_docentes', function (Blueprint $table) {
             $table->dropForeign('datos_docentes_ibfk_1');
             $table->dropForeign('datos_docentes_ibfk_2');
+            $table->dropForeign('fk_docente_abreviatura');
         });
     }
 };

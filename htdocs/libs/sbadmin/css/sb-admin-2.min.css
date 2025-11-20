@@ -5970,6 +5970,93 @@ a.close.disabled {
   }
 }
 
+.modal-fullscreen {
+            max-width: 100%;
+            margin: 0;
+        }
+
+        .modal-fullscreen .modal-content {
+            height: 100vh;
+        }
+
+        #tablaCalificaciones {
+            font-size: 0.85rem;
+        }
+
+        #tablaCalificaciones th {
+            white-space: nowrap;
+            padding: 0.5rem;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        #tablaCalificaciones td {
+            padding: 0.25rem;
+            vertical-align: middle;
+        }
+
+        .alumno-cell {
+            position: sticky;
+            left: 0;
+            background: white;
+            z-index: 10;
+            font-weight: 500;
+        }
+
+        .matricula-cell {
+            position: sticky;
+            left: 50px;
+            background: white;
+            z-index: 10;
+        }
+
+        .nombre-cell {
+            position: sticky;
+            left: 170px;
+            background: white;
+            z-index: 10;
+        }
+
+        .calificacion-input-matriz {
+            width: 70px;
+            text-align: center;
+            font-weight: bold;
+            padding: 0.25rem;
+            border: 1px solid #dee2e6;
+        }
+
+        .calificacion-input-matriz:focus {
+            background-color: #fff3cd;
+            border-color: #28a745;
+        }
+
+        .calificacion-input-matriz.is-invalid {
+            border-color: #dc3545;
+            background-color: #f8d7da;
+        }
+
+        .calificacion-input-matriz[readonly] {
+            background-color: #e9ecef;
+            cursor: not-allowed;
+        }
+
+        .unidad-header {
+            background-color: #17a2b8 !important;
+            color: white !important;
+            font-weight: bold;
+        }
+
+        .evaluacion-header {
+            background-color: #6c757d !important;
+            color: white !important;
+            font-size: 0.75rem;
+        }
+
+        tr:hover .alumno-cell,
+        tr:hover .matricula-cell,
+        tr:hover .nombre-cell {
+            background-color: #f8f9fa;
+        }
 .tooltip {
   position: absolute;
   z-index: 1070;

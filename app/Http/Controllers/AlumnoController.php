@@ -61,8 +61,8 @@ if ($request->filled('busqueda')) {
     }
 
     // 🔹 Filtro por estatus académico
-    if ($request->filled('id_historial_status')) {
-        $query->where('id_historial_status', $request->id_historial_status);
+    if ($request->filled('estatus')) {
+        $query->where('estatus', $request->estatus);
     }
 
     // 🔹 Orden descendente por ID

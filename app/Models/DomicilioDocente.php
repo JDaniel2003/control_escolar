@@ -14,11 +14,11 @@ class DomicilioDocente extends Model
         'calle',
         'numero_exterior',
         'numero_interior',
-        'colonia',
         'codigo_postal',
-        'ciudad',
-        'estado',
-        'pais',
+        'id_distrito',      
+        'id_estado',        
+        'municipio',        
+        'colonia',
         'datos',
     ];
 

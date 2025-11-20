@@ -160,17 +160,16 @@
                                             @endforeach
                                         </select>
 
-                                        <!-- Estatus -->
-                                        <select name="id_historial_status"
-                                            class="form-control form-control-sm w-auto @error('id_historial_status') is-invalid @enderror">
+                                        <select name="estatus" class="form-control form-control-sm w-auto">
                                             <option value="">🔍 Buscar por Estatus</option>
                                             @foreach ($estatus as $status)
                                                 <option value="{{ $status->id_historial_status }}"
-                                                    {{ old('id_historial_status') == $status->id_historial_status ? 'selected' : '' }}>
+                                                    {{ request('estatus') == $status->id_historial_status ? 'selected' : '' }}>
                                                     {{ $status->nombre }}
                                                 </option>
                                             @endforeach
                                         </select>
+
 
                                         <!-- Mostrar -->
                                         <select name="mostrar" onchange="this.form.submit()"
@@ -371,16 +370,19 @@
                                                                             </div>
                                                                             <div class="p-4">
                                                                                 <div class="row">
-                                                                                    
+
                                                                                     @if ($alumno->estatus && in_array($alumno->estatus, [1, 2, 3, 4, 5, 6, 8, 9]))
-                                                                                    <div class="text-center col-md-5 mb-3">
-                                                                                        <label
-                                                                                            class="text-muted text-uppercase d-block">Carrera</label>
-                                                                                        <div class="font-weight-bold">
-                                                                                            {{ $alumno->datosAcademicos?->carrera?->nombre ?? 'No Asignada' }}
+                                                                                        <div
+                                                                                            class="text-center col-md-5 mb-3">
+                                                                                            <label
+                                                                                                class="text-muted text-uppercase d-block">Carrera</label>
+                                                                                            <div
+                                                                                                class="font-weight-bold">
+                                                                                                {{ $alumno->datosAcademicos?->carrera?->nombre ?? 'No Asignada' }}
+                                                                                            </div>
                                                                                         </div>
-                                                                                    </div>
-                                                                                    <div class="text-center col-md-4 mb-3">
+                                                                                        <div
+                                                                                            class="text-center col-md-4 mb-3">
                                                                                             <label
                                                                                                 class="text-muted text-uppercase d-block">Plan
                                                                                                 de Estudios</label>
@@ -389,14 +391,16 @@
                                                                                                 {{ $alumno->datosAcademicos?->planEstudio?->nombre ?? 'No asignado' }}
                                                                                             </div>
                                                                                         </div>
-                                                                                    <div class="text-center col-md-4 mb-3">
-                                                                                        <label
-                                                                                            class="text-muted text-uppercase d-block">Generación</label>
-                                                                                        <div class="font-weight-bold">
-                                                                                            {{ $alumno->generaciones?->nombre ?? 'N/A' }}
+                                                                                        <div
+                                                                                            class="text-center col-md-4 mb-3">
+                                                                                            <label
+                                                                                                class="text-muted text-uppercase d-block">Generación</label>
+                                                                                            <div
+                                                                                                class="font-weight-bold">
+                                                                                                {{ $alumno->generaciones?->nombre ?? 'N/A' }}
+                                                                                            </div>
                                                                                         </div>
-                                                                                    </div>
-                                                                                        
+
 
                                                                                         <div class="col-md-3 mb-3">
                                                                                             <label

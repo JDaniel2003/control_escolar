@@ -17,6 +17,7 @@ class DatosDocente extends Model
         'apellido_materno',
         'edad',
         'id_genero',
+        'id_abreviatura',
         'fecha_nacimiento',
         'cedula_profesional',
         'rfc',
@@ -66,6 +67,15 @@ class DatosDocente extends Model
     {
         return trim($this->nombre . ' ' . $this->apellido_paterno . ' ' . $this->apellido_materno);
     }
+public function abreviatura()
+{
+    return $this->belongsTo(Abreviatura::class, 'id_abreviatura', 'id_abreviatura');
+}
+public function getNombreConAbreviaturaAttribute()
+{
+    $abr = $this->abreviatura?->abreviatura ?? '';
+    return trim("{$abr} {$this->nombre_completo}");
+}
 
     /**
      * Obtener edad calculada desde fecha de nacimiento

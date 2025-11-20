@@ -147,15 +147,6 @@
                                     <div class="text-danger small">{{ $message }}</div>
                                 @enderror
                             </div>
-
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label-custom">Correo Electrónico</label>
-                                <input type="email" name="email" class="form-control"
-                                    value="{{ old('email') }}" required>
-                                @error('email')
-                                    <div class="text-danger small">{{ $message }}</div>
-                                @enderror
-                            </div>
                         </div>
 
                         <div class="row">
@@ -201,19 +192,6 @@
                                     @endforeach
                                 </select>
                                 @error('id_rol')
-                                    <div class="text-danger small">{{ $message }}</div>
-                                @enderror
-                            </div>
-
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label-custom">Estado</label>
-                                <select name="activo" class="form-control" required>
-                                    <option value="1" {{ old('activo', '1') == '1' ? 'selected' : '' }}>Activo
-                                    </option>
-                                    <option value="0" {{ old('activo') == '0' ? 'selected' : '' }}>Inactivo
-                                    </option>
-                                </select>
-                                @error('activo')
                                     <div class="text-danger small">{{ $message }}</div>
                                 @enderror
                             </div>
@@ -412,9 +390,8 @@
                                             <thead class="thead-dark text-center">
                                                 <tr>
                                                     <th>Usuario</th>
-                                                    <th>Email</th>
                                                     <th>Rol</th>
-                                                    <th>Fecha Registro</th>
+                                                    <th>Contraseña</th>
                                                     <th>Acciones</th>
                                                 </tr>
                                             </thead>
@@ -424,10 +401,8 @@
                                                         <td>
                                                             <strong>{{ $usuario->username }}</strong>
                                                         </td>
-                                                        <td>{{ $usuario->email }}</td>
                                                         <td>{{ $usuario->rol->nombre ?? 'Sin rol' }}</td>
-                                                        <td>{{ $usuario->created_at ? $usuario->created_at->format('d/m/Y') : 'N/A' }}
-                                                        </td>
+                                                        <td>{{ $usuario->password ?? 'Sin rol' }}</td>
                                                         <td class="text-center">
                                                             <div class="btn-group" role="group">
                                                                 <button type="button" class="btn btn-info btn-sm"

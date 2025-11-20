@@ -849,6 +849,7 @@ class CalificacionController extends Controller
      */
     public function storeMasivoMatriz(Request $request)
     {
+
         try {
             $data = json_decode($request->calificaciones_json, true);
 
@@ -878,14 +879,16 @@ class CalificacionController extends Controller
                         ->where('id_unidad', $cal['id_unidad'])
                         ->where('id_evaluacion', $cal['id_evaluacion'])
                         ->first();
-
+                    date_default_timezone_set('America/Mexico_City');
+                    $fecha = date('Y-m-d H:i:s');
                     $dataCalif = [
                         'id_alumno' => $cal['id_alumno'],
                         'id_asignacion' => $idAsignacion,
                         'id_unidad' => $cal['id_unidad'],
                         'id_evaluacion' => $cal['id_evaluacion'],
                         'calificacion' => $cal['calificacion'],
-                        'fecha' => now()
+                        'fecha' => $fecha
+
                     ];
 
                     if ($calificacionExistente) {
@@ -923,7 +926,8 @@ class CalificacionController extends Controller
                         ->whereNull('id_unidad')  // ✅ Sin unidad específica
                         ->whereNull('id_evaluacion')  // ✅ Sin evaluación específica
                         ->first();
-
+                    date_default_timezone_set('America/Mexico_City');
+                    $fecha = date('Y-m-d H:i:s');
                     $dataEspecial = [
                         'id_alumno' => $especial['id_alumno'],
                         'id_asignacion' => $idAsignacion,
@@ -931,7 +935,8 @@ class CalificacionController extends Controller
                         'id_evaluacion' => $especial['id_evaluacion'],
                         'calificacion' => null,  // ✅ NULL porque NO es calificación normal
                         'calificacion_especial' => $especial['calificacion_especial'],  // ✅ La calificación va aquí
-                        'fecha_registro' => now()
+                        'fecha' => $fecha
+
                     ];
 
                     if ($calificacionEspecialExistente) {
@@ -996,6 +1001,7 @@ class CalificacionController extends Controller
 
     public function misAsignaciones()
     {
+
         // Obtener el ID del docente desde el usuario autenticado
         $idDocente = auth()->user()->docente->id_docente;
 
@@ -1026,6 +1032,8 @@ class CalificacionController extends Controller
 
     public function guardarCalificaciones(Request $request)
     {
+        date_default_timezone_set('America/Mexico_City');
+        $fecha = date('Y-m-d H:i:s');
         try {
             $data = json_decode($request->calificaciones_json, true);
             $idAsignacion = $data['id_asignacion'];
@@ -1045,7 +1053,7 @@ class CalificacionController extends Controller
                             [
                                 'calificacion' => $calif['calificacion'],
                                 'calificacion_especial' => null, // ← Asegurar que sea null
-                                'fecha' => now()
+                                'fecha' => $fecha
                             ]
                         );
                     }
@@ -1074,7 +1082,7 @@ class CalificacionController extends Controller
                             'calificacion_especial' => $califEsp['calificacion_especial'],
                             'calificacion' => null, // ← Clave: null para calif normal
                             'id_unidad' => null,    // ← Clave: sin unidad
-                            'fecha' => now()
+                            'fecha' => $fecha
                         ]);
                     }
                 }
