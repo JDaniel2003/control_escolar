@@ -85,8 +85,8 @@ class AsignacionDocenteController extends Controller
             });
 
         $materias = Materia::all();
-        $grupos = Grupo::all();
-        $periodos = PeriodoEscolar::all();
+        $grupos = Grupo::whereIn('periodo', PeriodoEscolar::where('estado', 'Abierto')->pluck('id_periodo_escolar'))->get();
+        $periodos = PeriodoEscolar::where('estado', 'Abierto')->get();
         $carreras = Carrera::all();
         $numeroPeriodos = NumeroPeriodo::with('tipoPeriodo')->get();
 

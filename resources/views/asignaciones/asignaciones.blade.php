@@ -233,14 +233,7 @@
                                 @endif
 
                                 <!-- TEMPORAL: Obtener carreras directamente si no vienen del controlador -->
-                                @php
-                                    if (!isset($carreras)) {
-                                        $carreras = \App\Models\Carrera::all();
-                                    }
-                                    if (!isset($numeroPeriodos)) {
-                                        $numeroPeriodos = \App\Models\NumeroPeriodo::with('tipoPeriodo')->get();
-                                    }
-                                @endphp
+                                
 
                                 <div class="table-responsive">
                                     <table class="table table-bordered table-hover">

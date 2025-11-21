@@ -377,4 +377,6 @@ class DocentesController extends Controller
 
         return view('docentes.index', compact('docentes', 'generos', 'distritos', 'estados', 'usuarios'));
     }
+    
+    
 }

@@ -22,6 +22,7 @@ use App\Http\Controllers\CoordinadorController;
 use App\Http\Controllers\DocenteController;
 use App\Http\Controllers\DocentesController;
 use App\Http\Controllers\EstudianteController;
+use App\Http\Controllers\GrupoController;
 use App\Http\Controllers\UserController;
 
 
@@ -350,3 +351,5 @@ Route::post('/calificaciones/matriz-completa', [CalificacionController::class, '
     ->name('calificaciones.matriz.completa');
     Route::post('/calificaciones/guardar', [CalificacionController::class, 'guardarCalificaciones'])
     ->name('calificaciones.guardar');
+
+    Route::resource('grupos', GrupoController::class);

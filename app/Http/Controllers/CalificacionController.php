@@ -1000,35 +1000,38 @@ class CalificacionController extends Controller
     }
 
     public function misAsignaciones()
-    {
+{
+    // Obtener el ID del docente desde el usuario autenticado
+    $idDocente = auth()->user()->docente->id_docente;
 
-        // Obtener el ID del docente desde el usuario autenticado
-        $idDocente = auth()->user()->docente->id_docente;
-
-        if (!$idDocente) {
-            return view('docente.asignaciones', ['asignaciones' => collect()])
-                ->with('mensaje', 'No tienes un ID de docente asignado.');
-        }
-
-        // Cargar asignaciones con relaciones
-        $asignaciones = AsignacionDocente::with([
-            'materia',
-            'grupo.periodoEscolar' // ← Usa el nombre EXACTO del método
-        ])
-            ->where('id_docente', $idDocente)
-            ->get()
-            ->map(function ($asignacion) {
-                return [
-                    'id_asignacion' => $asignacion->id_asignacion,
-                    'materia' => $asignacion->materia?->nombre ?? 'Sin materia',
-                    'grupo' => $asignacion->grupo?->nombre ?? 'Sin grupo',
-                    'periodo' => $asignacion->grupo?->periodoEscolar?->nombre ?? 'Sin período',
-                    'id_grupo' => $asignacion->id_grupo,
-                    'id_periodo' => $asignacion->grupo?->periodoEscolar?->id_periodo_escolar
-                ];
-            });
-        return view('docente.asignaciones', compact('asignaciones'));
+    if (!$idDocente) {
+        return view('docente.asignaciones', ['asignaciones' => collect()])
+            ->with('mensaje', 'No tienes un ID de docente asignado.');
     }
+
+    // Cargar solo asignaciones cuyo período escolar esté ABIERTO
+    $asignaciones = AsignacionDocente::with([
+            'materia',
+            'grupo.periodoEscolar'
+        ])
+        ->where('id_docente', $idDocente)
+        ->whereHas('grupo.periodoEscolar', function ($query) {
+            $query->where('estado', 'abierto');
+        })
+        ->get()
+        ->map(function ($asignacion) {
+            return [
+                'id_asignacion' => $asignacion->id_asignacion,
+                'materia' => $asignacion->materia?->nombre ?? 'Sin materia',
+                'grupo' => $asignacion->grupo?->nombre ?? 'Sin grupo',
+                'periodo' => $asignacion->grupo?->periodoEscolar?->nombre ?? 'Sin período',
+                'id_grupo' => $asignacion->id_grupo,
+                'id_periodo' => $asignacion->grupo?->periodoEscolar?->id_periodo_escolar, // ← Usa el ID, no el nombre
+            ];
+        });
+
+    return view('docente.asignaciones', compact('asignaciones'));
+}
 
     public function guardarCalificaciones(Request $request)
     {

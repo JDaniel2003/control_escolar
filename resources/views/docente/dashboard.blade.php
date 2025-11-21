@@ -54,7 +54,7 @@
         </div>
 
         <div class="collapse navbar-collapse ml-4">
-            <ul class="navbar-nav" style="padding-left: 20%;">
+            <ul class="navbar-nav" style="padding-left: 75%;">
                 <li class="nav-item">
                     <a class="nav-link navbar-active-item px-3 mr-1" href="{{ route('docente.dashboard') }}">Inicio</a>
                 </li>

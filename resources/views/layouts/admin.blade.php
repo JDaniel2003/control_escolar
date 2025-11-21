@@ -181,7 +181,8 @@
                                 </div>
 
                                  <!-- GRUPOS -->
-                                <div class="col-md-6 col-lg-4 mb-4">
+                                <div onclick="window.location.href='{{ route('grupos.index') }}'"
+                                    class="col-md-6 col-lg-4 mb-4">
                                     <div class="logout-link card border-success h-100"
                                         style="border-width: 3px; border-radius: 25px;">
                                         <div class="card-body d-flex justify-content-between align-items-center py-4">
@@ -192,7 +193,8 @@
                                 </div>
 
                                 <!-- INSCRIPCIONES -->
-                                <div class="col-md-6 col-lg-4 mb-4">
+                                <div onclick="window.location.href='{{ route('historial.index') }}'"
+                                    class="col-md-6 col-lg-4 mb-4">
                                     <div class="logout-link card border-success h-100"
                                         style="border-width: 3px; border-radius: 25px;">
                                         <div class="card-body d-flex justify-content-between align-items-center py-4">
@@ -214,7 +216,8 @@
                                     </div>
                                 </div>
 
-                                <div class="col-md-6 col-lg-4 mb-4">
+                                <div onclick="window.location.href='{{ route('historial.index') }}'"
+                                    class="col-md-6 col-lg-4 mb-4">
                                     <div class="logout-link card border-success h-100"
                                         style="border-width: 3px; border-radius: 25px;">
                                         <div class="card-body d-flex justify-content-between align-items-center py-4">
@@ -250,7 +253,8 @@
                                     </div>
                                 </div>
 
-                                <div class="col-md-6 col-lg-4 mb-4">
+                                <div onclick="window.location.href='{{ route('historial.index') }}'"
+                                    class="col-md-6 col-lg-4 mb-4">
                                     <div class="logout-link card border-success h-100"
                                         style="border-width: 3px; border-radius: 25px;">
                                         <div class="card-body d-flex justify-content-between align-items-center py-4">
@@ -260,7 +264,8 @@
                                     </div>
                                 </div>
 
-                                <div class="col-md-6 col-lg-4 mb-4">
+                                <div onclick="window.location.href='{{ route('asignaciones.index') }}'"
+                                    class="col-md-6 col-lg-4 mb-4">
                                     <div class="logout-link card border-success h-100"
                                         style="border-width: 3px; border-radius: 25px;">
                                         <div class="card-body d-flex justify-content-between align-items-center py-4">

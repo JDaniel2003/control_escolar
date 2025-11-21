@@ -55,7 +55,7 @@
         </div>
 
         <div class="collapse navbar-collapse ml-4">
-            <ul class="navbar-nav" style="padding-left: 20%;">
+            <ul class="navbar-nav" style="padding-left: 75%;">
                 <li class="nav-item">
                     <a class="nav-link text-white px-3 mr-1" href="{{ route('docente.dashboard') }}">Inicio</a>
                 </li>
@@ -156,12 +156,16 @@
     <div class="modal fade" id="modalCalificar" tabindex="-1" role="dialog">
         <div class="modal-dialog modal-fullscreen" role="document">
             <div class="modal-content">
-                <div class="modal-header">
+                <div class="modal-header modal-header-custom border-0">
+                    <div class="w-100 text-center">
                     <h5 class="mb-0 font-weight-bold">
                         <i class="fas fa-graduation-cap mr-2"></i>
                         <span id="tituloModal">Calificar Materia</span>
                     </h5>
-                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    
+                        </div>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Cerrar"
+                        style="position: absolute; right: 1.5rem; top: 1.5rem; font-size: 1.8rem; opacity: 0.9;">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
@@ -276,7 +280,7 @@
                 console.log('Datos del modal:', datosModal);
 
                 // Actualizar título
-                $('#tituloModal').text(`Calificar: ${datosModal.materia} - ${datosModal.grupo}`);
+                $('#tituloModal').text(`Calificar Alumnos de la materia: ${datosModal.materia} - ${datosModal.grupo}`);
                 
                 // Llenar selects
                 $('#periodoCalificar').html(`<option value="${datosModal.id_periodo}" selected>${datosModal.id_periodo}</option>`);

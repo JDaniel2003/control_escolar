@@ -6,14 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="">
     <meta name="author" content="">
-    <title>Usuarios</title>
+    <title>Grupos</title>
     <link href="{{ asset('libs/fontawesome/css/all.min.css') }}" rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
     <link rel="icon" type="image/png" href="{{ asset('libs/sbadmin/img/up_logo.png') }}">
     <link href="{{ asset('libs/sbadmin/css/sb-admin-2.min.css') }}" rel="stylesheet">
 </head>
 <body id="page-top">
-    <!-- Top Header -->
     <!-- Top Header -->
     <div class="bg-danger text-white1 text-center py-2">
         <div class="d-flex justify-content-between align-items-center px-4">
@@ -55,7 +54,6 @@
                 <li class="nav-item"><a class="nav-link text-white px-3 mr-1" href="{{ route('materias.index') }}">Materias</a></li>
                 <li class="nav-item"><a class="nav-link text-white px-3 mr-1" href="{{ route('planes.index') }}">Planes de estudio</a></li>
                 <li class="nav-item"><a class="nav-link text-white px-3 mr-1" href="{{ route('alumnos.index') }}">Alumnos</a></li>
-                <li class="nav-item"><a class="nav-link text-white px-3 mr-1" href="{{ route('asignaciones.index') }}">Asignaciones Docentes</a></li>
                 <li class="nav-item"><a class="nav-link text-white px-3" href="{{ route('historial.index') }}">Historial</a></li>
                 <li class="nav-item"><a class="nav-link text-white px-3" href="#">Calificaciones</a></li>
             </ul>
@@ -76,13 +74,13 @@
             <div id="content">
                 <div class="container-fluid py-5">
                     <h1 class="text-danger text-center mb-5" style="font-size: 2.5rem; font-family: 'Arial Black', Verdana, sans-serif; font-weight: bold;">
-                        Gestión de Usuarios
+                        Gestión de Grupos
                     </h1>
                     <div class="row justify-content-center">
                         <div class="col-lg-10">
                             <div class="mb-3 text-right">
-                                <button type="button" class="btn btn-success" data-toggle="modal" data-target="#crearUsuarioModal">
-                                    <i class="fas fa-user-plus"></i> Nuevo Usuario
+                                <button type="button" class="btn btn-success" data-toggle="modal" data-target="#crearGrupoModal">
+                                    <i class="fas fa-plus"></i> Nuevo Grupo
                                 </button>
                             </div>
 
@@ -98,36 +96,34 @@
                                     <table class="table table-bordered table-hover text-center">
                                         <thead class="thead-dark">
                                             <tr>
-                                                <th>Usuario</th>
-                                                <th>Rol</th>
+                                                <th>Nombre</th>
+                                                <th>Carrera</th>
+                                                <th>Turno</th>
+                                                <th>Período</th>
                                                 <th>Acciones</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            @forelse ($usuarios as $usuario)
+                                            @forelse ($grupos as $grupo)
                                                 <tr>
-                                                    <td>{{ $usuario->username }}</td>
-                                                    <td>{{ $usuario->rol->nombre ?? 'Sin rol' }}</td>
-                                                    
+                                                    <td>{{ $grupo->nombre }}</td>
+                                                    <td>{{ $grupo->carrera?->nombre ?? '—' }}</td>
+                                                    <td>{{ $grupo->turno?->nombre ?? '—' }}</td>
+                                                    <td>{{ $grupo->periodoEscolar?->nombre ?? '—' }}</td>
                                                     <td>
                                                         <!-- Ver -->
                                                         <button class="btn btn-info btn-sm" data-toggle="modal"
-                                                            data-target="#verUsuarioModal{{ $usuario->id_usuario }}">
+                                                            data-target="#verGrupoModal{{ $grupo->id_grupo }}">
                                                             <i class="fas fa-eye"></i> Ver
                                                         </button>
                                                         <!-- Editar -->
                                                         <button class="btn btn-warning btn-sm" data-toggle="modal"
-                                                            data-target="#editarUsuarioModal{{ $usuario->id_usuario }}">
+                                                            data-target="#editarGrupoModal{{ $grupo->id_grupo }}">
                                                             <i class="fas fa-edit"></i> Editar
                                                         </button>
-                                                        <!-- Contraseña -->
-                                                        <button class="btn btn-secondary btn-sm" data-toggle="modal"
-                                                            data-target="#cambiarPasswordModal{{ $usuario->id_usuario }}">
-                                                            <i class="fas fa-key"></i>Cambiar Contraseña
-                                                        </button>
                                                         <!-- Eliminar -->
-                                                        <form action="{{ route('usuarios.destroy', $usuario->id_usuario) }}" method="POST"
-                                                            style="display:inline;" onsubmit="return confirm('¿Eliminar este usuario?');">
+                                                        <form action="{{ route('grupos.destroy', $grupo->id_grupo) }}" method="POST"
+                                                            style="display:inline;" onsubmit="return confirm('¿Eliminar este grupo?');">
                                                             @csrf @method('DELETE')
                                                             <button type="submit" class="btn btn-danger btn-sm">
                                                                 <i class="fas fa-trash-alt"></i> Eliminar
@@ -136,22 +132,25 @@
                                                     </td>
                                                 </tr>
 
-                                                <!-- Modal Ver Usuario -->
-                                                <div class="modal fade" id="verUsuarioModal{{ $usuario->id_usuario }}" tabindex="-1" role="dialog">
+                                                <!-- Modal Ver Grupo -->
+                                                <div class="modal fade" id="verGrupoModal{{ $grupo->id_grupo }}" tabindex="-1" role="dialog">
                                                     <div class="modal-dialog" role="document">
                                                         <div class="modal-content">
                                                             <div class="modal-header bg-info text-white">
-                                                                <h5 class="modal-title">👁️ Detalles del Usuario</h5>
+                                                                <h5 class="modal-title">👁️ Detalles del Grupo</h5>
                                                                 <button type="button" class="close text-white" data-dismiss="modal" aria-label="Cerrar">
                                                                     <span aria-hidden="true">&times;</span>
                                                                 </button>
                                                             </div>
                                                             <div class="modal-body">
-                                                                <p><strong>Usuario:</strong> {{ $usuario->username }}</p>
-                                                                <p><strong>Contraseña:</strong> {{ $usuario->password }}</p>
-                                                                <p><strong>Rol:</strong> {{ $usuario->rol->nombre ?? 'Sin rol' }}</p>
-                                                                <p><strong>Estado:</strong> {{ $usuario->activo ? 'Activo' : 'Inactivo' }}</p>
-                                                                <p><strong>Registrado:</strong> {{ $usuario->created_at ? $usuario->created_at->format('d/m/Y H:i') : '—' }}</p>
+                                                                <p><strong>Nombre:</strong> {{ $grupo->nombre }}</p>
+                                                                <p><strong>Carrera:</strong> {{ $grupo->carrera?->nombre ?? 'No asignada' }}</p>
+                                                                <p><strong>Turno:</strong> {{ $grupo->turno?->nombre ?? 'No asignado' }}</p>
+                                                                <p><strong>Período Escolar:</strong> {{ $grupo->periodoEscolar?->nombre ?? 'No asignado' }}</p>
+                                                                @if($grupo->datos)
+                                                                    <p><strong>Datos Adicionales:</strong></p>
+                                                                    <pre>{{ json_encode(json_decode($grupo->datos), JSON_PRETTY_PRINT) }}</pre>
+                                                                @endif
                                                             </div>
                                                             <div class="modal-footer">
                                                                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
@@ -160,45 +159,56 @@
                                                     </div>
                                                 </div>
 
-                                                <!-- Modal Editar Usuario -->
-                                                <div class="modal fade" id="editarUsuarioModal{{ $usuario->id_usuario }}" tabindex="-1" role="dialog">
-                                                    <div class="modal-dialog modal-lg" role="document">
+                                                <!-- Modal Editar Grupo -->
+                                                <div class="modal fade" id="editarGrupoModal{{ $grupo->id_grupo }}" tabindex="-1" role="dialog">
+                                                    <div class="modal-dialog" role="document">
                                                         <div class="modal-content">
                                                             <div class="modal-header bg-warning">
-                                                                <h5 class="modal-title">✏️ Editar Usuario</h5>
+                                                                <h5 class="modal-title">✏️ Editar Grupo</h5>
                                                                 <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
                                                                     <span aria-hidden="true">&times;</span>
                                                                 </button>
                                                             </div>
                                                             <div class="modal-body">
-                                                                <form action="{{ route('usuarios.update', $usuario->id_usuario) }}" method="POST">
+                                                                <form action="{{ route('grupos.update', $grupo->id_grupo) }}" method="POST">
                                                                     @csrf @method('PUT')
-                                                                    <div class="row">
-                                                                        <div class="col-md-6 mb-3">
-                                                                            <label>Usuario <span class="text-danger">*</span></label>
-                                                                            <input type="text" name="username" class="form-control"
-                                                                                value="{{ old('username', $usuario->username) }}" required>
-                                                                        </div>
-                                                                        <!-- ❌ CORREO ELIMINADO -->
+                                                                    <div class="mb-3">
+                                                                        <label>Nombre del Grupo <span class="text-danger">*</span></label>
+                                                                        <input type="text" name="nombre" class="form-control"
+                                                                            value="{{ old('nombre', $grupo->nombre) }}" required>
                                                                     </div>
-                                                                    <div class="row">
-                                                                        <div class="col-md-6 mb-3">
-                                                                            <label>Rol <span class="text-danger">*</span></label>
-                                                                            <select name="id_rol" class="form-control" required>
-                                                                                @foreach($roles as $rol)
-                                                                                    <option value="{{ $rol->id_rol }}" {{ old('id_rol', $usuario->id_rol) == $rol->id_rol ? 'selected' : '' }}>
-                                                                                        {{ $rol->nombre }}
-                                                                                    </option>
-                                                                                @endforeach
-                                                                            </select>
-                                                                        </div>
-                                                                        <div class="col-md-6 mb-3">
-                                                                            <label>Estado</label>
-                                                                            <select name="activo" class="form-control">
-                                                                                <option value="1" {{ old('activo', $usuario->activo) == 1 ? 'selected' : '' }}>Activo</option>
-                                                                                <option value="0" {{ old('activo', $usuario->activo) == 0 ? 'selected' : '' }}>Inactivo</option>
-                                                                            </select>
-                                                                        </div>
+                                                                    <div class="mb-3">
+                                                                        <label>Carrera</label>
+                                                                        <select name="id_carrera" class="form-control">
+                                                                            <option value="">-- Sin carrera --</option>
+                                                                            @foreach($carreras as $carrera)
+                                                                                <option value="{{ $carrera->id_carrera }}" {{ old('id_carrera', $grupo->id_carrera) == $carrera->id_carrera ? 'selected' : '' }}>
+                                                                                    {{ $carrera->nombre }}
+                                                                                </option>
+                                                                            @endforeach
+                                                                        </select>
+                                                                    </div>
+                                                                    <div class="mb-3">
+                                                                        <label>Turno</label>
+                                                                        <select name="id_turno" class="form-control">
+                                                                            <option value="">-- Sin turno --</option>
+                                                                            @foreach($turnos as $turno)
+                                                                                <option value="{{ $turno->id_turno }}" {{ old('id_turno', $grupo->id_turno) == $turno->id_turno ? 'selected' : '' }}>
+                                                                                    {{ $turno->nombre }}
+                                                                                </option>
+                                                                            @endforeach
+                                                                        </select>
+                                                                    </div>
+                                                                    <div class="mb-3">
+                                                                        <label>Período Escolar</label>
+                                                                        <select name="periodo" class="form-control">
+                                                                            <option value="">-- Sin período --</option>
+                                                                            @foreach($periodos as $periodo)
+                                                                                <option value="{{ $periodo->id_periodo_escolar }}" {{ old('periodo', $grupo->periodo) == $periodo->id_periodo_escolar ? 'selected' : '' }}>
+                                                                                    {{ $periodo->nombre }}
+                                                                                </option>
+                                                                            @endforeach
+                                                                        </select>
                                                                     </div>
                                                                     <div class="text-right mt-3">
                                                                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
@@ -209,42 +219,9 @@
                                                         </div>
                                                     </div>
                                                 </div>
-
-                                                <!-- Modal Cambiar Contraseña -->
-                                                <div class="modal fade" id="cambiarPasswordModal{{ $usuario->id_usuario }}" tabindex="-1" role="dialog">
-                                                    <div class="modal-dialog" role="document">
-                                                        <div class="modal-content">
-                                                            <div class="modal-header bg-secondary text-white">
-                                                                <h5 class="modal-title">🔑 Cambiar Contraseña</h5>
-                                                                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Cerrar">
-                                                                    <span aria-hidden="true">&times;</span>
-                                                                </button>
-                                                            </div>
-                                                            <div class="modal-body">
-                                                                <form action="{{ route('usuarios.update', $usuario->id_usuario) }}" method="POST">
-                                                                    @csrf @method('PUT')
-                                                                    <input type="hidden" name="change_password" value="1">
-                                                                    <div class="mb-3">
-                                                                        <label>Nueva Contraseña <span class="text-danger">*</span></label>
-                                                                        <input type="password" name="password" class="form-control" minlength="8" required>
-                                                                        <div class="form-text">Mínimo 8 caracteres</div>
-                                                                    </div>
-                                                                    <div class="mb-3">
-                                                                        <label>Confirmar Contraseña <span class="text-danger">*</span></label>
-                                                                        <input type="password" name="password_confirmation" class="form-control" required>
-                                                                    </div>
-                                                                    <div class="text-right mt-3">
-                                                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                                                                        <button type="submit" class="btn btn-success">Actualizar Contraseña</button>
-                                                                    </div>
-                                                                </form>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
                                             @empty
                                                 <tr>
-                                                    <td colspan="4" class="text-muted text-center">No hay usuarios registrados</td>
+                                                    <td colspan="5" class="text-muted text-center">No hay grupos registrados</td>
                                                 </tr>
                                             @endforelse
                                         </tbody>
@@ -266,51 +243,53 @@
         </div>
     </div>
 
-    <!-- Modal Crear Usuario -->
-    <div class="modal fade" id="crearUsuarioModal" tabindex="-1" role="dialog">
-        <div class="modal-dialog modal-lg" role="document">
+    <!-- Modal Crear Grupo -->
+    <div class="modal fade" id="crearGrupoModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header modal-header-custom">
-                    <h5 class="modal-title">👨‍💻 Crear Nuevo Usuario</h5>
+                    <h5 class="modal-title">🆕 Crear Nuevo Grupo</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form action="{{ route('usuarios.store') }}" method="POST">
+                    <form action="{{ route('grupos.store') }}" method="POST">
                         @csrf
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label>Nombre de Usuario <span class="text-danger">*</span></label>
-                                <input type="text" name="username" class="form-control" required>
-                            </div>
+                        <div class="mb-3">
+                            <label>Nombre del Grupo <span class="text-danger">*</span></label>
+                            <input type="text" name="nombre" class="form-control" placeholder="Ej: 1A, 2B, etc." required>
                         </div>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label>Contraseña <span class="text-danger">*</span></label>
-                                <input type="password" name="password" class="form-control" minlength="8" required>
-                                <div class="form-text">Mínimo 8 caracteres</div>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label>Confirmar Contraseña <span class="text-danger">*</span></label>
-                                <input type="password" name="password_confirmation" class="form-control" required>
-                            </div>
+                        <div class="mb-3">
+                            <label>Carrera</label>
+                            <select name="id_carrera" class="form-control">
+                                <option value="">-- Selecciona una carrera --</option>
+                                @foreach($carreras as $carrera)
+                                    <option value="{{ $carrera->id_carrera }}">{{ $carrera->nombre }}</option>
+                                @endforeach
+                            </select>
                         </div>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label>Rol <span class="text-danger">*</span></label>
-                                <select name="id_rol" class="form-control" required>
-                                    <option value="">-- Selecciona un rol --</option>
-                                    @foreach($roles as $rol)
-                                        <option value="{{ $rol->id_rol }}">{{ $rol->nombre }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
+                        <div class="mb-3">
+                            <label>Turno</label>
+                            <select name="id_turno" class="form-control">
+                                <option value="">-- Selecciona un turno --</option>
+                                @foreach($turnos as $turno)
+                                    <option value="{{ $turno->id_turno }}">{{ $turno->nombre }}</option>
+                                @endforeach
+                            </select>
                         </div>
-                        <!-- ❌ CORREO ELIMINADO -->
+                        <div class="mb-3">
+                            <label>Período Escolar</label>
+                            <select name="periodo" class="form-control">
+                                <option value="">-- Selecciona un período --</option>
+                                @foreach($periodos as $periodo)
+                                    <option value="{{ $periodo->id_periodo_escolar }}">{{ $periodo->nombre }}</option>
+                                @endforeach
+                            </select>
+                        </div>
                         <div class="text-right mt-3">
                             <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                            <button type="submit" class="btn btn-success">Crear Usuario</button>
+                            <button type="submit" class="btn btn-success">Crear Grupo</button>
                         </div>
                     </form>
                 </div>
