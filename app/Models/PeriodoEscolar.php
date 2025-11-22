@@ -19,12 +19,17 @@ class PeriodoEscolar extends Model
         'fecha_inicio',
         'fecha_fin',
         'estado',
+        'id_ciclo',
         'datos',
     ];
 
     public function tipoPeriodo()
 {
     return $this->belongsTo(TipoPeriodo::class, 'id_tipo_periodo');
+}
+public function ciclos()
+{
+    return $this->belongsTo(Ciclo::class, 'id_ciclo');
 }
 
 }

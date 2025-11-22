@@ -29,14 +29,19 @@ class AsignacionDocenteController extends Controller
 
         // Filtro por docente
         if ($request->filled('buscar')) { 
-            $busqueda = $request->buscar; 
+    $busqueda = $request->buscar;
 
-            $query->whereHas('docente.datosDocentes', function ($q) use ($busqueda) {
-                $q->where('nombre', 'LIKE', '%' . $busqueda . '%')
-                  ->orWhere('apellido_paterno', 'LIKE', '%' . $busqueda . '%')
-                  ->orWhere('apellido_materno', 'LIKE', '%' . $busqueda . '%');
-            });
-        }
+    $query->whereHas('docente.datosDocentes', function ($q) use ($busqueda) {
+        $q->where('nombre', 'LIKE', '%' . $busqueda . '%')
+          ->orWhere('apellido_paterno', 'LIKE', '%' . $busqueda . '%')
+          ->orWhere('apellido_materno', 'LIKE', '%' . $busqueda . '%')
+          ->orWhereHas('abreviatura', function ($qa) use ($busqueda) {
+              $qa->where('nombre', 'LIKE', '%' . $busqueda . '%')
+                 ->orWhere('abreviatura', 'LIKE', '%' . $busqueda . '%');
+          });
+    });
+}
+
 
         if ($request->filled('buscar_materia')) {
             $busquedaMateria = $request->buscar_materia;

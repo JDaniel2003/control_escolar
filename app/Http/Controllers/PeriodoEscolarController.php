@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Ciclo;
 use App\Models\PeriodoEscolar;
 use App\Models\TipoPeriodo;
 use Illuminate\Http\Request;
@@ -53,56 +54,125 @@ if ($request->filled('fecha_fin')) {
         
         // Para llenar el select de tipos
         $tipos = TipoPeriodo::all();
-        return view('layouts.periodos', compact('periodos', 'tipos'));
+        $ciclos = Ciclo::all();
+        $cicloActual = Ciclo::where('estado', 'Activo')->first();
+        return view('layouts.periodos', compact('periodos', 'tipos','ciclos','cicloActual'));
     }
 
     ///////////////////////////////////////////////////////////////////////////////
     public function create()
     {
         $tipos = TipoPeriodo::all();
-        return view('periodos.create', compact('tipos'));
+        $ciclos = Ciclo::all();
+        return view('periodos.create', compact('tipos','ciclos'));
     }
 
     public function store(Request $request)
-    {
-        // Validación de todos los campos
-        $request->validate([
-            'nombre' => [
-                'required',
-                'string',
-                'max:255',
-                'unique:periodos_escolares,nombre',
-                // formato con guion (ejemplo: JULIO-DICIEMBRE 2024)
-                'regex:/^[A-ZÁÉÍÓÚÑ]+-[A-ZÁÉÍÓÚÑ]+ \d{4}$/'
+{
+    // 1️⃣ Validación básica
+    $request->validate([
+        'nombre' => [
+            'required',
+            'string',
+            'max:255',
+            'unique:periodos_escolares,nombre',
+            'regex:/^[A-ZÁÉÍÓÚÑ]+-[A-ZÁÉÍÓÚÑ]+ \d{4}$/'
+        ],
+        'id_tipo_periodo' => 'required|exists:tipos_periodos,id_tipo_periodo',
+        'fecha_inicio' => 'required|date',
+        'fecha_fin' => 'required|date|after_or_equal:fecha_inicio',
+        'estado' => 'required|in:Abierto,Cerrado',
+    ]);
 
-            ],
-            'id_tipo_periodo' => 'required|exists:tipos_periodos,id_tipo_periodo',
-            // 🔹 obligatorio y debe existir
-            'fecha_inicio' => 'required|date',
-            'fecha_fin' => 'required|date|after_or_equal:fecha_inicio',
-            'estado' => 'required|in:Abierto,Cerrado',
-        ], [
-            // Mensajes personalizados
-            'nombre.unique' => 'El nombre del período ya existe.',
-            'nombre.regex' => 'El nombre debe tener el formato JULIO-DICIEMBRE 2024.',
-            'nombre.required' => 'El campo nombre es obligatorio.',
-            'id_tipo_periodo.required' => 'Debes seleccionar un tipo de período.',
-            'id_tipo_periodo.exists' => 'El tipo de período seleccionado no es válido.',
-        ]);
+    // 2️⃣ Obtener duración del tipo de período
+    $tipo = TipoPeriodo::findOrFail($request->id_tipo_periodo);
+    $duracionMeses = (int)$tipo->duracion; // ejemplo: 6 = semestre, 3 = trimestre, etc.
 
-        // Inserción en la base de datos
-        PeriodoEscolar::create([
-            'nombre' => $request->nombre,
-            'id_tipo_periodo' => $request->id_tipo_periodo,
-            'fecha_inicio' => $request->fecha_inicio,
-            'fecha_fin' => $request->fecha_fin,
-            'estado' => $request->estado,
-        ]);
+    // 3️⃣ Calcular fechas usando Carbon
+    $fechaInicio = \Carbon\Carbon::parse($request->fecha_inicio);
+    $fechaFin = \Carbon\Carbon::parse($request->fecha_fin);
 
-        // Redirección con mensaje de éxito
-        return redirect()->route('periodos.index')
-            ->with('success', 'Período escolar creado correctamente.');
+    // 📅 Validar que la fecha fin sea posterior a la fecha inicio
+    if ($fechaFin->lte($fechaInicio)) {
+        return back()
+            ->withErrors([
+                'fecha_fin' => 'La fecha de fin debe ser posterior a la fecha de inicio.'
+            ])
+            ->withInput();
     }
+
+    // 📊 Calcular diferencia en meses considerando solo año y mes (ignorando días)
+    $mesInicio = $fechaInicio->month;
+    $anioInicio = $fechaInicio->year;
+    $mesFin = $fechaFin->month;
+    $anioFin = $fechaFin->year;
+    
+    // Fórmula: (año_fin - año_inicio) * 12 + (mes_fin - mes_inicio) + 1
+    // El +1 es porque contamos ambos meses (inicio y fin)
+    $mesesReales = (($anioFin - $anioInicio) * 12) + ($mesFin - $mesInicio) + 1;
+    
+    // 🔍 Validar que la duración en meses coincida exactamente
+    if ($mesesReales !== $duracionMeses) {
+        // Calcular el mes esperado de finalización
+        $mesFinEsperado = $fechaInicio->copy()->addMonths($duracionMeses - 1);
+        $nombreMesEsperado = ucfirst($mesFinEsperado->translatedFormat('F \d\e Y'));
+        
+        return back()
+            ->withErrors([
+                'fecha_fin' => sprintf(
+                    'La duración del período debe ser de %d meses. ' .
+                    'Con fecha inicio: %s (%s de %d), la fecha fin debe estar en %s (cualquier día). ' .
+                    'Actualmente la duración es de %d meses.',
+                    $duracionMeses,
+                    $fechaInicio->format('d/m/Y'),
+                    ucfirst($fechaInicio->translatedFormat('F')),
+                    $anioInicio,
+                    $nombreMesEsperado,
+                    $mesesReales
+                )
+            ])
+            ->withInput();
+    }
+
+
+    // 4️⃣ Crear período
+    PeriodoEscolar::create([
+        'nombre' => $request->nombre,
+        'id_tipo_periodo' => $request->id_tipo_periodo,
+        'fecha_inicio' => $request->fecha_inicio,
+        'fecha_fin' => $request->fecha_fin,
+        'estado' => $request->estado,
+        'id_ciclo' => $request->id_ciclo,
+    ]);
+
+    return redirect()->route('periodos.index')
+        ->with('success', 'Período escolar creado correctamente.');
+}
+
+// 🎯 MÉTODO ADICIONAL: Calcular automáticamente la fecha fin
+public function calcularFechaFin(Request $request)
+{
+    $request->validate([
+        'fecha_inicio' => 'required|date',
+        'id_tipo_periodo' => 'required|exists:tipos_periodos,id_tipo_periodo'
+    ]);
+
+    $tipo = TipoPeriodo::findOrFail($request->id_tipo_periodo);
+    $duracionMeses = (int)$tipo->duracion;
+    
+    $fechaInicio = \Carbon\Carbon::parse($request->fecha_inicio);
+    
+    // Sumar los meses de duración y restar 1 para quedarnos en el mismo mes
+    // Ejemplo: 15/01/2025 + 6 meses - 1 mes = mes de Junio
+    $fechaFin = $fechaInicio->copy()->addMonths($duracionMeses - 1)->endOfMonth();
+
+    return response()->json([
+        'fecha_fin' => $fechaFin->format('Y-m-d'),
+        'fecha_fin_formateada' => $fechaFin->format('d/m/Y'),
+        'duracion_meses' => $duracionMeses,
+        'mes_fin' => $fechaFin->translatedFormat('F Y')
+    ]);
+}
 
     public function edit($id)
     {
@@ -112,37 +182,91 @@ if ($request->filled('fecha_fin')) {
     }
 
     public function update(Request $request, $id)
-    {
-        $request->validate([
-            'nombre' => [
-                'required',
-                'string',
-                'max:255',
-                'unique:periodos_escolares,nombre,' . $id . ',id_periodo_escolar',
-                // formato con guion (ejemplo: JULIO-DICIEMBRE 2024)
-                'regex:/^[A-ZÁÉÍÓÚÑ]+-[A-ZÁÉÍÓÚÑ]+ \d{4}$/'
+{
+    // 1️⃣ Validación básica
+    $request->validate([
+        'nombre' => [
+            'required',
+            'string',
+            'max:255',
+            'regex:/^[A-ZÁÉÍÓÚÑ]+-[A-ZÁÉÍÓÚÑ]+ \d{4}$/'
+        ],
+        'id_tipo_periodo' => 'required|exists:tipos_periodos,id_tipo_periodo',
+        'fecha_inicio' => 'required|date',
+        'fecha_fin' => 'required|date|after_or_equal:fecha_inicio',
+        'estado' => 'required|in:Abierto,Cerrado',
+    ], [
+        
+        'nombre.regex' => 'El nombre debe tener el formato JULIO-DICIEMBRE 2024.',
+        'nombre.required' => 'El campo nombre es obligatorio.',
+        'id_tipo_periodo.required' => 'Debes seleccionar un tipo de período.',
+        'id_tipo_periodo.exists' => 'El tipo de período seleccionado no es válido.',
+        'fecha_fin.after_or_equal' => 'La fecha de fin debe ser posterior a la fecha de inicio.',
+    ]);
 
-            ],
-            'id_tipo_periodo' => 'required|exists:tipos_periodos,id_tipo_periodo',
-            // 🔹 obligatorio y debe existir
-            'fecha_inicio' => 'required|date',
-            'fecha_fin' => 'required|date|after_or_equal:fecha_inicio',
-            'estado' => 'required|in:Abierto,Cerrado',
-        ], [
-            // Mensajes personalizados
-            'nombre.unique' => 'El nombre del período ya existe.',
-            'nombre.regex' => 'El nombre debe tener el formato JULIO-DICIEMBRE 2024.',
-            'nombre.required' => 'El campo nombre es obligatorio.',
-            'id_tipo_periodo.required' => 'Debes seleccionar un tipo de período.',
-            'id_tipo_periodo.exists' => 'El tipo de período seleccionado no es válido.',
-        ]);
+    // 2️⃣ Obtener duración del tipo de período
+    $tipo = TipoPeriodo::findOrFail($request->id_tipo_periodo);
+    $duracionMeses = (int)$tipo->duracion;
 
-        $periodo = PeriodoEscolar::findOrFail($id);
-        $periodo->update($request->all());
+    // 3️⃣ Calcular fechas usando Carbon
+    $fechaInicio = \Carbon\Carbon::parse($request->fecha_inicio);
+    $fechaFin = \Carbon\Carbon::parse($request->fecha_fin);
 
-        return redirect()->route('periodos.index')
-            ->with('success', 'Período escolar actualizado correctamente.');
+    // 📅 Validar que la fecha fin sea posterior a la fecha inicio
+    if ($fechaFin->lte($fechaInicio)) {
+        return back()
+            ->withErrors([
+                'fecha_fin' => 'La fecha de fin debe ser posterior a la fecha de inicio.'
+            ])
+            ->withInput();
     }
+
+    // 📊 Calcular diferencia en meses (SOLO mes y año, ignorando días)
+    $mesInicio = $fechaInicio->month;
+    $anioInicio = $fechaInicio->year;
+    $mesFin = $fechaFin->month;
+    $anioFin = $fechaFin->year;
+    
+    // Fórmula: (año_fin - año_inicio) * 12 + (mes_fin - mes_inicio) + 1
+    $mesesReales = (($anioFin - $anioInicio) * 12) + ($mesFin - $mesInicio) + 1;
+    
+    // 🔍 Validar que la duración en meses coincida exactamente
+    if ($mesesReales !== $duracionMeses) {
+        // Calcular el mes esperado de finalización
+        $mesFinEsperado = $fechaInicio->copy()->addMonths($duracionMeses - 1);
+        $nombreMesEsperado = ucfirst($mesFinEsperado->translatedFormat('F \d\e Y'));
+        
+        return back()
+            ->withErrors([
+                'fecha_fin' => sprintf(
+                    'La duración del período debe ser de %d meses. ' .
+                    'Con fecha inicio: %s (%s de %d), la fecha fin debe estar en %s (cualquier día). ' .
+                    'Actualmente la duración es de %d meses.',
+                    $duracionMeses,
+                    $fechaInicio->format('d/m/Y'),
+                    ucfirst($fechaInicio->translatedFormat('F')),
+                    $anioInicio,
+                    $nombreMesEsperado,
+                    $mesesReales
+                )
+            ])
+            ->withInput();
+    }
+
+    // 4️⃣ Actualizar el período
+    $periodo = PeriodoEscolar::findOrFail($id);
+    $periodo->update([
+        'nombre' => $request->nombre,
+        'id_tipo_periodo' => $request->id_tipo_periodo,
+        'fecha_inicio' => $request->fecha_inicio,
+        'fecha_fin' => $request->fecha_fin,
+        'estado' => $request->estado,
+        'id_ciclo' => $request->id_ciclo,
+    ]);
+
+    return redirect()->route('periodos.index')
+        ->with('success', 'Período escolar actualizado correctamente.');
+}
 
     public function destroy($id)
     {

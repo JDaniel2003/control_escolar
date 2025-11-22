@@ -231,6 +231,7 @@
                                                 <th>Tipo de Período</th>
                                                 <th>Fecha Inicio</th>
                                                 <th>Fecha Fin</th>
+                                                <th>Ciclo</th>
                                                 <th>Estado</th>
                                                 <th>Acciones</th>
                                             </tr>
@@ -242,6 +243,7 @@
                                                     <td>{{ $periodo->tipoPeriodo->nombre ?? 'N/A' }}</td>
                                                     <td>{{ $periodo->fecha_inicio }}</td>
                                                     <td>{{ $periodo->fecha_fin }}</td>
+                                                    <td>{{ $periodo->ciclos->nombre }}</td>
                                                     <td>{{ $periodo->estado }}</td>
                                                     <td>
                                                         <!-- Botón Editar -->
@@ -260,7 +262,8 @@
                                                             <div class="modal-dialog modal-lg" role="document">
                                                                 <div class="modal-content border-0 shadow-lg">
 
-                                                                    <div class="modal-header modal-header-custom border-0">
+                                                                    <div
+                                                                        class="modal-header modal-header-custom border-0">
                                                                         <div class="w-100">
                                                                             <div class="text-center">
                                                                                 <h5 class="m-0 font-weight-bold"
@@ -290,14 +293,15 @@
                                                                         @method('PUT')
                                                                         <div class="modal-body modal-body-custom p-4">
 
-                                                                            <div class="form-container p-4 bg-white rounded shadow-sm border">
+                                                                            <div
+                                                                                class="form-container p-4 bg-white rounded shadow-sm border">
 
                                                                                 <div class="form-section mb-4">
 
                                                                                     <div class="form-group mb-3">
                                                                                         <label
                                                                                             style="text-align: left; display: block;">
-                                                                                            📝 Nombre del Período <span
+                                                                                            Nombre del Período <span
                                                                                                 class="required-asterisk">*</span>
                                                                                         </label>
                                                                                         <input type="text"
@@ -315,14 +319,15 @@
                                                                                     <div class="form-group">
                                                                                         <label
                                                                                             style="text-align: left; display: block;">
-                                                                                            🏷️ Tipo de Período <span
+                                                                                            Tipo de Período <span
                                                                                                 class="required-asterisk">*</span>
                                                                                         </label>
                                                                                         <select name="id_tipo_periodo"
                                                                                             class="form-control form-control-custom @error('id_tipo_periodo') is-invalid @enderror"
                                                                                             required>
                                                                                             <option value="">--
-                                                                                                Seleccione un tipo de período --
+                                                                                                Seleccione un tipo de
+                                                                                                período --
                                                                                             </option>
                                                                                             @foreach ($tipos as $tipo)
                                                                                                 <option
@@ -343,7 +348,7 @@
                                                                                             <div class="form-group">
                                                                                                 <label
                                                                                                     style="text-align: left; display: block;">
-                                                                                                    📅 Fecha de Inicio
+                                                                                                    Fecha de Inicio
                                                                                                     <span
                                                                                                         class="required-asterisk">*</span>
                                                                                                 </label>
@@ -365,7 +370,7 @@
                                                                                             <div class="form-group">
                                                                                                 <label
                                                                                                     style="text-align: left; display: block;">
-                                                                                                    📅 Fecha de
+                                                                                                    Fecha de
                                                                                                     Finalización
                                                                                                     <span
                                                                                                         class="required-asterisk">*</span>
@@ -385,42 +390,124 @@
                                                                                         </div>
                                                                                     </div>
 
-                                                                                    <div class="form-group mb-0">
-                                                                                        <label
-                                                                                            style="text-align: left; display: block;">
-                                                                                            ⚡ Estado del Período <span
-                                                                                                class="required-asterisk">*</span>
-                                                                                        </label>
-                                                                                        <select name="estado"
-                                                                                            class="form-control form-control-custom @error('estado') is-invalid @enderror"
-                                                                                            required>
-                                                                                            <option value="">--
-                                                                                                Seleccione el estado --
-                                                                                            </option>
-                                                                                            <option value="Abierto"
-                                                                                                {{ $periodo->estado == 'Abierto' ? 'selected' : '' }}>
-                                                                                                Abierto
-                                                                                            </option>
-                                                                                            <option value="Cerrado"
-                                                                                                {{ $periodo->estado == 'Cerrado' ? 'selected' : '' }}>
-                                                                                                Cerrado
-                                                                                            </option>
-                                                                                        </select>
-                                                                                        @error('estado')
-                                                                                            <div class="invalid-feedback">
-                                                                                                {{ $message }}</div>
-                                                                                        @enderror
+                                                                                    <div class="row">
+                                                                                        <div class="col-md-6">
+                                                                                            <div
+                                                                                                class="form-group mb-0">
+                                                                                                <label
+                                                                                                    style="text-align: left; display: block;">
+                                                                                                    Estado del Período
+                                                                                                    <span
+                                                                                                        class="required-asterisk">*</span>
+                                                                                                </label>
+                                                                                                <select name="estado"
+                                                                                                    class="form-control form-control-custom @error('estado') is-invalid @enderror"
+                                                                                                    required>
+                                                                                                    <option
+                                                                                                        value="">
+                                                                                                        --
+                                                                                                        Seleccione el
+                                                                                                        estado
+                                                                                                        --
+                                                                                                    </option>
+                                                                                                    <option
+                                                                                                        value="Abierto"
+                                                                                                        {{ $periodo->estado == 'Abierto' ? 'selected' : '' }}>
+                                                                                                        Abierto
+                                                                                                    </option>
+                                                                                                    <option
+                                                                                                        value="Cerrado"
+                                                                                                        {{ $periodo->estado == 'Cerrado' ? 'selected' : '' }}>
+                                                                                                        Cerrado
+                                                                                                    </option>
+                                                                                                </select>
+                                                                                                @error('estado')
+                                                                                                    <div
+                                                                                                        class="invalid-feedback">
+                                                                                                        {{ $message }}
+                                                                                                    </div>
+                                                                                                @enderror
+                                                                                            </div>
+                                                                                        </div>
+
+
+                                                                                        <div class="col-md-6">
+                                                                                            <div
+                                                                                                class="form-group mb-3">
+                                                                                                <label
+                                                                                                    class="form-label-custom d-flex">
+                                                                                                    Ciclo Escolar
+                                                                                                    <span
+                                                                                                        class="required-asterisk ml-1">*</span>
+                                                                                                </label>
+
+                                                                                                <select name="id_ciclo"
+                                                                                                    class="form-control form-control-custom @error('id_ciclo') is-invalid @enderror"
+                                                                                                    required>
+                                                                                                    <option
+                                                                                                        value="">
+                                                                                                        -- Seleccione un
+                                                                                                        ciclo escolar --
+                                                                                                    </option>
+                                                                                                    @if ($cicloActual)
+                                                                                                        <option
+                                                                                                            value="{{ $cicloActual->id_ciclo }}"
+                                                                                                            {{ old('id_ciclo', $cicloActual->id_ciclo) == $cicloActual->id_ciclo ? 'selected' : '' }}>
+                                                                                                            {{ $cicloActual->nombre }}
+                                                                                                        </option>
+                                                                                                    @else
+                                                                                                        <option
+                                                                                                            value=""
+                                                                                                            disabled>No
+                                                                                                            hay ciclos
+                                                                                                            activos
+                                                                                                            disponibles
+                                                                                                        </option>
+                                                                                                    @endif
+                                                                                                </select>
+
+                                                                                                @if ($cicloActual)
+                                                                                                    <small
+                                                                                                        class="text-success mt-1 d-block">
+                                                                                                        <i
+                                                                                                            class="fas fa-check-circle"></i>
+                                                                                                        Ciclo activo
+                                                                                                        actual
+                                                                                                    </small>
+                                                                                                @else
+                                                                                                    <small
+                                                                                                        class="text-danger mt-1 d-block">
+                                                                                                        <i
+                                                                                                            class="fas fa-exclamation-triangle"></i>
+                                                                                                        No hay un ciclo
+                                                                                                        escolar activo
+                                                                                                        configurado
+                                                                                                    </small>
+                                                                                                @endif
+
+                                                                                                @error('id_ciclo')
+                                                                                                    <div
+                                                                                                        class="invalid-feedback">
+                                                                                                        {{ $message }}
+                                                                                                    </div>
+                                                                                                @enderror
+                                                                                            </div>
+                                                                                        </div>
                                                                                     </div>
 
                                                                                 </div>
                                                                             </div>
 
+
                                                                             <div
                                                                                 class="modal-footer modal-footer-custom">
-                                                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                                                                                <button type="button"
+                                                                                    class="btn btn-secondary"
+                                                                                    data-dismiss="modal">
                                                                                     Cancelar
                                                                                 </button>
-                                                                                <button type="submit" class="btn btn-success">
+                                                                                <button type="submit"
+                                                                                    class="btn btn-success">
                                                                                     ✓ Actualizar Período
                                                                                 </button>
                                                                             </div>
@@ -441,13 +528,15 @@
                                                             </button>
 
                                                             <!-- Modal de Confirmación -->
-                                                            <div class="modal fade" id="eliminarModal{{ $periodo->id_periodo_escolar }}"
+                                                            <div class="modal fade"
+                                                                id="eliminarModal{{ $periodo->id_periodo_escolar }}"
                                                                 tabindex="-1" role="dialog"
                                                                 aria-labelledby="eliminarModalLabel{{ $periodo->id_periodo_escolar }}"
                                                                 aria-hidden="true">
                                                                 <div class="modal-dialog" role="document">
                                                                     <div class="modal-content">
-                                                                        <div class="modal-header1 modal-header-custom border-0">
+                                                                        <div
+                                                                            class="modal-header1 modal-header-custom border-0">
                                                                             <div class="w-100">
                                                                                 <div class="text-center">
 
@@ -477,7 +566,8 @@
                                                                                 style="display:inline-block;">
                                                                                 @csrf
                                                                                 @method('DELETE')
-                                                                                <button type="submit" class="btn btn-danger">Eliminar</button>
+                                                                                <button type="submit"
+                                                                                    class="btn btn-danger">Eliminar</button>
                                                                             </form>
                                                                         </div>
                                                                     </div>
@@ -527,7 +617,211 @@
 
 
 
+    <script>
+        // 📅 CÁLCULO AUTOMÁTICO DE FECHA FIN DEL PERÍODO
+        document.addEventListener('DOMContentLoaded', function() {
 
+            // Elementos del formulario
+            const fechaInicioInput = document.querySelector('[name="fecha_inicio"]');
+            const tipoPeriodoSelect = document.querySelector('[name="id_tipo_periodo"]');
+            const fechaFinInput = document.querySelector('[name="fecha_fin"]');
+
+            // Duraciones por tipo de período (configurables)
+            const duracionesPeriodos = {
+                '1': 6, // Semestre: 6 meses
+                '2': 3, // Trimestre: 3 meses
+                '3': 4, // Cuatrimestre: 4 meses
+                '4': 2, // Bimestre: 2 meses
+                '5': 12 // Anual: 12 meses
+            };
+
+            // 🔄 Función para calcular la fecha fin
+            function calcularFechaFin() {
+                const fechaInicio = fechaInicioInput.value;
+                const tipoPeriodo = tipoPeriodoSelect.value;
+
+                if (!fechaInicio || !tipoPeriodo) {
+                    return;
+                }
+
+                // Obtener duración en meses
+                const duracionMeses = duracionesPeriodos[tipoPeriodo];
+
+                if (!duracionMeses) {
+                    console.warn('Duración no definida para el tipo de período:', tipoPeriodo);
+                    return;
+                }
+
+                // Crear objeto Date desde la fecha de inicio
+                const fecha = new Date(fechaInicio + 'T00:00:00');
+
+                // Sumar los meses de duración - 1 (para quedarnos en el mes correcto)
+                // Ejemplo: 15/01/2025 + (6-1) meses = 15/06/2025
+                fecha.setMonth(fecha.getMonth() + duracionMeses - 1);
+
+                // Obtener el último día del mes
+                const ultimoDiaMes = new Date(fecha.getFullYear(), fecha.getMonth() + 1, 0).getDate();
+                fecha.setDate(ultimoDiaMes);
+
+                // Formatear la fecha al formato YYYY-MM-DD
+                const year = fecha.getFullYear();
+                const month = String(fecha.getMonth() + 1).padStart(2, '0');
+                const day = String(fecha.getDate()).padStart(2, '0');
+                const fechaFin = `${year}-${month}-${day}`;
+
+                // Asignar la fecha calculada al campo fecha_fin
+                fechaFinInput.value = fechaFin;
+
+                // Mostrar notificación visual (opcional)
+                mostrarNotificacionFecha(duracionMeses, fechaFin);
+            }
+
+            // 💬 Función para mostrar notificación de la fecha calculada
+            function mostrarNotificacionFecha(meses, fechaFin) {
+                // Buscar o crear el contenedor de notificación
+                let notificacion = document.getElementById('notificacion-fecha');
+
+                if (!notificacion) {
+                    notificacion = document.createElement('div');
+                    notificacion.id = 'notificacion-fecha';
+                    notificacion.className = 'alert alert-info alert-dismissible fade show mt-2';
+                    notificacion.style.fontSize = '0.85rem';
+                    fechaFinInput.parentElement.appendChild(notificacion);
+                }
+
+                // Formatear fecha para mostrar
+                const fechaFormateada = new Date(fechaFin + 'T00:00:00').toLocaleDateString('es-MX', {
+                    day: '2-digit',
+                    month: 'long',
+                    year: 'numeric'
+                });
+
+                notificacion.innerHTML = `
+            <i class="fas fa-info-circle me-1"></i>
+            <strong>Fecha calculada automáticamente:</strong> 
+            ${fechaFormateada} (${meses} meses de duración)
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+
+                // Auto-ocultar después de 5 segundos
+                setTimeout(() => {
+                    notificacion.classList.remove('show');
+                    setTimeout(() => notificacion.remove(), 300);
+                }, 5000);
+            }
+
+            // 🎯 Event listeners
+            if (fechaInicioInput && tipoPeriodoSelect) {
+                fechaInicioInput.addEventListener('change', calcularFechaFin);
+                tipoPeriodoSelect.addEventListener('change', calcularFechaFin);
+            }
+
+            // 🔍 Validación en tiempo real de la duración
+            if (fechaFinInput) {
+                fechaFinInput.addEventListener('change', function() {
+                    validarDuracionPeriodo();
+                });
+            }
+
+            // ✅ Función para validar la duración del período
+            function validarDuracionPeriodo() {
+                const fechaInicio = fechaInicioInput.value;
+                const fechaFin = fechaFinInput.value;
+                const tipoPeriodo = tipoPeriodoSelect.value;
+
+                if (!fechaInicio || !fechaFin || !tipoPeriodo) {
+                    return;
+                }
+
+                const duracionEsperada = duracionesPeriodos[tipoPeriodo];
+
+                // Calcular diferencia en meses (contando meses completos)
+                const inicio = new Date(fechaInicio + 'T00:00:00');
+                const fin = new Date(fechaFin + 'T00:00:00');
+
+                // Calcular meses reales: (año_fin - año_inicio) * 12 + (mes_fin - mes_inicio) + 1
+                const mesesDiferencia = ((fin.getFullYear() - inicio.getFullYear()) * 12) +
+                    (fin.getMonth() - inicio.getMonth()) +
+                    1;
+
+                // Validar que coincidan exactamente los meses
+                if (mesesDiferencia !== duracionEsperada) {
+                    mostrarErrorDuracion(duracionEsperada, mesesDiferencia);
+                    fechaFinInput.classList.add('is-invalid');
+                    fechaFinInput.classList.remove('is-valid');
+                } else {
+                    ocultarErrorDuracion();
+                    fechaFinInput.classList.remove('is-invalid');
+                    fechaFinInput.classList.add('is-valid');
+                }
+            }
+
+            // ⚠️ Mostrar mensaje de error de duración
+            function mostrarErrorDuracion(esperada, actual) {
+                let errorDiv = document.getElementById('error-duracion');
+
+                if (!errorDiv) {
+                    errorDiv = document.createElement('div');
+                    errorDiv.id = 'error-duracion';
+                    errorDiv.className = 'invalid-feedback d-block';
+                    fechaFinInput.parentElement.appendChild(errorDiv);
+                }
+
+                errorDiv.textContent =
+                    `La duración debe ser de ${esperada} meses. Actualmente es de ${actual} meses.`;
+            }
+
+            // ✅ Ocultar mensaje de error
+            function ocultarErrorDuracion() {
+                const errorDiv = document.getElementById('error-duracion');
+                if (errorDiv) {
+                    errorDiv.remove();
+                }
+            }
+
+            // 🚀 MÉTODO AJAX ALTERNATIVO (si prefieres obtener la duración del servidor)
+            async function calcularFechaFinAjax() {
+                const fechaInicio = fechaInicioInput.value;
+                const tipoPeriodo = tipoPeriodoSelect.value;
+
+                if (!fechaInicio || !tipoPeriodo) {
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/periodos/calcular-fecha-fin', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                        },
+                        body: JSON.stringify({
+                            fecha_inicio: fechaInicio,
+                            id_tipo_periodo: tipoPeriodo
+                        })
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        fechaFinInput.value = data.fecha_fin;
+                        mostrarNotificacionFecha(data.duracion_meses, data.fecha_fin);
+                    }
+                } catch (error) {
+                    console.error('Error al calcular fecha fin:', error);
+                }
+            }
+
+            // 💡 SUGERENCIA: Agregar tooltip con información
+            if (tipoPeriodoSelect) {
+                tipoPeriodoSelect.addEventListener('change', function() {
+                    const duracion = duracionesPeriodos[this.value];
+                    if (duracion) {
+                        this.title = `Este período tiene una duración de ${duracion} meses`;
+                    }
+                });
+            }
+        });
+    </script>
 
 
     <!-- Modal Nuevo Período -->
@@ -566,7 +860,7 @@
 
                                 <div class="form-group mb-3">
                                     <label class="form-label-custom d-flex">
-                                        📝 Nombre del Período
+                                        Nombre del Período
                                         <span class="required-asterisk ml-1">*</span>
                                     </label>
                                     <small class="form-text text-muted">
@@ -588,7 +882,7 @@
 
                                 <div class="form-group mb-0">
                                     <label class="form-label-custom d-flex">
-                                        🏷️ Tipo de Período
+                                        Tipo de Período
                                         <span class="required-asterisk ml-1">*</span>
                                     </label>
                                     <select name="id_tipo_periodo"
@@ -615,7 +909,7 @@
                                     <div class="col-md-6">
                                         <div class="form-group mb-3">
                                             <label class="form-label-custom d-flex">
-                                                📅 Fecha de Inicio
+                                                Fecha de Inicio
                                                 <span class="required-asterisk ml-1">*</span>
                                             </label>
                                             <input type="date" name="fecha_inicio"
@@ -631,7 +925,7 @@
                                     <div class="col-md-6">
                                         <div class="form-group mb-3">
                                             <label class="form-label-custom d-flex">
-                                                📅 Fecha de Finalización
+                                                Fecha de Finalización
                                                 <span class="required-asterisk ml-1">*</span>
                                             </label>
                                             <input type="date" name="fecha_fin" value="{{ old('fecha_fin') }}"
@@ -647,49 +941,94 @@
 
                             <!-- Sección 3: Estado -->
                             <div class="status-section mb-4">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label class="form-label-custom d-flex">
+                                                Estado del Período
+                                                <span class="required-asterisk ml-1">*</span>
+                                            </label>
+                                            <select name="estado"
+                                                class="form-control form-control-custom @error('estado') is-invalid @enderror"
+                                                required>
+                                                <option value="">-- Seleccione el estado del período--</option>
+                                                <option value="Abierto"
+                                                    {{ old('estado') == 'Abierto' ? 'selected' : '' }}>
+                                                    Abierto
+                                                </option>
+                                                <option value="Cerrado"
+                                                    {{ old('estado') == 'Cerrado' ? 'selected' : '' }}>
+                                                    Cerrado
+                                                </option>
+                                            </select>
+                                            @error('estado')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
 
-                                <div class="form-group mb-2">
-                                    <label class="form-label-custom d-flex">
-                                        ⚡ Estado del Período
-                                        <span class="required-asterisk ml-1">*</span>
-                                    </label>
-                                    <select name="estado"
-                                        class="form-control form-control-custom @error('estado') is-invalid @enderror"
-                                        required>
-                                        <option value="">-- Seleccione el estado del período--</option>
-                                        <option value="Abierto" {{ old('estado') == 'Abierto' ? 'selected' : '' }}>
-                                            Abierto
-                                        </option>
-                                        <option value="Cerrado" {{ old('estado') == 'Cerrado' ? 'selected' : '' }}>
-                                            Cerrado
-                                        </option>
-                                    </select>
-                                    @error('estado')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
+
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label class="form-label-custom d-flex">
+                                                Ciclo Escolar
+                                                <span class="required-asterisk ml-1">*</span>
+                                            </label>
+
+                                            <select name="id_ciclo"
+                                                class="form-control form-control-custom @error('id_ciclo') is-invalid @enderror"
+                                                required>
+                                                <option value="">-- Seleccione un ciclo escolar --</option>
+                                                @if ($cicloActual)
+                                                    <option value="{{ $cicloActual->id_ciclo }}"
+                                                        {{ old('id_ciclo', $cicloActual->id_ciclo) == $cicloActual->id_ciclo ? 'selected' : '' }}>
+                                                        {{ $cicloActual->nombre }}
+                                                    </option>
+                                                @else
+                                                    <option value="" disabled>No hay ciclos activos disponibles
+                                                    </option>
+                                                @endif
+                                            </select>
+
+                                            @if ($cicloActual)
+                                                <small class="text-success mt-1 d-block">
+                                                    <i class="fas fa-check-circle"></i>
+                                                    Ciclo activo actual
+                                                </small>
+                                            @else
+                                                <small class="text-danger mt-1 d-block">
+                                                    <i class="fas fa-exclamation-triangle"></i>
+                                                    No hay un ciclo escolar activo configurado
+                                                </small>
+                                            @endif
+
+                                            @error('id_ciclo')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
                                 </div>
+                                <!-- Nota de campos obligatorios -->
+                                <div class="text-center">
+                                    <small class="text-muted">
+                                        <span class="required-asterisk">*</span> Campos obligatorios
+                                    </small>
+                                </div>
+
                             </div>
-                            <!-- Nota de campos obligatorios -->
-                        <div class="text-center">
-                            <small class="text-muted">
-                                <span class="required-asterisk">*</span> Campos obligatorios
-                            </small>
-                        </div>
 
                         </div>
 
-                    </div>
-
-                    <div class="modal-footer modal-footer-custom border-top">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                            <i class="fas fa-times mr-2"></i>
-                            Cancelar
-                        </button>
-                        <button type="submit" class="btn btn-success">
-                            <i class="fas fa-save mr-2"></i>
-                            Guardar Período
-                        </button>
-                    </div>
+                        <div class="modal-footer modal-footer-custom border-top">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                                <i class="fas fa-times mr-2"></i>
+                                Cancelar
+                            </button>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-save mr-2"></i>
+                                Guardar Período
+                            </button>
+                        </div>
                 </form>
             </div>
         </div>

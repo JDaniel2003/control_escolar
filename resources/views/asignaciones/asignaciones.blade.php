@@ -641,90 +641,114 @@
     <!-- Modales de Detalle, Editar y Eliminar -->
     @foreach ($asignaciones as $asignacion)
         <!-- Modal Detalle -->
-        <div class="modal fade" id="detalleModal{{ $asignacion->id_asignacion }}" tabindex="-1" role="dialog"
-            aria-labelledby="detalleModalLabel{{ $asignacion->id_asignacion }}" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content border-0 shadow-lg">
-                    <div class="modal-header modal-header-custom border-0">
-                        <div class="w-100">
-                            <div class="text-center">
-                                <h5 class="m-0 font-weight-bold"
-                                    id="detalleModalLabel{{ $asignacion->id_asignacion }}">
-                                    Detalles de la Asignación
-                                </h5>
-                                <p class="m-0 mt-2 mb-0" style="font-size: 0.9rem; opacity: 0.95;">
-                                    Información completa de la asignación docente
-                                </p>
-                            </div>
-                        </div>
-                        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Cerrar"
-                            style="position: absolute; right: 1.5rem; top: 1.5rem; font-size: 1.8rem; opacity: 0.9;">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body modal-body-custom p-4">
-                        <div class="form-container p-4 bg-white rounded shadow-sm border">
-                            <div class="info-section mb-4">
-                                <div class="card shadow mb-4 border-0">
-                                    <div class="card-header py-3 text-white card-header-custom">
-                                        <h6 class="m-0 font-weight-bold text-danger"><i
-                                                class="fas fa-chalkboard-teacher mr-2"></i> Información de la
-                                            Asignación</h6>
-                                    </div>
-                                    <div class="card-body1">
-                                        <div class="row">
-                                            <div class="col-md-6 mb-3">
-                                                <div class="info-item">
-                                                    <label class="text-muted text-uppercase d-block">
-                                                        Docente:
-                                                    </label>
-                                                    <div class="text-muted d-block font-weight-bold">
-                                                        {{ $asignacion->docente->nombre_completo ?? 'N/A' }}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6 mb-3">
-                                                <div class="info-item">
-                                                    <label class="text-muted text-uppercase d-block"> Materia:
-                                                    </label>
-                                                    <div class="text-muted d-block font-weight-bold">
-                                                        {{ $asignacion->materia->nombre ?? 'N/A' }}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6 mb-3">
-                                                <div class="info-item">
-                                                    <label class="text-muted text-uppercase d-block"> Grupo:
-                                                    </label>
-                                                    <div class="text-muted d-block font-weight-bold">
-                                                        {{ $asignacion->grupo->nombre ?? 'N/A' }}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6 mb-3">
-                                                <div class="info-item">
-                                                    <label class="text-muted text-uppercase d-block"> Período Escolar:
-                                                    </label>
-                                                    <div class="text-muted d-block font-weight-bold">
-                                                        {{ $asignacion->periodoEscolar->nombre ?? 'N/A' }}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer modal-footer-custom border-top">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                            <i class="fas fa-times mr-2"></i>
-                            Cerrar
-                        </button>
+        <!-- Modal Detalle -->
+<div class="modal fade" id="detalleModal{{ $asignacion->id_asignacion }}" tabindex="-1" role="dialog"
+    aria-labelledby="detalleModalLabel{{ $asignacion->id_asignacion }}" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header modal-header-custom border-0">
+                <div class="w-100">
+                    <div class="text-center">
+                        <h5 class="m-0 font-weight-bold"
+                            id="detalleModalLabel{{ $asignacion->id_asignacion }}">
+                            Detalles de la Asignación
+                        </h5>
+                        <p class="m-0 mt-2 mb-0" style="font-size: 0.9rem; opacity: 0.95;">
+                            Información completa de la asignación docente
+                        </p>
                     </div>
                 </div>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Cerrar"
+                    style="position: absolute; right: 1.5rem; top: 1.5rem; font-size: 1.8rem; opacity: 0.9;">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
+
+            <div class="modal-body modal-body-custom p-4">
+                <div class="form-container p-4 bg-white rounded shadow-sm border">
+
+                    <div class="card shadow mb-4 border-0">
+                        <div class="card-header py-3 text-white card-header-custom">
+                            <h6 class="m-0 font-weight-bold text-danger">
+                                <i class="fas fa-chalkboard-teacher mr-2"></i>
+                                Información de la Asignación
+                            </h6>
+                        </div>
+
+                        <div class="card-body1 p-4 text-center">
+                            <!-- PERÍODO / SEMESTRE / CUATRIMESTRE -->
+                                <div class="col-md-10 text-center mb-3">
+                                    <label class="text-muted text-uppercase d-block">Número de Período:</label>
+
+                                    @php
+                                        $num = $asignacion->materia->numeroPeriodo->numero ?? null;
+                                        $tipo = $asignacion->materia->numeroPeriodo->tipoPeriodo->nombre ?? null;
+                                    @endphp
+
+                                    <div class="text-muted d-block font-weight-bold">
+                                        @if ($num)
+                                            {{ $num }}° 
+                                            @if ($tipo)
+                                                {{ $tipo }}
+                                            @endif
+                                        @else
+                                            N/A
+                                        @endif
+                                    </div>
+                                </div>
+                            <div class="row">
+
+                                
+                                <!-- DOCENTE -->
+                                <div class="col-md-6 mb-3">
+                                    <label class="text-muted text-uppercase d-block">Docente:</label>
+                                    <div class="text-muted d-block font-weight-bold">
+                                        {{ $asignacion->docente->nombre_completo ?? 'N/A' }}
+                                    </div>
+                                </div>
+
+                                <!-- MATERIA -->
+                                <div class="col-md-6 mb-3">
+                                    <label class="text-muted text-uppercase d-block">Materia:</label>
+                                    <div class="text-muted d-block font-weight-bold">
+                                        {{ $asignacion->materia->nombre ?? 'N/A' }}
+                                    </div>
+                                </div>
+
+                                <!-- GRUPO -->
+                                <div class="col-md-6 mb-3">
+                                    <label class="text-muted text-uppercase d-block">Grupo:</label>
+                                    <div class="text-muted d-block font-weight-bold">
+                                        {{ $asignacion->grupo->nombre ?? 'N/A' }}
+                                    </div>
+                                </div>
+
+                                <!-- PERÍODO ESCOLAR -->
+                                <div class="col-md-6 mb-3">
+                                    <label class="text-muted text-uppercase d-block">Período Escolar:</label>
+                                    <div class="text-muted d-block font-weight-bold">
+                                        {{ $asignacion->periodoEscolar->nombre ?? 'N/A' }}
+                                    </div>
+                                </div>
+
+                                
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="modal-footer modal-footer-custom border-top">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                    <i class="fas fa-times mr-2"></i> Cerrar
+                </button>
+            </div>
+
         </div>
+    </div>
+</div>
 
         <!-- Modal Editar -->
         <div class="modal fade" id="editarModal{{ $asignacion->id_asignacion }}" tabindex="-1" role="dialog"

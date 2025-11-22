@@ -120,34 +120,40 @@
                                 style="padding: 0.75rem 1.25rem;">
                                 <div class="container mb-4 d-flex ">
                                     <div class="p-3 border rounded bg-light d-inline-block shadow-sm">
-                                        <form id="filtrosForm" method="GET" action="{{ route('historial.index') }}" class="d-flex flex-wrap gap-2 align-items-center">
+                                        <form id="filtrosForm" method="GET"
+                                            action="{{ route('historial.index') }}"
+                                            class="d-flex flex-wrap gap-2 align-items-center">
                                             <div style="width: 500px;">
                                                 <input type="text" id="searchInput"
                                                     class="form-control form-control-sm border-secondary"
                                                     placeholder="🔍 Buscar">
                                             </div>
                                             <select name="mostrar" onchange="this.form.submit()"
-                                            class="form-control form-control-sm w-auto">
-                                            <option value="10" {{ request('mostrar') == 10 ? 'selected' : '' }}>10
-                                            </option>
-                                            <option value="13" {{ request('mostrar') == 13 ? 'selected' : '' }}>13
-                                            </option>
-                                            <option value="25" {{ request('mostrar') == 25 ? 'selected' : '' }}>25
-                                            </option>
-                                            <option value="50" {{ request('mostrar') == 50 ? 'selected' : '' }}>50
-                                            </option>
-                                            <option value="todo"
-                                                {{ request('mostrar') == 'todo' ? 'selected' : '' }}>Todo</option>
-                                        </select>
-                                        <a href="{{ route('historial.index', ['mostrar' => 'todo']) }}"
-                                            class="btn btn-sm btn-outline-secondary d-flex align-items-center">
-                                            <i class="fas fa-list me-1"></i> Mostrar todo
-                                        </a>
-                                        </form>    
+                                                class="form-control form-control-sm w-auto">
+                                                <option value="10"
+                                                    {{ request('mostrar') == 10 ? 'selected' : '' }}>10
+                                                </option>
+                                                <option value="13"
+                                                    {{ request('mostrar') == 13 ? 'selected' : '' }}>13
+                                                </option>
+                                                <option value="25"
+                                                    {{ request('mostrar') == 25 ? 'selected' : '' }}>25
+                                                </option>
+                                                <option value="50"
+                                                    {{ request('mostrar') == 50 ? 'selected' : '' }}>50
+                                                </option>
+                                                <option value="todo"
+                                                    {{ request('mostrar') == 'todo' ? 'selected' : '' }}>Todo</option>
+                                            </select>
+                                            <a href="{{ route('historial.index', ['mostrar' => 'todo']) }}"
+                                                class="btn btn-sm btn-outline-secondary d-flex align-items-center">
+                                                <i class="fas fa-list me-1"></i> Mostrar todo
+                                            </a>
+                                        </form>
                                     </div>
-                                    
+
                                 </div>
-                                
+
                             </div>
 
                             @if (session('success'))
@@ -592,10 +598,9 @@
                                             <select name="id_periodo_escolar" id="periodoEscolarMasivo"
                                                 class="form-control" required>
                                                 <option value="">-- Selecciona un período --</option>
-                                                @foreach ($periodos as $periodo)
+                                                @foreach ($periodosAbiertos as $periodo)
                                                     <option value="{{ $periodo->id_periodo_escolar }}">
-                                                        {{ $periodo->nombre }}
-                                                    </option>
+                                                        {{ $periodo->nombre }}</option>
                                                 @endforeach
                                             </select>
                                         </div>
@@ -717,10 +722,13 @@
                                             <select name="id_periodo_origen" id="periodoOrigen" class="form-control"
                                                 required>
                                                 <option value="">-- Selecciona período --</option>
-                                                @foreach ($periodos as $p)
-                                                    <option value="{{ $p->id_periodo_escolar }}">{{ $p->nombre }}
+                                                @if ($ultimoPeriodoCerrado)
+                                                    <option value="{{ $ultimoPeriodoCerrado->id_periodo_escolar }}">
+                                                        {{ $ultimoPeriodoCerrado->nombre }}
                                                     </option>
-                                                @endforeach
+                                                @else
+                                                    <option disabled>No hay periodos cerrados</option>
+                                                @endif
                                             </select>
                                         </div>
                                         <div class="col-md-6 mb-3">
@@ -752,7 +760,7 @@
                                             <select name="id_periodo_destino" id="periodoDestino"
                                                 class="form-control" required>
                                                 <option value="">-- Selecciona período --</option>
-                                                @foreach ($periodos as $p)
+                                                @foreach ($periodosAbiertos as $p)
                                                     <option value="{{ $p->id_periodo_escolar }}">{{ $p->nombre }}
                                                     </option>
                                                 @endforeach
@@ -910,7 +918,7 @@
                                         <select name="id_periodo_escolar" id="periodoSelect"
                                             class="form-control custom-select" required>
                                             <option value="">-- Selecciona un período --</option>
-                                            @foreach ($periodos as $periodo)
+                                            @foreach ($periodosAbiertos as $periodo)
                                                 <option value="{{ $periodo->id_periodo_escolar }}">
                                                     {{ $periodo->nombre }}</option>
                                             @endforeach

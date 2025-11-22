@@ -20,67 +20,72 @@ class HistorialController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request) 
-{
-    // 🔹 Consulta base con relaciones
-    $query = Alumno::with(['datosPersonales', 'datosAcademicos', 'statusAcademico', 'generaciones'])
-        ->orderByDesc('id_alumno');
+    public function index(Request $request)
+    {
+        // 🔹 Consulta base con relaciones
+        $query = Alumno::with(['datosPersonales', 'datosAcademicos', 'statusAcademico', 'generaciones'])
+            ->orderByDesc('id_alumno');
 
-    // 🔹 Obtener valor de mostrar (SIEMPRE verificar si existe)
-    $mostrar = $request->has('mostrar') ? $request->get('mostrar') : '10';
-    
-    // 🔹 Aplicar paginación o mostrar todo
-    if ($mostrar === "todo") {
-        $alumnos = $query->get(); // sin paginar
-    } else {
-        // Asegurar que sea un número válido
-        $perPage = is_numeric($mostrar) ? (int)$mostrar : 10;
-        $alumnos = $query->paginate($perPage)->appends($request->all());
+        // 🔹 Obtener valor de mostrar (SIEMPRE verificar si existe)
+        $mostrar = $request->has('mostrar') ? $request->get('mostrar') : '10';
+
+        // 🔹 Aplicar paginación o mostrar todo
+        if ($mostrar === "todo") {
+            $alumnos = $query->get(); // sin paginar
+        } else {
+            // Asegurar que sea un número válido
+            $perPage = is_numeric($mostrar) ? (int)$mostrar : 10;
+            $alumnos = $query->paginate($perPage)->appends($request->all());
+        }
+
+        // 🔹 Historial con relaciones (PAGINADO)
+        $queryHistorial = Historial::with([
+            'alumno.datosPersonales',
+            'historialStatus',
+            'statusInicio',
+            'statusTerminacion',
+            'asignacion1.materia',
+            'asignacion2.materia',
+            'asignacion3.materia',
+            'asignacion4.materia',
+            'asignacion5.materia',
+            'asignacion6.materia',
+            'asignacion7.materia',
+            'asignacion8.materia',
+            'asignacion9.materia',
+            'asignacion10.materia'
+        ])->orderByDesc('id_historial');
+
+        // Aplicar la misma lógica de paginación
+        if ($mostrar === "todo") {
+            $historial = $queryHistorial->get();
+        } else {
+            $perPage = is_numeric($mostrar) ? (int)$mostrar : 10;
+            $historial = $queryHistorial->paginate($perPage)->appends($request->all());
+        }
+
+        // 🔹 Datos para selects y modal
+        // 🔹 Periodos para selects: diferenciar según el contexto
+        $periodosAbiertos = PeriodoEscolar::where('estado', 'Abierto')->orderBy('fecha_inicio', 'desc')->get();
+        $ultimoPeriodoCerrado = PeriodoEscolar::where('estado', 'Cerrado')
+            ->orderBy('fecha_fin', 'desc') // el más recientemente cerrado
+            ->first();
+        $grupos = Grupo::whereIn('periodo', PeriodoEscolar::where('estado', 'Abierto')->pluck('id_periodo_escolar'))->get();
+        $numerosPeriodo = \App\Models\NumeroPeriodo::with('tipoPeriodo')->get();
+        $statusAcademicos = StatusAcademico::all();
+        $historialStatus = HistorialStatus::all();
+
+        return view('historial.historial', compact(
+            'alumnos',
+            'historial',
+            'periodosAbiertos', 
+            'ultimoPeriodoCerrado',
+            'grupos',
+            'numerosPeriodo',
+            'statusAcademicos',
+            'historialStatus'
+        ));
     }
-
-    // 🔹 Historial con relaciones (PAGINADO)
-    $queryHistorial = Historial::with([
-        'alumno.datosPersonales', 
-        'historialStatus', 
-        'statusInicio', 
-        'statusTerminacion',
-        'asignacion1.materia', 
-        'asignacion2.materia', 
-        'asignacion3.materia', 
-        'asignacion4.materia', 
-        'asignacion5.materia',
-        'asignacion6.materia', 
-        'asignacion7.materia', 
-        'asignacion8.materia', 
-        'asignacion9.materia', 
-        'asignacion10.materia'
-    ])->orderByDesc('id_historial');
-    
-    // Aplicar la misma lógica de paginación
-    if ($mostrar === "todo") {
-        $historial = $queryHistorial->get();
-    } else {
-        $perPage = is_numeric($mostrar) ? (int)$mostrar : 10;
-        $historial = $queryHistorial->paginate($perPage)->appends($request->all());
-    }
-
-    // 🔹 Datos para selects y modal
-    $periodos = \App\Models\PeriodoEscolar::all();
-    $grupos = \App\Models\Grupo::with(['carrera', 'turno'])->get();
-    $numerosPeriodo = \App\Models\NumeroPeriodo::with('tipoPeriodo')->get();
-    $statusAcademicos = StatusAcademico::all();
-    $historialStatus = HistorialStatus::all();
-
-    return view('historial.historial', compact(
-        'alumnos', 
-        'historial', 
-        'periodos', 
-        'grupos', 
-        'numerosPeriodo', 
-        'statusAcademicos', 
-        'historialStatus'
-    ));
-}
 
     /**
      * Obtener asignaciones disponibles basado en grupo y período
@@ -226,82 +231,81 @@ class HistorialController extends Controller
      * Display the specified resource.
      */
     public function show(Historial $historial)
-{
-    $historial->load([
-        'alumno.datosPersonales',
-        'alumno.datosAcademicos.carrera',
-        'statusInicio',
-        'statusTerminacion',
-        'asignacion1.materia',
-        'asignacion1.docente.datosDocentes',
-        'asignacion1.grupo',
-        'asignacion1.periodoEscolar',
-        'asignacion2.materia',
-        'asignacion2.docente.datosDocentes',
-        'asignacion3.materia',
-        'asignacion3.docente.datosDocentes',
-        'asignacion4.materia',
-        'asignacion4.docente.datosDocentes',
-        'asignacion5.materia',
-        'asignacion5.docente.datosDocentes',
-        'asignacion6.materia',
-        'asignacion6.docente.datosDocentes',
-        'asignacion7.materia',
-        'asignacion7.docente.datosDocentes',
-        'asignacion8.materia',
-        'asignacion8.docente.datosDocentes',
-        'asignacion9.materia',
-        'asignacion9.docente.datosDocentes',
-        'asignacion10.materia',
-        'asignacion10.docente.datosDocentes'
-    ]);
-
-    return view('historial.show', compact('historial'));
-}
-  public function update(Request $request, Historial $historial)
-{
-    Log::info('ID del historial recibido:', ['id' => $historial->id_historial]);
-    try {
-        // Validación de los datos recibidos
-        $request->validate([
-            'id_alumno' => 'required|exists:alumnos,id_alumno',
-            'fecha_inscripcion' => 'required|date',
-            'id_status_inicio' => 'required|exists:status_academico,id_status_academico',
-            'id_status_terminacion' => 'nullable|exists:historial_status,id_historial_status',
-            'materias' => 'required|array|min:1|max:8',
-            'materias.*' => 'exists:asignaciones_docentes,id_asignacion',
+    {
+        $historial->load([
+            'alumno.datosPersonales',
+            'alumno.datosAcademicos.carrera',
+            'statusInicio',
+            'statusTerminacion',
+            'asignacion1.materia',
+            'asignacion1.docente.datosDocentes',
+            'asignacion1.grupo',
+            'asignacion1.periodoEscolar',
+            'asignacion2.materia',
+            'asignacion2.docente.datosDocentes',
+            'asignacion3.materia',
+            'asignacion3.docente.datosDocentes',
+            'asignacion4.materia',
+            'asignacion4.docente.datosDocentes',
+            'asignacion5.materia',
+            'asignacion5.docente.datosDocentes',
+            'asignacion6.materia',
+            'asignacion6.docente.datosDocentes',
+            'asignacion7.materia',
+            'asignacion7.docente.datosDocentes',
+            'asignacion8.materia',
+            'asignacion8.docente.datosDocentes',
+            'asignacion9.materia',
+            'asignacion9.docente.datosDocentes',
+            'asignacion10.materia',
+            'asignacion10.docente.datosDocentes'
         ]);
 
-        // Actualizar campos básicos
-        $historial->id_alumno = $request->id_alumno;
-        $historial->fecha_inscripcion = $request->fecha_inscripcion;
-        $historial->id_status_inicio = $request->id_status_inicio;
-        $historial->id_status_terminacion = $request->id_status_terminacion;
-
-        // Limpiar todas las asignaciones anteriores (1 a 8)
-        for ($i = 1; $i <= 8; $i++) {
-            $historial->{"id_asignacion_$i"} = null;
-        }
-
-        // Asignar las nuevas materias seleccionadas
-        $materias = $request->materias;
-        foreach ($materias as $index => $idAsignacion) {
-            if ($index < 8) { // Solo hasta 8
-                $historial->{"id_asignacion_" . ($index + 1)} = $idAsignacion;
-            }
-        }
-
-        // Guardar cambios
-        $historial->save();
-
-        return redirect()->route('historial.index')
-            ->with('success', 'Reinscripción actualizada exitosamente.');
-
-    } catch (\Exception $e) {
-        Log::error('Error en update historial: ' . $e->getMessage());
-        return back()->withErrors(['error' => 'Error al actualizar: ' . $e->getMessage()])->withInput();
+        return view('historial.show', compact('historial'));
     }
-}
+    public function update(Request $request, Historial $historial)
+    {
+        Log::info('ID del historial recibido:', ['id' => $historial->id_historial]);
+        try {
+            // Validación de los datos recibidos
+            $request->validate([
+                'id_alumno' => 'required|exists:alumnos,id_alumno',
+                'fecha_inscripcion' => 'required|date',
+                'id_status_inicio' => 'required|exists:status_academico,id_status_academico',
+                'id_status_terminacion' => 'nullable|exists:historial_status,id_historial_status',
+                'materias' => 'required|array|min:1|max:8',
+                'materias.*' => 'exists:asignaciones_docentes,id_asignacion',
+            ]);
+
+            // Actualizar campos básicos
+            $historial->id_alumno = $request->id_alumno;
+            $historial->fecha_inscripcion = $request->fecha_inscripcion;
+            $historial->id_status_inicio = $request->id_status_inicio;
+            $historial->id_status_terminacion = $request->id_status_terminacion;
+
+            // Limpiar todas las asignaciones anteriores (1 a 8)
+            for ($i = 1; $i <= 8; $i++) {
+                $historial->{"id_asignacion_$i"} = null;
+            }
+
+            // Asignar las nuevas materias seleccionadas
+            $materias = $request->materias;
+            foreach ($materias as $index => $idAsignacion) {
+                if ($index < 8) { // Solo hasta 8
+                    $historial->{"id_asignacion_" . ($index + 1)} = $idAsignacion;
+                }
+            }
+
+            // Guardar cambios
+            $historial->save();
+
+            return redirect()->route('historial.index')
+                ->with('success', 'Reinscripción actualizada exitosamente.');
+        } catch (\Exception $e) {
+            Log::error('Error en update historial: ' . $e->getMessage());
+            return back()->withErrors(['error' => 'Error al actualizar: ' . $e->getMessage()])->withInput();
+        }
+    }
     /**
      * Remove the specified resource from storage.
      */
@@ -659,129 +663,127 @@ class HistorialController extends Controller
     }
 
     public function storeMasivoAvanzado(Request $request)
-{
-    try {
-        $request->validate([
-            'id_periodo_destino' => 'required|exists:periodos_escolares,id_periodo_escolar',
-            'id_grupo_destino' => 'required|exists:grupos,id_grupo',
-            'id_numero_periodo_destino' => 'required|exists:numero_periodos,id_numero_periodo',
-            'fecha_inscripcion' => 'nullable|date',
-            'alumnos_json' => 'required|json',
-        ]);
+    {
+        try {
+            $request->validate([
+                'id_periodo_destino' => 'required|exists:periodos_escolares,id_periodo_escolar',
+                'id_grupo_destino' => 'required|exists:grupos,id_grupo',
+                'id_numero_periodo_destino' => 'required|exists:numero_periodos,id_numero_periodo',
+                'fecha_inscripcion' => 'nullable|date',
+                'alumnos_json' => 'required|json',
+            ]);
 
-        $alumnos = json_decode($request->alumnos_json, true);
-        
-        if (!$alumnos || !is_array($alumnos)) {
-            return redirect()->back()->withErrors(['error' => 'Datos de alumnos inválidos']);
-        }
+            $alumnos = json_decode($request->alumnos_json, true);
 
-        Log::info('Reinscripción masiva avanzada iniciada', [
-            'total_alumnos' => count($alumnos),
-            'periodo_destino' => $request->id_periodo_destino,
-            'grupo_destino' => $request->id_grupo_destino
-        ]);
-
-        DB::beginTransaction();
-
-        $reinscripciones = 0;
-        $duplicados = 0;
-        $errores = [];
-
-        foreach ($alumnos as $alumno) {
-            try {
-                // Validar datos del alumno
-                if (!isset($alumno['id_alumno']) || !isset($alumno['statusInicio'])) {
-                    throw new \Exception("Faltan datos requeridos");
-                }
-
-                if (!isset($alumno['materias']) || count($alumno['materias']) === 0) {
-                    throw new \Exception("No tiene materias asignadas");
-                }
-
-                // Verificar duplicados
-                $asignacionesDestino = AsignacionDocente::where('id_grupo', $request->id_grupo_destino)
-                    ->where('id_periodo_escolar', $request->id_periodo_destino)
-                    ->pluck('id_asignacion')
-                    ->toArray();
-
-                if (empty($asignacionesDestino)) {
-                    throw new \Exception("No hay asignaciones para el grupo destino");
-                }
-
-                $existe = Historial::where('id_alumno', $alumno['id_alumno'])
-                    ->where(function($query) use ($asignacionesDestino) {
-                        foreach ($asignacionesDestino as $asignacion) {
-                            for ($i = 1; $i <= 10; $i++) {
-                                $query->orWhere("id_asignacion_$i", $asignacion);
-                            }
-                        }
-                    })
-                    ->exists();
-
-                if ($existe) {
-                    $duplicados++;
-                    continue;
-                }
-
-                // ✅ Preparar datos SIN id_historial_status
-                $data = [
-                    'id_alumno' => $alumno['id_alumno'],
-                    'fecha_inscripcion' => $request->fecha_inscripcion ?? now(),
-                    'id_status_inicio' => $alumno['statusInicio'],
-                    'id_status_terminacion' => $alumno['statusTerminacion'] ?? null,
-                ];
-
-                // Asignar materias (máximo 10)
-                $materias = array_slice($alumno['materias'], 0, 10);
-                for ($i = 1; $i <= 10; $i++) {
-                    $data["id_asignacion_$i"] = $materias[$i - 1] ?? null;
-                }
-
-                Log::info("Creando reinscripción", [
-                    'id_alumno' => $alumno['id_alumno'],
-                    'total_materias' => count($materias)
-                ]);
-
-                Historial::create($data);
-                $reinscripciones++;
-
-            } catch (\Exception $e) {
-                $alumnoId = $alumno['id_alumno'] ?? 'desconocido';
-                $error = "Alumno ID {$alumnoId}: {$e->getMessage()}";
-                $errores[] = $error;
-                Log::error('Error al procesar alumno', [
-                    'id_alumno' => $alumnoId,
-                    'error' => $e->getMessage()
-                ]);
+            if (!$alumnos || !is_array($alumnos)) {
+                return redirect()->back()->withErrors(['error' => 'Datos de alumnos inválidos']);
             }
+
+            Log::info('Reinscripción masiva avanzada iniciada', [
+                'total_alumnos' => count($alumnos),
+                'periodo_destino' => $request->id_periodo_destino,
+                'grupo_destino' => $request->id_grupo_destino
+            ]);
+
+            DB::beginTransaction();
+
+            $reinscripciones = 0;
+            $duplicados = 0;
+            $errores = [];
+
+            foreach ($alumnos as $alumno) {
+                try {
+                    // Validar datos del alumno
+                    if (!isset($alumno['id_alumno']) || !isset($alumno['statusInicio'])) {
+                        throw new \Exception("Faltan datos requeridos");
+                    }
+
+                    if (!isset($alumno['materias']) || count($alumno['materias']) === 0) {
+                        throw new \Exception("No tiene materias asignadas");
+                    }
+
+                    // Verificar duplicados
+                    $asignacionesDestino = AsignacionDocente::where('id_grupo', $request->id_grupo_destino)
+                        ->where('id_periodo_escolar', $request->id_periodo_destino)
+                        ->pluck('id_asignacion')
+                        ->toArray();
+
+                    if (empty($asignacionesDestino)) {
+                        throw new \Exception("No hay asignaciones para el grupo destino");
+                    }
+
+                    $existe = Historial::where('id_alumno', $alumno['id_alumno'])
+                        ->where(function ($query) use ($asignacionesDestino) {
+                            foreach ($asignacionesDestino as $asignacion) {
+                                for ($i = 1; $i <= 10; $i++) {
+                                    $query->orWhere("id_asignacion_$i", $asignacion);
+                                }
+                            }
+                        })
+                        ->exists();
+
+                    if ($existe) {
+                        $duplicados++;
+                        continue;
+                    }
+
+                    // ✅ Preparar datos SIN id_historial_status
+                    $data = [
+                        'id_alumno' => $alumno['id_alumno'],
+                        'fecha_inscripcion' => $request->fecha_inscripcion ?? now(),
+                        'id_status_inicio' => $alumno['statusInicio'],
+                        'id_status_terminacion' => $alumno['statusTerminacion'] ?? null,
+                    ];
+
+                    // Asignar materias (máximo 10)
+                    $materias = array_slice($alumno['materias'], 0, 10);
+                    for ($i = 1; $i <= 10; $i++) {
+                        $data["id_asignacion_$i"] = $materias[$i - 1] ?? null;
+                    }
+
+                    Log::info("Creando reinscripción", [
+                        'id_alumno' => $alumno['id_alumno'],
+                        'total_materias' => count($materias)
+                    ]);
+
+                    Historial::create($data);
+                    $reinscripciones++;
+                } catch (\Exception $e) {
+                    $alumnoId = $alumno['id_alumno'] ?? 'desconocido';
+                    $error = "Alumno ID {$alumnoId}: {$e->getMessage()}";
+                    $errores[] = $error;
+                    Log::error('Error al procesar alumno', [
+                        'id_alumno' => $alumnoId,
+                        'error' => $e->getMessage()
+                    ]);
+                }
+            }
+
+            DB::commit();
+
+            $mensaje = "✅ $reinscripciones reinscripción(es) creada(s) exitosamente";
+            if ($duplicados > 0) {
+                $mensaje .= ". ⚠️ $duplicados ya existían";
+            }
+
+            Log::info('Reinscripción masiva completada', [
+                'reinscripciones' => $reinscripciones,
+                'duplicados' => $duplicados,
+                'errores' => count($errores)
+            ]);
+
+            return redirect()->route('historial.index')
+                ->with('success', $mensaje)
+                ->with('errores', $errores);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error crítico en storeMasivoAvanzado', [
+                'error' => $e->getMessage()
+            ]);
+
+            return redirect()->back()
+                ->withErrors(['error' => 'Error: ' . $e->getMessage()])
+                ->withInput();
         }
-
-        DB::commit();
-
-        $mensaje = "✅ $reinscripciones reinscripción(es) creada(s) exitosamente";
-        if ($duplicados > 0) {
-            $mensaje .= ". ⚠️ $duplicados ya existían";
-        }
-
-        Log::info('Reinscripción masiva completada', [
-            'reinscripciones' => $reinscripciones,
-            'duplicados' => $duplicados,
-            'errores' => count($errores)
-        ]);
-
-        return redirect()->route('historial.index')
-            ->with('success', $mensaje)
-            ->with('errores', $errores);
-
-    } catch (\Exception $e) {
-        DB::rollBack();
-        Log::error('Error crítico en storeMasivoAvanzado', [
-            'error' => $e->getMessage()
-        ]);
-        
-        return redirect()->back()
-            ->withErrors(['error' => 'Error: ' . $e->getMessage()])
-            ->withInput();
     }
-}
 }
