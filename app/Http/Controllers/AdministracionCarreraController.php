@@ -27,9 +27,11 @@ class AdministracionCarreraController extends Controller
         }
 
         $mostrar = $request->get('mostrar', 10);
-        $administraciones = ($mostrar === 'todo')
-            ? $query->get()
-            : $query->paginate((int)$mostrar);
+    if ($mostrar === "todo") {
+        $administraciones = $query->get();
+    } else {
+        $administraciones = $query->paginate((int)$mostrar)->appends($request->all());
+    }
 
         $areas = Area::all();
         $carreras = Carrera::all();
@@ -44,7 +46,7 @@ class AdministracionCarreraController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'id_area' => 'required|exists:areas,id_area',
-            'id_usuario' => 'required|exists:users,id_usuario',
+            'id_usuario' => 'required|exists:usuarios,id_usuario',
             'id_carrera' => 'required|exists:carreras,id_carrera|unique:administracion_carreras,id_carrera,NULL,id_administracion_carrera,id_area,' . $request->id_area . ',id_usuario,' . $request->id_usuario,
         ], [
             'id_area.required' => 'El área es obligatoria.',
@@ -75,7 +77,7 @@ class AdministracionCarreraController extends Controller
 
         $validator = Validator::make($request->all(), [
             'id_area' => 'required|exists:areas,id_area',
-            'id_usuario' => 'required|exists:users,id_usuario',
+            'id_usuario' => 'required|exists:usuarios,id_usuario',
             'id_carrera' => 'required|exists:carreras,id_carrera|unique:administracion_carreras,id_carrera,' . $admin->id_administracion_carrera . ',id_administracion_carrera,id_area,' . $request->id_area . ',id_usuario,' . $request->id_usuario,
         ], [
             'id_area.required' => 'El área es obligatoria.',

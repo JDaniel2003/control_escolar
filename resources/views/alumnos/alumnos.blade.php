@@ -1379,7 +1379,8 @@
                                                                                                 <input type="text"
                                                                                                     name="tutor[nombres]"
                                                                                                     class="form-control form-control-sm"
-                                                                                                    value="{{ old('tutor', optional($alumno->tutor)->nombres) }}"
+                                                                                                    value="{{ old('tutor.nombres', optional($alumno->tutor)->nombres) }}"
+
                                                                                                     placeholder="Nombre completo del tutor">
                                                                                             </div>
                                                                                             <div class="col-md-4 mb-2">
@@ -1786,663 +1787,775 @@
     <!-- End Page Wrapper -->
 
     <!-- Modal Nuevo Alumno-->
-    <div class="modal fade" id="nuevoAlumnoModal" tabindex="-1" role="dialog" aria-labelledby="nuevoAlumnoLabel"
-        aria-hidden="true">
-        <div class="modal-dialog modal-xl modal-dialog-scrollable" role="document">
-            <div class="modal-content border-0 shadow-lg">
-                {{-- Header --}}
-                <div class="modal-header modal-header-custom border-0 py-3">
-                    <div class="w-100 text-center">
-                        <h5 class="m-0 font-weight-bold" id="nuevoAlumnoLabel">
-                            👨‍🎓 Registrar Nuevo Alumno / Aspirante
-                        </h5>
-                        <p class="m-0 mt-2 mb-0" style="font-size: 0.9rem; opacity: 0.95;">
-                            Complete todos los datos del estudiante
-                        </p>
-                    </div>
-                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Cerrar"
-                        style="position: absolute; right: 1.5rem; top: 1.5rem; font-size: 1.8rem; opacity: 0.9;">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+    <!-- Modal Nuevo Alumno con Validaciones -->
+<div class="modal fade" id="nuevoAlumnoModal" tabindex="-1" role="dialog" aria-labelledby="nuevoAlumnoLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable" role="document">
+        <div class="modal-content border-0 shadow-lg">
+            {{-- Header --}}
+            <div class="modal-header modal-header-custom border-0 py-3">
+                <div class="w-100 text-center">
+                    <h5 class="m-0 font-weight-bold" id="nuevoAlumnoLabel">
+                        👨‍🎓 Registrar Nuevo Alumno / Aspirante
+                    </h5>
+                    <p class="m-0 mt-2 mb-0" style="font-size: 0.9rem; opacity: 0.95;">
+                        Complete todos los datos del estudiante
+                    </p>
                 </div>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Cerrar"
+                    style="position: absolute; right: 1.5rem; top: 1.5rem; font-size: 1.8rem; opacity: 0.9;">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
 
-                {{-- Body --}}
-                <div class="modal-body p-3" style="background-color: #f8f9fa;">
-                    <div class="form-container p-4 bg-white rounded shadow-sm border">
-                        <form action="{{ route('alumnos.store') }}" method="POST">
-                            @csrf
-                            <input type="hidden" name="is_create_alumno" value="1">
-                            {{-- Acordeón para secciones --}}
-                            <div class="accordion" id="alumnoAccordion">
-                                @if ($errors->any() && old('is_create_alumno'))
-                        <div class="alert alert-danger mb-3">
-                            <ul class="mb-0">
-                                @foreach ($errors->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
-                    @endif
+            {{-- Body --}}
+            <div class="modal-body p-3" style="background-color: #f8f9fa;">
+                <div class="form-container p-4 bg-white rounded shadow-sm border">
+                    <form action="{{ route('alumnos.store') }}" method="POST">
+                        @csrf
+                        <input type="hidden" name="is_create_alumno" value="1">
+                        
+                        {{-- Alerta de errores general --}}
+                        @if ($errors->any() && old('is_create_alumno'))
+                            <div class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
+                                <strong><i class="fas fa-exclamation-triangle mr-2"></i>Por favor corrija los siguientes errores:</strong>
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                        @endif
 
+                        {{-- Acordeón para secciones --}}
+                        <div class="accordion" id="alumnoAccordion">
 
-                                {{-- =================== DATOS PERSONALES =================== --}}
-                                <div class="card mb-2 border-0 shadow-sm">
-                                    <div class="card-header p-0" id="headingDatosPersonales">
-                                        <button
-                                            class="btn text-danger font-weight-bold btn-block text-left py-2 px-3 text-decoration-none"
-                                            type="button" data-toggle="collapse"
-                                            data-target="#collapseDatosPersonales" aria-expanded="true"
-                                            aria-controls="collapseDatosPersonales">
-                                            <i class="fas fa-user mr-2"></i>Datos Personales
-                                            <i class="fas fa-chevron-down float-right mt-1"></i>
-                                        </button>
-                                    </div>
-                                    <div id="collapseDatosPersonales" class="collapse show"
-                                        aria-labelledby="headingDatosPersonales" data-parent="#alumnoAccordion">
-                                        <div class="card-body p-3">
-                                            <div class="row">
-                                                <div class="flex-grow-1" style="min-width: 200px;">
-                                                    <label class="form-label-custom small mb-1">
-                                                        Nombres <span class="text-danger">*</span>
-                                                    </label>
-                                                    <input type="text" name="datos_personales[nombres]"
-                                                        class="form-control form-control-sm" placeholder="Nombres"
-                                                        required>
-                                                        @error('datos_personales.nombres')
-                                                @if(old('is_create_alumno'))
-                                                    <div class="invalid-feedback d-block">{{ $message }}</div>
-                                                @endif
-                                            @enderror
-                                                </div>
-                                                <div class="flex-grow-1" style="min-width: 200px;">
-                                                    <label class="form-label-custom small mb-1">
-                                                        Primer Apellido <span class="text-danger">*</span>
-                                                    </label>
-                                                    <input type="text" name="datos_personales[primer_apellido]"
-                                                        class="form-control form-control-sm"
-                                                        placeholder="Primer apellido" required>
-                                                        @error('datos_personales.primer_apellido')
-                                                @if(old('is_create_alumno'))
-                                                    <div class="invalid-feedback d-block">{{ $message }}</div>
-                                                @endif
-                                            @enderror
-                                                </div>
-                                                <div class="flex-grow-1" style="min-width: 200px;">
-                                                    <label class="form-label-custom small mb-1">Segundo
-                                                        Apellido</label>
-                                                    <input type="text" name="datos_personales[segundo_apellido]"
-                                                        class="form-control form-control-sm"
-                                                        placeholder="Segundo apellido">
-                                                </div>
+                            {{-- =================== DATOS PERSONALES =================== --}}
+                            <div class="card mb-2 border-0 shadow-sm">
+                                <div class="card-header p-0" id="headingDatosPersonales">
+                                    <button class="btn text-danger font-weight-bold btn-block text-left py-2 px-3 text-decoration-none"
+                                        type="button" data-toggle="collapse" data-target="#collapseDatosPersonales"
+                                        aria-expanded="true" aria-controls="collapseDatosPersonales">
+                                        <i class="fas fa-user mr-2"></i>Datos Personales
+                                        <i class="fas fa-chevron-down float-right mt-1"></i>
+                                    </button>
+                                </div>
+                                <div id="collapseDatosPersonales" class="collapse show"
+                                    aria-labelledby="headingDatosPersonales" data-parent="#alumnoAccordion">
+                                    <div class="card-body p-3">
+                                        <div class="row">
+                                            <div class="col-md-4 mb-2">
+                                                <label class="form-label-custom small mb-1">
+                                                    Nombres <span class="text-danger">*</span>
+                                                </label>
+                                                <input type="text" name="datos_personales[nombres]"
+                                                    class="form-control form-control-sm @error('datos_personales.nombres') @if(old('is_create_alumno')) is-invalid @endif @enderror"
+                                                    value="{{ old('datos_personales.nombres') }}"
+                                                    placeholder="Nombres" required>
+                                                @error('datos_personales.nombres')
+                                                    @if(old('is_create_alumno'))
+                                                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                                                    @endif
+                                                @enderror
                                             </div>
-
-                                            <div class="row">
-                                                <div class="flex-grow-1" style="min-width: 200px;">
-                                                    <label class="form-label-custom small mb-1">CURP</label>
-                                                    <input type="text" name="curp" maxlength="18"
-                                                        class="form-control form-control-sm"
-                                                        placeholder="18 caracteres" required>
-                                                </div>
-                                                <div class="flex-grow-1" style="min-width: 200px;">
-                                                    <label class="form-label-custom small mb-1">Fecha de
-                                                        Nacimiento</label>
-                                                    <input type="date" name="fecha_nacimiento" id="fecha_nacimiento_create"
-                                                        class="form-control form-control-sm" required>
-                                                        @error('datos_personales.fecha_nacimiento')
-                                                @if(old('is_create_alumno'))
-                                                    <div class="invalid-feedback d-block">{{ $message }}</div>
-                                                @endif
-                                            @enderror
-                                                </div>
-                                                <div class="flex-grow-1" style="width: 50px;">
-                                                    <label class="form-label-custom small mb-1">Edad</label>
-                                                    <input type="number" name="edad" id="edad_create" min="18" max="100" readonly
-                                                        class="form-control form-control-sm" placeholder="Años">
-                                                </div>
-                                                <div class="flex-grow-1" style="min-width: 200px;">
-                                                    <label class="form-label-custom small mb-1">Lugar de
-                                                        Nacimiento</label>
-                                                    <input type="text" name="lugar_nacimiento"
-                                                        class="form-control form-control-sm"
-                                                        placeholder="Ciudad, Estado">
-                                                </div>
-                                                <div class="col-md-3 mb-2">
-                                                    <label class="form-label-custom small mb-1">Estado de
-                                                        Nacimiento</label>
-                                                    <select name="estado_nacimiento"
-                                                        class="form-control form-control-sm">
-                                                        <option value="">-- Selecciona --</option>
-                                                        @foreach ($estados as $estado)
-                                                            <option value="{{ $estado->id_estado }}">
-                                                                {{ $estado->nombre }}
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
+                                            <div class="col-md-4 mb-2">
+                                                <label class="form-label-custom small mb-1">
+                                                    Primer Apellido <span class="text-danger">*</span>
+                                                </label>
+                                                <input type="text" name="datos_personales[primer_apellido]"
+                                                    class="form-control form-control-sm @error('datos_personales.primer_apellido') @if(old('is_create_alumno')) is-invalid @endif @enderror"
+                                                    value="{{ old('datos_personales.primer_apellido') }}"
+                                                    placeholder="Primer apellido" required>
+                                                @error('datos_personales.primer_apellido')
+                                                    @if(old('is_create_alumno'))
+                                                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                                                    @endif
+                                                @enderror
                                             </div>
+                                            <div class="col-md-4 mb-2">
+                                                <label class="form-label-custom small mb-1">Segundo Apellido</label>
+                                                <input type="text" name="datos_personales[segundo_apellido]"
+                                                    class="form-control form-control-sm"
+                                                    value="{{ old('datos_personales.segundo_apellido') }}"
+                                                    placeholder="Segundo apellido">
+                                            </div>
+                                        </div>
 
-                                            <div class="row">
+                                        <div class="row">
+                                            <div class="col-md-3 mb-2">
+                                                <label class="form-label-custom small mb-1">CURP</label>
+                                                <input type="text" name="curp" maxlength="18"
+                                                    class="form-control form-control-sm @error('curp') @if(old('is_create_alumno')) is-invalid @endif @enderror"
+                                                    value="{{ old('curp') }}"
+                                                    placeholder="18 caracteres">
+                                                @error('curp')
+                                                    @if(old('is_create_alumno'))
+                                                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                                                    @endif
+                                                @enderror
+                                            </div>
+                                            <div class="col-md-3 mb-2">
+                                                <label class="form-label-custom small mb-1">Fecha de Nacimiento</label>
+                                                <input type="date" name="fecha_nacimiento" id="fecha_nacimiento_create"
+                                                    class="form-control form-control-sm @error('fecha_nacimiento') @if(old('is_create_alumno')) is-invalid @endif @enderror"
+                                                    value="{{ old('fecha_nacimiento') }}">
+                                                @error('fecha_nacimiento')
+                                                    @if(old('is_create_alumno'))
+                                                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                                                    @endif
+                                                @enderror
+                                            </div>
+                                            <div class="col-md-2 mb-2">
+                                                <label class="form-label-custom small mb-1">Edad</label>
+                                                <input type="number" name="edad" id="edad_create" min="18" max="100" readonly
+                                                    class="form-control form-control-sm"
+                                                    value="{{ old('edad') }}"
+                                                    placeholder="Años">
+                                            </div>
+                                            <div class="col-md-2 mb-2">
+                                                <label class="form-label-custom small mb-1">Lugar Nac.</label>
+                                                <input type="text" name="lugar_nacimiento"
+                                                    class="form-control form-control-sm"
+                                                    value="{{ old('lugar_nacimiento') }}"
+                                                    placeholder="Ciudad">
+                                            </div>
+                                            <div class="col-md-2 mb-2">
+                                                <label class="form-label-custom small mb-1">Estado Nac.</label>
+                                                <select name="estado_nacimiento" class="form-control form-control-sm">
+                                                    <option value="">-- Selecciona --</option>
+                                                    @foreach ($estados as $estado)
+                                                        <option value="{{ $estado->id_estado }}"
+                                                            {{ old('estado_nacimiento') == $estado->id_estado ? 'selected' : '' }}>
+                                                            {{ $estado->nombre }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
 
-                                                <div class="flex-grow-1" style="min-width: 150px;">
-                                                    <label class="form-label-custom small mb-1">Estado Civil</label>
-                                                    <select name="id_estado_civil"
-                                                        class="form-control form-control-sm">
-                                                        <option value="">-- Selecciona --</option>
-                                                        @foreach ($estados_civiles as $estado)
-                                                            <option value="{{ $estado->id_estado_civil }}">
-                                                                {{ $estado->nombre }}
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                                <div class="flex-grow-1" style="min-width: 150px;">
-                                                    <label class="form-label-custom small mb-1">Género</label>
-                                                    <select name="id_genero" class="form-control form-control-sm">
-                                                        <option value="">-- Selecciona --</option>
-                                                        @foreach ($generos as $genero)
-                                                            <option value="{{ $genero->id_genero }}">
-                                                                {{ $genero->nombre }}
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                                <div class="flex-grow-1" style="min-width: 150px;">
-                                                    <label class="form-label-custom small mb-1">Tipo Sangre</label>
-                                                    <select name="id_tipo_sangre"
-                                                        class="form-control form-control-sm">
-                                                        <option value="">-- Selecciona --</option>
-                                                        @foreach ($tipos_sangre as $tipo)
-                                                            <option value="{{ $tipo->id_tipo_sangre }}">
-                                                                {{ $tipo->nombre }}
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
+                                        <div class="row">
+                                            <div class="col-md-3 mb-2">
+                                                <label class="form-label-custom small mb-1">Estado Civil</label>
+                                                <select name="id_estado_civil" class="form-control form-control-sm">
+                                                    <option value="">-- Selecciona --</option>
+                                                    @foreach ($estados_civiles as $estado)
+                                                        <option value="{{ $estado->id_estado_civil }}"
+                                                            {{ old('id_estado_civil') == $estado->id_estado_civil ? 'selected' : '' }}>
+                                                            {{ $estado->nombre }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="col-md-2 mb-2">
+                                                <label class="form-label-custom small mb-1">Género</label>
+                                                <select name="id_genero" class="form-control form-control-sm">
+                                                    <option value="">-- Selecciona --</option>
+                                                    @foreach ($generos as $genero)
+                                                        <option value="{{ $genero->id_genero }}"
+                                                            {{ old('id_genero') == $genero->id_genero ? 'selected' : '' }}>
+                                                            {{ $genero->nombre }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="col-md-2 mb-2">
+                                                <label class="form-label-custom small mb-1">Tipo Sangre</label>
+                                                <select name="id_tipo_sangre" class="form-control form-control-sm">
+                                                    <option value="">-- Selecciona --</option>
+                                                    @foreach ($tipos_sangre as $tipo)
+                                                        <option value="{{ $tipo->id_tipo_sangre }}"
+                                                            {{ old('id_tipo_sangre') == $tipo->id_tipo_sangre ? 'selected' : '' }}>
+                                                            {{ $tipo->nombre }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="col-md-3 mb-2">
+                                                <label class="form-label-custom small mb-1">Lengua Indígena</label>
+                                                <select name="id_lengua_indigena" class="form-control form-control-sm">
+                                                    <option value="">-- Selecciona --</option>
+                                                    @foreach ($lenguas as $lengua)
+                                                        <option value="{{ $lengua->id_lengua_indigena }}"
+                                                            {{ old('id_lengua_indigena') == $lengua->id_lengua_indigena ? 'selected' : '' }}>
+                                                            {{ $lengua->nombre }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="col-md-2 mb-2">
+                                                <label class="form-label-custom small mb-1">N° Hijos</label>
+                                                <input type="number" name="hijos" min="0"
+                                                    class="form-control form-control-sm"
+                                                    value="{{ old('hijos', 0) }}"
+                                                    placeholder="0">
+                                            </div>
+                                        </div>
 
-                                                <div class="flex-grow-1" style="min-width: 200px;">
-                                                    <label class="form-label-custom small mb-1">Lengua Indígena</label>
-                                                    <select name="id_lengua_indigena"
-                                                        class="form-control form-control-sm">
-                                                        <option value="">-- Selecciona --</option>
-                                                        @foreach ($lenguas as $lengua)
-                                                            <option value="{{ $lengua->id_lengua_indigena }}">
-                                                                {{ $lengua->nombre }}
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                                <div class="flex-grow-1" style="min-width: 200px;">
-                                                    <label class="form-label-custom small mb-1">Discapacidad</label>
-                                                    <select name="id_discapacidad"
-                                                        class="form-control form-control-sm">
-                                                        <option value="">-- Selecciona --</option>
-                                                        @foreach ($discapacidades as $discapacidad)
-                                                            <option value="{{ $discapacidad->id_discapacidad }}">
-                                                                {{ $discapacidad->nombre }}
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                                <div class="flex-grow-1" style="width: 100px;">
-                                                    <label class="form-label-custom small mb-1">N° Hijos</label>
-                                                    <input type="number" name="hijos" min="0"
-                                                        class="form-control form-control-sm" placeholder="0">
-                                                </div>
-
-                                                <div class="flex-grow-1" style="min-width: 200px;">
-                                                    <label class="form-label-custom small mb-1">Correo
-                                                        Electrónico</label>
-                                                    <input type="email" name="correo"
-                                                        class="form-control form-control-sm"
-                                                        placeholder="ejemplo@correo.com">
-                                                </div>
-                                                <div class="flex-grow-1" style="min-width: 150px;">
-                                                    <label class="form-label-custom small mb-1">Teléfono</label>
-                                                    <input type="text" name="datos_personales[telefono]"
-                                                        maxlength="10" class="form-control form-control-sm"
-                                                        placeholder="10 dígitos">
-                                                </div>
-                                                <div class="flex-grow-1" style="min-width: 150px;">
-                                                    <label class="form-label-custom small mb-1">N° Seguridad
-                                                        Social</label>
-                                                    <input type="text" name="numero_seguridad_social"
-                                                        maxlength="11" class="form-control form-control-sm"
-                                                        placeholder="11 dígitos">
-                                                </div>
+                                        <div class="row">
+                                            <div class="col-md-3 mb-2">
+                                                <label class="form-label-custom small mb-1">Discapacidad</label>
+                                                <select name="id_discapacidad" class="form-control form-control-sm">
+                                                    <option value="">-- Selecciona --</option>
+                                                    @foreach ($discapacidades as $discapacidad)
+                                                        <option value="{{ $discapacidad->id_discapacidad }}"
+                                                            {{ old('id_discapacidad') == $discapacidad->id_discapacidad ? 'selected' : '' }}>
+                                                            {{ $discapacidad->nombre }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="col-md-4 mb-2">
+                                                <label class="form-label-custom small mb-1">Correo Electrónico</label>
+                                                <input type="email" name="correo"
+                                                    class="form-control form-control-sm @error('correo') @if(old('is_create_alumno')) is-invalid @endif @enderror"
+                                                    value="{{ old('correo') }}"
+                                                    placeholder="ejemplo@correo.com">
+                                                @error('correo')
+                                                    @if(old('is_create_alumno'))
+                                                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                                                    @endif
+                                                @enderror
+                                            </div>
+                                            <div class="col-md-2 mb-2">
+                                                <label class="form-label-custom small mb-1">Teléfono</label>
+                                                <input type="text" name="datos_personales[telefono]" maxlength="10"
+                                                    class="form-control form-control-sm @error('datos_personales.telefono') @if(old('is_create_alumno')) is-invalid @endif @enderror"
+                                                    value="{{ old('datos_personales.telefono') }}"
+                                                    placeholder="10 dígitos">
+                                                @error('datos_personales.telefono')
+                                                    @if(old('is_create_alumno'))
+                                                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                                                    @endif
+                                                @enderror
+                                            </div>
+                                            <div class="col-md-3 mb-2">
+                                                <label class="form-label-custom small mb-1">N° Seguridad Social</label>
+                                                <input type="text" name="numero_seguridad_social" maxlength="11"
+                                                    class="form-control form-control-sm @error('numero_seguridad_social') @if(old('is_create_alumno')) is-invalid @endif @enderror"
+                                                    value="{{ old('numero_seguridad_social') }}"
+                                                    placeholder="11 dígitos">
+                                                @error('numero_seguridad_social')
+                                                    @if(old('is_create_alumno'))
+                                                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                                                    @endif
+                                                @enderror
                                             </div>
                                         </div>
                                     </div>
                                 </div>
+                            </div>
 
-                                {{-- =================== DOMICILIO ALUMNO =================== --}}
-                                <div class="card mb-2 border-0 shadow-sm">
-                                    <div class="card-header p-0" id="headingDomicilio">
-                                        <button
-                                            class="btn text-danger font-weight-bold btn-block text-left py-2 px-3 text-decoration-none collapsed"
-                                            type="button" data-toggle="collapse" data-target="#collapseDomicilio"
-                                            aria-expanded="false" aria-controls="collapseDomicilio">
-                                            <i class="fas fa-home mr-2"></i>Domicilio del Alumno
-                                            <i class="fas fa-chevron-down float-right mt-1"></i>
-                                        </button>
-                                    </div>
-                                    <div id="collapseDomicilio" class="collapse"
-                                        aria-labelledby="headingDomicilio" data-parent="#alumnoAccordion">
-                                        <div class="card-body p-3">
-                                            <div class="row">
-                                                <div class="col-md-4 mb-2">
-                                                    <label class="form-label-custom small mb-1">
-                                                        Calle <span class="text-danger">*</span>
-                                                    </label>
-                                                    <input type="text" name="domicilio_alumno[calle]"
-                                                        class="form-control form-control-sm"
-                                                        placeholder="Nombre de la calle" required>
-                                                </div>
-                                                <div class="col-md-2 mb-2">
-                                                    <label class="form-label-custom small mb-1">N° Ext.</label>
-                                                    <input type="number" name="domicilio_alumno[numero_exterior]"
-                                                        min="0" class="form-control form-control-sm"
-                                                        placeholder="0">
-                                                </div>
-                                                <div class="col-md-2 mb-2">
-                                                    <label class="form-label-custom small mb-1">N° Int.</label>
-                                                    <input type="number" name="domicilio_alumno[numero_interior]"
-                                                        min="0" class="form-control form-control-sm"
-                                                        placeholder="0">
-                                                </div>
-                                                <div class="col-md-4 mb-2">
-                                                    <label class="form-label-custom small mb-1">
-                                                        Colonia <span class="text-danger">*</span>
-                                                    </label>
-                                                    <input type="text" name="domicilio_alumno[colonia]"
-                                                        class="form-control form-control-sm"
-                                                        placeholder="Nombre de la colonia" required>
-                                                </div>
+                            {{-- =================== DOMICILIO ALUMNO =================== --}}
+                            <div class="card mb-2 border-0 shadow-sm">
+                                <div class="card-header p-0" id="headingDomicilio">
+                                    <button class="btn text-danger font-weight-bold btn-block text-left py-2 px-3 text-decoration-none collapsed"
+                                        type="button" data-toggle="collapse" data-target="#collapseDomicilio"
+                                        aria-expanded="false" aria-controls="collapseDomicilio">
+                                        <i class="fas fa-home mr-2"></i>Domicilio del Alumno
+                                        <i class="fas fa-chevron-down float-right mt-1"></i>
+                                    </button>
+                                </div>
+                                <div id="collapseDomicilio" class="collapse" aria-labelledby="headingDomicilio"
+                                    data-parent="#alumnoAccordion">
+                                    <div class="card-body p-3">
+                                        <div class="row">
+                                            <div class="col-md-4 mb-2">
+                                                <label class="form-label-custom small mb-1">
+                                                    Calle <span class="text-danger">*</span>
+                                                </label>
+                                                <input type="text" name="domicilio_alumno[calle]"
+                                                    class="form-control form-control-sm @error('domicilio_alumno.calle') @if(old('is_create_alumno')) is-invalid @endif @enderror"
+                                                    value="{{ old('domicilio_alumno.calle') }}"
+                                                    placeholder="Nombre de la calle" required>
+                                                @error('domicilio_alumno.calle')
+                                                    @if(old('is_create_alumno'))
+                                                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                                                    @endif
+                                                @enderror
                                             </div>
-
-                                            <div class="row">
-                                                <div class="col-md-4 mb-2">
-                                                    <label class="form-label-custom small mb-1">
-                                                        Comunidad <span class="text-danger">*</span>
-                                                    </label>
-                                                    <input type="text" name="domicilio_alumno[comunidad]"
-                                                        class="form-control form-control-sm"
-                                                        placeholder="Nombre de la comunidad" required>
-                                                </div>
-                                                <div class="col-md-3 mb-2">
-                                                    <label class="form-label-custom small mb-1">Distrito</label>
-                                                    <select name="domicilio_alumno[id_distrito]"
-                                                        class="form-control form-control-sm">
-                                                        <option value="">-- Selecciona --</option>
-                                                        @foreach ($distritos as $distrito)
-                                                            <option value="{{ $distrito->id_distrito }}">
-                                                                {{ $distrito->nombre }}
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                                <div class="col-md-3 mb-2">
-                                                    <label class="form-label-custom small mb-1">Estado</label>
-                                                    <select name="domicilio_alumno[id_estado]"
-                                                        class="form-control form-control-sm">
-                                                        <option value="">-- Selecciona --</option>
-                                                        @foreach ($estados as $estado)
-                                                            <option value="{{ $estado->id_estado }}">
-                                                                {{ $estado->nombre }}
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                                <div class="col-md-2 mb-2">
-                                                    <label class="form-label-custom small mb-1">C.P.</label>
-                                                    <input type="number" name="codigo_postal" min="0"
-                                                        class="form-control form-control-sm" placeholder="00000">
-                                                </div>
+                                            <div class="col-md-2 mb-2">
+                                                <label class="form-label-custom small mb-1">N° Ext.</label>
+                                                <input type="number" name="domicilio_alumno[numero_exterior]" min="0"
+                                                    class="form-control form-control-sm"
+                                                    value="{{ old('domicilio_alumno.numero_exterior') }}"
+                                                    placeholder="0">
                                             </div>
+                                            <div class="col-md-2 mb-2">
+                                                <label class="form-label-custom small mb-1">N° Int.</label>
+                                                <input type="number" name="domicilio_alumno[numero_interior]" min="0"
+                                                    class="form-control form-control-sm"
+                                                    value="{{ old('domicilio_alumno.numero_interior') }}"
+                                                    placeholder="0">
+                                            </div>
+                                            <div class="col-md-4 mb-2">
+                                                <label class="form-label-custom small mb-1">
+                                                    Colonia <span class="text-danger">*</span>
+                                                </label>
+                                                <input type="text" name="domicilio_alumno[colonia]"
+                                                    class="form-control form-control-sm @error('domicilio_alumno.colonia') @if(old('is_create_alumno')) is-invalid @endif @enderror"
+                                                    value="{{ old('domicilio_alumno.colonia') }}"
+                                                    placeholder="Nombre de la colonia" required>
+                                                @error('domicilio_alumno.colonia')
+                                                    @if(old('is_create_alumno'))
+                                                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                                                    @endif
+                                                @enderror
+                                            </div>
+                                        </div>
 
-                                            <div class="row">
-                                                <div class="col-md-4 mb-2">
-                                                    <label class="form-label-custom small mb-1">
-                                                        Municipio <span class="text-danger">*</span>
-                                                    </label>
-                                                    <input type="text" name="domicilio_alumno[municipio]"
-                                                        class="form-control form-control-sm"
-                                                        placeholder="Nombre del municipio" required>
-                                                </div>
+                                        <div class="row">
+                                            <div class="col-md-4 mb-2">
+                                                <label class="form-label-custom small mb-1">
+                                                    Comunidad <span class="text-danger">*</span>
+                                                </label>
+                                                <input type="text" name="domicilio_alumno[comunidad]"
+                                                    class="form-control form-control-sm @error('domicilio_alumno.comunidad') @if(old('is_create_alumno')) is-invalid @endif @enderror"
+                                                    value="{{ old('domicilio_alumno.comunidad') }}"
+                                                    placeholder="Nombre de la comunidad" required>
+                                                @error('domicilio_alumno.comunidad')
+                                                    @if(old('is_create_alumno'))
+                                                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                                                    @endif
+                                                @enderror
+                                            </div>
+                                            <div class="col-md-3 mb-2">
+                                                <label class="form-label-custom small mb-1">Distrito</label>
+                                                <select name="domicilio_alumno[id_distrito]" class="form-control form-control-sm">
+                                                    <option value="">-- Selecciona --</option>
+                                                    @foreach ($distritos as $distrito)
+                                                        <option value="{{ $distrito->id_distrito }}"
+                                                            {{ old('domicilio_alumno.id_distrito') == $distrito->id_distrito ? 'selected' : '' }}>
+                                                            {{ $distrito->nombre }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="col-md-3 mb-2">
+                                                <label class="form-label-custom small mb-1">
+                                                    Estado <span class="text-danger">*</span>
+                                                </label>
+                                                <select name="domicilio_alumno[id_estado]"
+                                                    class="form-control form-control-sm @error('domicilio_alumno.id_estado') @if(old('is_create_alumno')) is-invalid @endif @enderror"
+                                                    required>
+                                                    <option value="">-- Selecciona --</option>
+                                                    @foreach ($estados as $estado)
+                                                        <option value="{{ $estado->id_estado }}"
+                                                            {{ old('domicilio_alumno.id_estado') == $estado->id_estado ? 'selected' : '' }}>
+                                                            {{ $estado->nombre }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                                @error('domicilio_alumno.id_estado')
+                                                    @if(old('is_create_alumno'))
+                                                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                                                    @endif
+                                                @enderror
+                                            </div>
+                                            <div class="col-md-2 mb-2">
+                                                <label class="form-label-custom small mb-1">C.P.</label>
+                                                <input type="number" name="codigo_postal" min="0"
+                                                    class="form-control form-control-sm @error('codigo_postal') @if(old('is_create_alumno')) is-invalid @endif @enderror"
+                                                    value="{{ old('codigo_postal') }}"
+                                                    placeholder="00000">
+                                                @error('codigo_postal')
+                                                    @if(old('is_create_alumno'))
+                                                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                                                    @endif
+                                                @enderror
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-md-4 mb-2">
+                                                <label class="form-label-custom small mb-1">
+                                                    Municipio <span class="text-danger">*</span>
+                                                </label>
+                                                <input type="text" name="domicilio_alumno[municipio]"
+                                                    class="form-control form-control-sm @error('domicilio_alumno.municipio') @if(old('is_create_alumno')) is-invalid @endif @enderror"
+                                                    value="{{ old('domicilio_alumno.municipio') }}"
+                                                    placeholder="Nombre del municipio" required>
+                                                @error('domicilio_alumno.municipio')
+                                                    @if(old('is_create_alumno'))
+                                                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                                                    @endif
+                                                @enderror
                                             </div>
                                         </div>
                                     </div>
                                 </div>
+                            </div>
 
-                                {{-- =================== ESCUELA DE PROCEDENCIA =================== --}}
-                                <div class="card mb-2 border-0 shadow-sm">
-                                    <div class="card-header p-0" id="headingEscuela">
-                                        <button
-                                            class="btn text-danger font-weight-bold btn-block text-left py-2 px-3 text-decoration-none collapsed"
-                                            type="button" data-toggle="collapse" data-target="#collapseEscuela"
-                                            aria-expanded="false" aria-controls="collapseEscuela">
-                                            <i class="fas fa-school mr-2"></i>Escuela de Procedencia
-                                            <i class="fas fa-chevron-down float-right mt-1"></i>
-                                        </button>
-                                    </div>
-                                    <div id="collapseEscuela" class="collapse" aria-labelledby="headingEscuela"
-                                        data-parent="#alumnoAccordion">
-                                        <div class="card-body p-3">
-                                            <div class="row">
-                                                <div class="col-md-4 mb-2">
-                                                    <label class="form-label-custom small mb-1">Subsistema</label>
-                                                    <select name="id_subsistema"
-                                                        class="form-control form-control-sm">
-                                                        <option value="">-- Selecciona --</option>
-                                                        @foreach ($subsistemas as $subsistema)
-                                                            <option value="{{ $subsistema->id_subsistema }}">
-                                                                {{ $subsistema->nombre }}
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                                <div class="col-md-3 mb-2">
-                                                    <label class="form-label-custom small mb-1">Tipo Escuela</label>
-                                                    <select name="id_tipo_escuela"
-                                                        class="form-control form-control-sm">
-                                                        <option value="">-- Selecciona --</option>
-                                                        @foreach ($tiposEscuela as $tipo)
-                                                            <option value="{{ $tipo->id_tipo_escuela }}">
-                                                                {{ $tipo->nombre }}
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                                <div class="col-md-3 mb-2">
-                                                    <label class="form-label-custom small mb-1">
-                                                        Promedio <span class="text-danger">*</span>
-                                                    </label>
-                                                    <input type="number" name="promedio_egreso" min="0"
-                                                        step="0.01" class="form-control form-control-sm"
-                                                        placeholder="0.00" required>
-                                                </div>
-                                                <div class="col-md-2 mb-2">
-                                                    <label class="form-label-custom small mb-1">Beca</label>
-                                                    <select name="id_beca" class="form-control form-control-sm">
-                                                        <option value="">-- Selecciona --</option>
-                                                        @foreach ($becas as $beca)
-                                                            <option value="{{ $beca->id_beca }}">
-                                                                {{ $beca->nombre }}
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
+                            {{-- =================== ESCUELA DE PROCEDENCIA =================== --}}
+                            <div class="card mb-2 border-0 shadow-sm">
+                                <div class="card-header p-0" id="headingEscuela">
+                                    <button class="btn text-danger font-weight-bold btn-block text-left py-2 px-3 text-decoration-none collapsed"
+                                        type="button" data-toggle="collapse" data-target="#collapseEscuela"
+                                        aria-expanded="false" aria-controls="collapseEscuela">
+                                        <i class="fas fa-school mr-2"></i>Escuela de Procedencia
+                                        <i class="fas fa-chevron-down float-right mt-1"></i>
+                                    </button>
+                                </div>
+                                <div id="collapseEscuela" class="collapse" aria-labelledby="headingEscuela"
+                                    data-parent="#alumnoAccordion">
+                                    <div class="card-body p-3">
+                                        <div class="row">
+                                            <div class="col-md-4 mb-2">
+                                                <label class="form-label-custom small mb-1">Subsistema</label>
+                                                <select name="id_subsistema" class="form-control form-control-sm">
+                                                    <option value="">-- Selecciona --</option>
+                                                    @foreach ($subsistemas as $subsistema)
+                                                        <option value="{{ $subsistema->id_subsistema }}"
+                                                            {{ old('id_subsistema') == $subsistema->id_subsistema ? 'selected' : '' }}>
+                                                            {{ $subsistema->nombre }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
                                             </div>
+                                            <div class="col-md-3 mb-2">
+                                                <label class="form-label-custom small mb-1">Tipo Escuela</label>
+                                                <select name="id_tipo_escuela" class="form-control form-control-sm">
+                                                    <option value="">-- Selecciona --</option>
+                                                    @foreach ($tiposEscuela as $tipo)
+                                                        <option value="{{ $tipo->id_tipo_escuela }}"
+                                                            {{ old('id_tipo_escuela') == $tipo->id_tipo_escuela ? 'selected' : '' }}>
+                                                            {{ $tipo->nombre }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="col-md-3 mb-2">
+                                                <label class="form-label-custom small mb-1">
+                                                    Promedio <span class="text-danger">*</span>
+                                                </label>
+                                                <input type="number" name="promedio_egreso" min="0" max="10" step="0.01"
+                                                    class="form-control form-control-sm @error('promedio_egreso') @if(old('is_create_alumno')) is-invalid @endif @enderror"
+                                                    value="{{ old('promedio_egreso') }}"
+                                                    placeholder="0.00" required>
+                                                @error('promedio_egreso')
+                                                    @if(old('is_create_alumno'))
+                                                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                                                    @endif
+                                                @enderror
+                                            </div>
+                                            <div class="col-md-2 mb-2">
+                                                <label class="form-label-custom small mb-1">Beca</label>
+                                                <select name="id_beca" class="form-control form-control-sm">
+                                                    <option value="">-- Selecciona --</option>
+                                                    @foreach ($becas as $beca)
+                                                        <option value="{{ $beca->id_beca }}"
+                                                            {{ old('id_beca') == $beca->id_beca ? 'selected' : '' }}>
+                                                            {{ $beca->nombre }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
 
-                                            <div class="row">
+                                        <div class="row">
+                                            <div class="col-md-5 mb-2">
+                                                <label class="form-label-custom small mb-1">Área Especialización</label>
+                                                <select name="id_area_especializacion" class="form-control form-control-sm">
+                                                    <option value="">-- Selecciona --</option>
+                                                    @foreach ($areaEspecializacion as $area)
+                                                        <option value="{{ $area->id_area_especializacion }}"
+                                                            {{ old('id_area_especializacion') == $area->id_area_especializacion ? 'selected' : '' }}>
+                                                            {{ $area->nombre }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="col-md-3 mb-2">
+                                                <label class="form-label-custom small mb-1">Estado</label>
+                                                <select name="escuela[id_estado]" class="form-control form-control-sm">
+                                                    <option value="">-- Selecciona --</option>
+                                                    @foreach ($estados as $estado)
+                                                        <option value="{{ $estado->id_estado }}"
+                                                            {{ old('escuela.id_estado') == $estado->id_estado ? 'selected' : '' }}>
+                                                            {{ $estado->nombre }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="col-md-4 mb-2">
+                                                <label class="form-label-custom small mb-1">Localidad</label>
+                                                <input type="text" name="escuela[localidad]"
+                                                    class="form-control form-control-sm"
+                                                    value="{{ old('escuela.localidad') }}"
+                                                    placeholder="Nombre de la localidad">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- =================== DATOS DEL TUTOR =================== --}}
+                            <div class="card mb-2 border-0 shadow-sm">
+                                <div class="card-header p-0" id="headingTutor">
+                                    <button class="btn text-danger font-weight-bold btn-block text-left py-2 px-3 text-decoration-none collapsed"
+                                        type="button" data-toggle="collapse" data-target="#collapseTutor"
+                                        aria-expanded="false" aria-controls="collapseTutor">
+                                        <i class="fas fa-user-tie mr-2"></i>Datos del Tutor
+                                        <i class="fas fa-chevron-down float-right mt-1"></i>
+                                    </button>
+                                </div>
+                                <div id="collapseTutor" class="collapse" aria-labelledby="headingTutor"
+                                    data-parent="#alumnoAccordion">
+                                    <div class="card-body p-3">
+                                        <div class="row">
+                                            <div class="col-md-8 mb-2">
+                                                <label class="form-label-custom small mb-1">Nombre Completo</label>
+                                                <input type="text" name="tutor[nombres]"
+                                                    class="form-control form-control-sm"
+                                                    value="{{ old('tutor.nombres') }}"
+                                                    placeholder="Nombre completo del tutor">
+                                            </div>
+                                            <div class="col-md-4 mb-2">
+                                                <label class="form-label-custom small mb-1">Parentesco</label>
+                                                <select name="id_parentesco" class="form-control form-control-sm">
+                                                    <option value="">-- Selecciona --</option>
+                                                    @foreach ($parentescos as $parentesco)
+                                                        <option value="{{ $parentesco->id_parentesco }}"
+                                                            {{ old('id_parentesco') == $parentesco->id_parentesco ? 'selected' : '' }}>
+                                                            {{ $parentesco->nombre }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-md-4 mb-2">
+                                                <label class="form-label-custom small mb-1">Calle</label>
+                                                <input type="text" name="domicilio_tutor[calle]"
+                                                    class="form-control form-control-sm @error('domicilio_tutor.calle') @if(old('is_create_alumno')) is-invalid @endif @enderror"
+                                                    value="{{ old('domicilio_tutor.calle') }}"
+                                                    placeholder="Nombre de la calle">
+                                                @error('domicilio_tutor.calle')
+                                                    @if(old('is_create_alumno'))
+                                                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                                                    @endif
+                                                @enderror
+                                            </div>
+                                            <div class="col-md-2 mb-2">
+                                                <label class="form-label-custom small mb-1">N° Ext.</label>
+                                                <input type="number" name="domicilio_tutor[numero_exterior]" min="0"
+                                                    class="form-control form-control-sm"
+                                                    value="{{ old('domicilio_tutor.numero_exterior') }}"
+                                                    placeholder="0">
+                                            </div>
+                                            <div class="col-md-2 mb-2">
+                                                <label class="form-label-custom small mb-1">N° Int.</label>
+                                                <input type="number" name="domicilio_tutor[numero_interior]" min="0"
+                                                    class="form-control form-control-sm"
+                                                    value="{{ old('domicilio_tutor.numero_interior') }}"
+                                                    placeholder="0">
+                                            </div>
+                                            <div class="col-md-4 mb-2">
+                                                <label class="form-label-custom small mb-1">Colonia</label>
+                                                <input type="text" name="domicilio_tutor[colonia]"
+                                                    class="form-control form-control-sm @error('domicilio_tutor.colonia') @if(old('is_create_alumno')) is-invalid @endif @enderror"
+                                                    value="{{ old('domicilio_tutor.colonia') }}"
+                                                    placeholder="Nombre de la colonia">
+                                                @error('domicilio_tutor.colonia')
+                                                    @if(old('is_create_alumno'))
+                                                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                                                    @endif
+                                                @enderror
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-md-4 mb-2">
+                                                <label class="form-label-custom small mb-1">Municipio</label>
+                                                <input type="text" name="domicilio_tutor[municipio]"
+                                                    class="form-control form-control-sm @error('domicilio_tutor.municipio') @if(old('is_create_alumno')) is-invalid @endif @enderror"
+                                                    value="{{ old('domicilio_tutor.municipio') }}"
+                                                    placeholder="Nombre del municipio">
+                                                @error('domicilio_tutor.municipio')
+                                                    @if(old('is_create_alumno'))
+                                                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                                                    @endif
+                                                @enderror
+                                            </div>
+                                            <div class="col-md-3 mb-2">
+                                                <label class="form-label-custom small mb-1">Distrito</label>
+                                                <select name="domicilio_tutor[id_distrito]" class="form-control form-control-sm">
+                                                    <option value="">-- Selecciona --</option>
+                                                    @foreach ($distritos as $distrito)
+                                                        <option value="{{ $distrito->id_distrito }}"
+                                                            {{ old('domicilio_tutor.id_distrito') == $distrito->id_distrito ? 'selected' : '' }}>
+                                                            {{ $distrito->nombre }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="col-md-3 mb-2">
+                                                <label class="form-label-custom small mb-1">Estado</label>
+                                                <select name="domicilio_tutor[id_estado]" class="form-control form-control-sm">
+                                                    <option value="">-- Selecciona --</option>
+                                                    @foreach ($estados as $estado)
+                                                        <option value="{{ $estado->id_estado }}"
+                                                            {{ old('domicilio_tutor.id_estado') == $estado->id_estado ? 'selected' : '' }}>
+                                                            {{ $estado->nombre }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="col-md-2 mb-2">
+                                                <label class="form-label-custom small mb-1">Teléfono</label>
+                                                <input type="text" name="tutor[telefono]" maxlength="10"
+                                                    class="form-control form-control-sm @error('tutor.telefono') @if(old('is_create_alumno')) is-invalid @endif @enderror"
+                                                    value="{{ old('tutor.telefono') }}"
+                                                    placeholder="10 dígitos">
+                                                @error('tutor.telefono')
+                                                    @if(old('is_create_alumno'))
+                                                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                                                    @endif
+                                                @enderror
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- =================== ESTATUS ACADÉMICO =================== --}}
+                            <div class="card mb-2 border-0 shadow-sm">
+                                <div class="card-header p-0" id="headingEstatus">
+                                    <button class="btn text-danger font-weight-bold btn-block text-left py-2 px-3 text-decoration-none collapsed"
+                                        type="button" data-toggle="collapse" data-target="#collapseEstatus"
+                                        aria-expanded="false" aria-controls="collapseEstatus">
+                                        <i class="fas fa-graduation-cap mr-2"></i>Estatus Académico
+                                        <i class="fas fa-chevron-down float-right mt-1"></i>
+                                    </button>
+                                </div>
+                                <div id="collapseEstatus" class="collapse" aria-labelledby="headingEstatus"
+                                    data-parent="#alumnoAccordion">
+                                    <div class="card-body p-3">
+                                        <div class="row">
+                                            <div class="col-md-4 mb-2">
+                                                <label class="form-label-custom small mb-1">
+                                                    Estatus <span class="text-danger">*</span>
+                                                </label>
+                                                <select name="id_historial_status" id="id_historial_status"
+                                                    class="form-control form-control-sm @error('id_historial_status') @if(old('is_create_alumno')) is-invalid @endif @enderror"
+                                                    required>
+                                                    <option value="">-- Selecciona --</option>
+                                                    @foreach ($estatus as $status)
+                                                        <option value="{{ $status->id_historial_status }}"
+                                                            {{ old('id_historial_status') == $status->id_historial_status ? 'selected' : '' }}>
+                                                            {{ $status->nombre }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                                @error('id_historial_status')
+                                                    @if(old('is_create_alumno'))
+                                                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                                                    @endif
+                                                @enderror
+                                            </div>
+                                        </div>
+
+                                        {{-- =================== DATOS ACADÉMICOS (CONDICIONAL) =================== --}}
+                                        <div id="seccionAcademica" style="display:none;">
+                                            <div class="row mt-3">
+                                                <div class="col-md-3 mb-2">
+                                                    <label class="form-label-custom small mb-1">Generación</label>
+                                                    <select name="id_generacion" class="form-control form-control-sm">
+                                                        <option value="">-- Selecciona --</option>
+                                                        @foreach ($generaciones as $generacion)
+                                                            <option value="{{ $generacion->id_generacion }}"
+                                                                {{ old('id_generacion') == $generacion->id_generacion ? 'selected' : '' }}>
+                                                                {{ $generacion->nombre }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-4 mb-2">
+                                                    <label class="form-label-custom small mb-1">Matrícula</label>
+                                                    <input type="text" name="matricula"
+                                                        class="form-control form-control-sm @error('matricula') @if(old('is_create_alumno')) is-invalid @endif @enderror"
+                                                        value="{{ old('matricula') }}"
+                                                        placeholder="Número de matrícula">
+                                                    @error('matricula')
+                                                        @if(old('is_create_alumno'))
+                                                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                                                        @endif
+                                                    @enderror
+                                                </div>
                                                 <div class="col-md-5 mb-2">
-                                                    <label class="form-label-custom small mb-1">Área
-                                                        Especialización</label>
-                                                    <select name="id_area_especializacion"
-                                                        class="form-control form-control-sm">
+                                                    <label class="form-label-custom small mb-1">Carrera</label>
+                                                    <select name="id_carrera"
+                                                        class="form-control form-control-sm @error('id_carrera') @if(old('is_create_alumno')) is-invalid @endif @enderror">
                                                         <option value="">-- Selecciona --</option>
-                                                        @foreach ($areaEspecializacion as $area)
-                                                            <option value="{{ $area->id_area_especializacion }}">
-                                                                {{ $area->nombre }}
+                                                        @foreach ($carreras as $carrera)
+                                                            <option value="{{ $carrera->id_carrera }}"
+                                                                {{ old('id_carrera') == $carrera->id_carrera ? 'selected' : '' }}>
+                                                                {{ $carrera->nombre }}
                                                             </option>
                                                         @endforeach
                                                     </select>
+                                                    @error('id_carrera')
+                                                        @if(old('is_create_alumno'))
+                                                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                                                        @endif
+                                                    @enderror
                                                 </div>
-                                                <div class="col-md-3 mb-2">
-                                                    <label class="form-label-custom small mb-1">Estado</label>
-                                                    <select name="escuela[id_estado]"
-                                                        class="form-control form-control-sm">
+                                                <div class="col-md-4 mb-2">
+                                                    <label class="form-label-custom small mb-1">Plan de Estudios</label>
+                                                    <select name="id_plan_estudio" class="form-control form-control-sm">
                                                         <option value="">-- Selecciona --</option>
-                                                        @foreach ($estados as $estado)
-                                                            <option value="{{ $estado->id_estado }}">
-                                                                {{ $estado->nombre }}
+                                                        @foreach ($planes as $plan)
+                                                            <option value="{{ $plan->id_plan_estudio }}"
+                                                                {{ old('id_plan_estudio') == $plan->id_plan_estudio ? 'selected' : '' }}>
+                                                                {{ $plan->nombre }}
                                                             </option>
                                                         @endforeach
                                                     </select>
-                                                </div>
-                                                <div class="col-md-4 mb-2">
-                                                    <label class="form-label-custom small mb-1">Localidad</label>
-                                                    <input type="text" name="escuela[localidad]"
-                                                        class="form-control form-control-sm"
-                                                        placeholder="Nombre de la localidad">
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {{-- =================== DATOS DEL TUTOR =================== --}}
-                                <div class="card mb-2 border-0 shadow-sm">
-                                    <div class="card-header p-0" id="headingTutor">
-                                        <button
-                                            class="btn text-danger font-weight-bold btn-block text-left py-2 px-3 text-decoration-none collapsed"
-                                            type="button" data-toggle="collapse" data-target="#collapseTutor"
-                                            aria-expanded="false" aria-controls="collapseTutor">
-                                            <i class="fas fa-user-tie mr-2"></i>Datos del Tutor
-                                            <i class="fas fa-chevron-down float-right mt-1"></i>
-                                        </button>
-                                    </div>
-                                    <div id="collapseTutor" class="collapse" aria-labelledby="headingTutor"
-                                        data-parent="#alumnoAccordion">
-                                        <div class="card-body p-3">
-                                            <div class="row">
-                                                <div class="col-md-8 mb-2">
-                                                    <label class="form-label-custom small mb-1">Nombre
-                                                        Completo</label>
-                                                    <input type="text" name="tutor[nombres]"
-                                                        class="form-control form-control-sm"
-                                                        placeholder="Nombre completo del tutor">
-                                                </div>
-                                                <div class="col-md-4 mb-2">
-                                                    <label class="form-label-custom small mb-1">Parentesco</label>
-                                                    <select name="id_parentesco"
-                                                        class="form-control form-control-sm">
-                                                        <option value="">-- Selecciona --</option>
-                                                        @foreach ($parentescos as $parentesco)
-                                                            <option value="{{ $parentesco->id_parentesco }}">
-                                                                {{ $parentesco->nombre }}
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                            </div>
-
-                                            <div class="row">
-                                                <div class="col-md-4 mb-2">
-                                                    <label class="form-label-custom small mb-1">
-                                                        Calle <span class="text-danger">*</span>
-                                                    </label>
-                                                    <input type="text" name="domicilio_tutor[calle]"
-                                                        class="form-control form-control-sm"
-                                                        placeholder="Nombre de la calle" required>
-                                                </div>
-                                                <div class="col-md-2 mb-2">
-                                                    <label class="form-label-custom small mb-1">N° Ext.</label>
-                                                    <input type="number" name="domicilio_tutor[numero_exterior]"
-                                                        min="0" class="form-control form-control-sm"
-                                                        placeholder="0">
-                                                </div>
-                                                <div class="col-md-2 mb-2">
-                                                    <label class="form-label-custom small mb-1">N° Int.</label>
-                                                    <input type="number" name="domicilio_tutor[numero_interior]"
-                                                        min="0" class="form-control form-control-sm"
-                                                        placeholder="0">
                                                 </div>
                                                 <div class="col-md-4 mb-2">
                                                     <label class="form-label-custom small mb-1">
-                                                        Colonia <span class="text-danger">*</span>
+                                                        Servicio Social <span class="text-danger">*</span>
                                                     </label>
-                                                    <input type="text" name="domicilio_tutor[colonia]"
-                                                        class="form-control form-control-sm"
-                                                        placeholder="Nombre de la colonia" required>
-                                                </div>
-                                            </div>
-
-                                            <div class="row">
-                                                <div class="col-md-4 mb-2">
-                                                    <label class="form-label-custom small mb-1">
-                                                        Municipio <span class="text-danger">*</span>
-                                                    </label>
-                                                    <input type="text" name="domicilio_tutor[municipio]"
-                                                        class="form-control form-control-sm"
-                                                        placeholder="Nombre del municipio" required>
-                                                </div>
-                                                <div class="col-md-3 mb-2">
-                                                    <label class="form-label-custom small mb-1">Distrito</label>
-                                                    <select name="domicilio_tutor[id_distrito]"
-                                                        class="form-control form-control-sm">
+                                                    <select name="servicios_social"
+                                                        class="form-control form-control-sm @error('servicios_social') @if(old('is_create_alumno')) is-invalid @endif @enderror"
+                                                        required>
                                                         <option value="">-- Selecciona --</option>
-                                                        @foreach ($distritos as $distrito)
-                                                            <option value="{{ $distrito->id_distrito }}">
-                                                                {{ $distrito->nombre }}
-                                                            </option>
-                                                        @endforeach
+                                                        <option value="1" {{ old('servicios_social') == '1' ? 'selected' : '' }}>Sí</option>
+                                                        <option value="0" {{ old('servicios_social', '0') == '0' ? 'selected' : '' }}>No</option>
                                                     </select>
-                                                </div>
-                                                <div class="col-md-3 mb-2">
-                                                    <label class="form-label-custom small mb-1">Estado</label>
-                                                    <select name="domicilio_tutor[id_estado]"
-                                                        class="form-control form-control-sm">
-                                                        <option value="">-- Selecciona --</option>
-                                                        @foreach ($estados as $estado)
-                                                            <option value="{{ $estado->id_estado }}">
-                                                                {{ $estado->nombre }}
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                                <div class="col-md-2 mb-2">
-                                                    <label class="form-label-custom small mb-1">Teléfono</label>
-                                                    <input type="text" name="tutor[telefono]" maxlength="10"
-                                                        class="form-control form-control-sm"
-                                                        placeholder="10 dígitos">
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {{-- =================== ESTATUS ACADÉMICO =================== --}}
-                                <div class="card mb-2 border-0 shadow-sm">
-                                    <div class="card-header p-0" id="headingEstatus">
-                                        <button
-                                            class="btn text-danger font-weight-bold btn-block text-left py-2 px-3 text-decoration-none collapsed"
-                                            type="button" data-toggle="collapse" data-target="#collapseEstatus"
-                                            aria-expanded="false" aria-controls="collapseEstatus">
-                                            <i class="fas fa-graduation-cap mr-2"></i>Estatus Académico
-                                            <i class="fas fa-chevron-down float-right mt-1"></i>
-                                        </button>
-                                    </div>
-                                    <div id="collapseEstatus" class="collapse" aria-labelledby="headingEstatus"
-                                        data-parent="#alumnoAccordion">
-                                        <div class="card-body p-3">
-                                            <div class="row">
-                                                <div class="col-md-4 mb-2">
-                                                    <label class="form-label-custom small mb-1">
-                                                        Estatus <span class="text-danger">*</span>
-                                                    </label>
-                                                    <select name="id_historial_status" id="id_historial_status"
-                                                        class="form-control form-control-sm" required>
-                                                        <option value="">-- Selecciona --</option>
-                                                        @foreach ($estatus as $status)
-                                                            <option value="{{ $status->id_historial_status }}">
-                                                                {{ $status->nombre }}
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                            </div>
-
-                                            {{-- =================== DATOS ACADÉMICOS (CONDICIONAL) =================== --}}
-                                            <div id="seccionAcademica" style="display:none;">
-                                                <div class="row mt-3">
-                                                    <div class="col-md-3 mb-2">
-                                                        <label class="form-label-custom small mb-1">Generación</label>
-                                                        <select name="id_generacion"
-                                                            class="form-control form-control-sm">
-                                                            <option value="">-- Selecciona --</option>
-                                                            @foreach ($generaciones as $generacion)
-                                                                <option value="{{ $generacion->id_generacion }}">
-                                                                    {{ $generacion->nombre }}
-                                                                </option>
-                                                            @endforeach
-                                                        </select>
-                                                    </div>
-                                                    <div class="col-md-4 mb-2">
-                                                        <label class="form-label-custom small mb-1">Matrícula</label>
-                                                        <input type="text" name="matricula"
-                                                            class="form-control form-control-sm"
-                                                            placeholder="Número de matrícula">
-                                                    </div>
-                                                    <div class="col-md-4 mb-2">
-                                                        <label class="form-label-custom small mb-1">Carrera</label>
-                                                        <select name="id_carrera"
-                                                            class="form-control form-control-sm">
-                                                            <option value="">-- Selecciona --</option>
-                                                            @foreach ($carreras as $carrera)
-                                                                <option value="{{ $carrera->id_carrera }}">
-                                                                    {{ $carrera->nombre }}
-                                                                </option>
-                                                            @endforeach
-                                                        </select>
-                                                    </div>
-                                                    <div class="col-md-4 mb-2">
-                                                        <label class="form-label-custom small mb-1">Plan de
-                                                            Estudios</label>
-                                                        <select name="id_plan_estudio"
-                                                            class="form-control form-control-sm">
-                                                            <option value="">-- Selecciona --</option>
-                                                            @foreach ($planes as $plan)
-                                                                <option value="{{ $plan->id_plan_estudio }}">
-                                                                    {{ $plan->nombre }}
-                                                                </option>
-                                                            @endforeach
-                                                        </select>
-                                                    </div>
-                                                    <div class="col-md-4 mb-2">
-                                                        <label class="form-label-custom small mb-1">
-                                                            Servicio Social <span class="text-danger">*</span>
-                                                        </label>
-                                                        <select name="servicios_social"
-                                                            class="form-control form-control-sm" required>
-                                                            <option value="">-- Selecciona --</option>
-                                                            <option value="1"
-                                                                {{ old('servicios_social') == '1' ? 'selected' : '' }}>
-                                                                Sí</option>
-                                                            <option value="0"
-                                                                {{ old('servicios_social', '0') == '0' ? 'selected' : '' }}>
-                                                                No</option>
-                                                        </select>
-                                                    </div>
+                                                    @error('servicios_social')
+                                                        @if(old('is_create_alumno'))
+                                                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                                                        @endif
+                                                    @enderror
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
+                        </div>
 
-                            {{-- Nota de campos obligatorios --}}
-                            <div class="text-center mt-3 mb-2">
-                                <small class="text-muted">
-                                    <span class="text-danger">*</span> Campos obligatorios
-                                </small>
-                            </div>
+                        {{-- Nota de campos obligatorios --}}
+                        <div class="text-center mt-3 mb-2">
+                            <small class="text-muted">
+                                <span class="text-danger">*</span> Campos obligatorios
+                            </small>
+                        </div>
 
-                            {{-- Footer con botones --}}
-                            <div class="text-right mt-3">
-                                <button type="button" class="btn btn-outline-secondary btn-sm px-3"
-                                    data-dismiss="modal">
-                                    <i class="fas fa-times mr-1"></i>Cancelar
-                                </button>
-                                <button type="submit" class="btn btn-success btn-sm px-3">
-                                    <i class="fas fa-save mr-1"></i>Guardar Alumno
-                                </button>
-                            </div>
-                        </form>
-                    </div>
+                        {{-- Footer con botones --}}
+                        <div class="text-right mt-3">
+                            <button type="button" class="btn btn-outline-secondary btn-sm px-3" data-dismiss="modal">
+                                <i class="fas fa-times mr-1"></i>Cancelar
+                            </button>
+                            <button type="submit" class="btn btn-success btn-sm px-3">
+                                <i class="fas fa-save mr-1"></i>Guardar Alumno
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -2462,15 +2575,15 @@
         });
     </script>
     <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        @if ($errors->any() && old('is_create_alumno'))
-            $('#nuevoAlumnoModal').modal('show');
-        @endif
-        @if ($errors->any() && old('alumno_id'))
-            $('#editarModal{{ old("alumno_id") }}').modal('show');
-        @endif
-    });
-</script>
+        document.addEventListener("DOMContentLoaded", function() {
+            @if ($errors->any() && old('is_create_alumno'))
+                $('#nuevoAlumnoModal').modal('show');
+            @endif
+            @if ($errors->any() && old('alumno_id'))
+                $('#editarModal{{ old('alumno_id') }}').modal('show');
+            @endif
+        });
+    </script>
 
 
 
@@ -2544,7 +2657,7 @@
                 });
             }
 
-            
+
         });
     </script>
 </body>
