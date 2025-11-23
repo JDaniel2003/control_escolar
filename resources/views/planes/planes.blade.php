@@ -500,166 +500,134 @@
                                                         </button>
 
                                                         <!-- Modal Editar Plan -->
-                                                        <div class="modal fade"
-                                                            id="editarModal{{ $plan->id_plan_estudio }}"
-                                                            tabindex="-1" role="dialog"
-                                                            aria-labelledby="editarModalLabel{{ $plan->id_plan_estudio }}"
-                                                            aria-hidden="true">
+                                                        <!-- Modal Editar Plan -->
+<div class="modal fade" id="editarModal{{ $plan->id_plan_estudio }}" tabindex="-1" role="dialog"
+    aria-labelledby="editarModalLabel{{ $plan->id_plan_estudio }}" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header modal-header-custom border-0">
+                <div class="w-100 text-center">
+                    <h5 class="m-0 font-weight-bold" id="editarModalLabel{{ $plan->id_plan_estudio }}">
+                        ✏️ Editar Plan de Estudio
+                    </h5>
+                    <p class="m-0 mt-2 mb-0" style="font-size: 0.9rem; opacity: 0.95;">
+                        Modifique la información del plan de estudios
+                    </p>
+                </div>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Cerrar"
+                    style="position: absolute; right: 1.5rem; top: 1.5rem; font-size: 1.8rem; opacity: 0.9;">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form action="{{ route('planes.update', $plan->id_plan_estudio) }}" method="POST">
+                @csrf
+                @method('PUT')
+                <input type="hidden" name="plan_id" value="{{ $plan->id_plan_estudio }}">
+                <div class="modal-body modal-body-custom p-4">
+                    <div class="form-container p-4 bg-white rounded shadow-sm border">
+                        <div class="card shadow mb-3 border-0">
+                            <div class="card-header py-3 text-white card-header-custom d-flex">
+                                <h6 class="m-0 font-weight-bold text-danger">
+                                    <i class="fas fa-book"></i> Información del Plan
+                                </h6>
+                            </div>
+                            <div class="card-body1 p-4">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="form-group mb-3">
+                                            <label class="form-label-custom d-flex">
+                                                📝 Nombre del Plan
+                                                <span class="required-asterisk ml-1">*</span>
+                                            </label>
+                                            <input type="text" name="nombre"
+                                                class="form-control form-control-custom @error('nombre') {{ old('plan_id') == $plan->id_plan_estudio ? 'is-invalid' : '' }} @enderror"
+                                                value="{{ old('nombre', $plan->nombre) }}" required>
+                                            <small class="form-text text-muted">Nombre descriptivo del plan de estudios.</small>
+                                            @error('nombre')
+                                                @if(old('plan_id') == $plan->id_plan_estudio)
+                                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                                @endif
+                                            @enderror
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
-                                                            <div class="modal-dialog modal-lg" role="document">
-                                                                <div class="modal-content border-0 shadow-lg">
+                        <div class="card shadow mb-4 border-0">
+                            <div class="card-header py-3 text-white card-header-custom d-flex">
+                                <h6 class="m-0 font-weight-bold text-danger">
+                                    <i class="fas fa-university"></i> Datos Académicos
+                                </h6>
+                            </div>
+                            <div class="card-body1 p-4">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label class="form-label-custom d-flex">
+                                                🎓 Carrera
+                                                <span class="required-asterisk ml-1">*</span>
+                                            </label>
+                                            <select name="id_carrera"
+                                                class="form-control form-control-custom @error('id_carrera') {{ old('plan_id') == $plan->id_plan_estudio ? 'is-invalid' : '' }} @enderror"
+                                                required>
+                                                <option value="">-- Seleccione una carrera --</option>
+                                                @foreach ($carreras as $carrera)
+                                                    <option value="{{ $carrera->id_carrera }}" {{ (old('id_carrera', $plan->id_carrera) == $carrera->id_carrera) ? 'selected' : '' }}>
+                                                        {{ $carrera->nombre }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                            @error('id_carrera')
+                                                @if(old('plan_id') == $plan->id_plan_estudio)
+                                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                                @endif
+                                            @enderror
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label class="form-label-custom d-flex">
+                                                ⚡ Estado del Plan
+                                                <span class="required-asterisk ml-1">*</span>
+                                            </label>
+                                            <select name="vigencia"
+                                                class="form-control form-control-custom @error('vigencia') {{ old('plan_id') == $plan->id_plan_estudio ? 'is-invalid' : '' }} @enderror"
+                                                required>
+                                                <option value="">-- Seleccione estado --</option>
+                                                <option value="Vigente" {{ (old('vigencia', $plan->vigencia) == 'Vigente') ? 'selected' : '' }}>Vigente</option>
+                                                <option value="No vigente" {{ (old('vigencia', $plan->vigencia) == 'No vigente') ? 'selected' : '' }}>No vigente</option>
+                                            </select>
+                                            @error('vigencia')
+                                                @if(old('plan_id') == $plan->id_plan_estudio)
+                                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                                @endif
+                                            @enderror
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
-                                                                    {{-- Header --}}
-                                                                    <div
-                                                                        class="modal-header modal-header-custom border-0">
-                                                                        <div class="w-100 text-center">
-                                                                            <h5 class="m-0 font-weight-bold"
-                                                                                id="editarModalLabel{{ $plan->id_plan_estudio }}">
-                                                                                ✏️ Editar Plan de Estudios
-                                                                            </h5>
-                                                                            <p class="m-0 mt-2 mb-0"
-                                                                                style="font-size: 0.9rem; opacity: 0.95;">
-                                                                                Modifique la información del plan de
-                                                                                estudios
-                                                                            </p>
-                                                                        </div>
-                                                                        <button type="button"
-                                                                            class="close text-white"
-                                                                            data-dismiss="modal" aria-label="Cerrar"
-                                                                            style="position: absolute; right: 1.5rem; top: 1.5rem; font-size: 1.8rem; opacity: 0.9;">
-                                                                            <span aria-hidden="true">&times;</span>
-                                                                        </button>
-                                                                    </div>
-
-                                                                    {{-- Form --}}
-                                                                    <form
-                                                                        action="{{ route('planes.update', $plan->id_plan_estudio) }}"
-                                                                        method="POST">
-                                                                        @csrf
-                                                                        @method('PUT')
-
-                                                                        {{-- Body --}}
-                                                                        <div class="modal-body modal-body-custom p-4">
-                                                                            <div
-                                                                                class="form-container p-4 bg-white rounded shadow-sm border">
-
-                                                                                {{-- Nombre --}}
-                                                                                <div class="info-section mb-4">
-                                                                                    <div class="form-group mb-2">
-                                                                                        <label
-                                                                                            class="form-label-custom d-flex">
-                                                                                            📝 Nombre
-                                                                                            <span
-                                                                                                class="required-asterisk ml-1">*</span>
-                                                                                        </label>
-
-                                                                                        <input type="text"
-                                                                                            placeholder="Ej: Plan 2024"
-                                                                                            name="nombre"
-                                                                                            class="form-control form-control-custom @error('nombre') is-invalid @enderror"
-                                                                                            value="{{ old('nombre', $plan->nombre) }}"
-                                                                                            required>
-                                                                                        @error('nombre')
-                                                                                            <div class="invalid-feedback">
-                                                                                                {{ $message }}</div>
-                                                                                        @enderror
-                                                                                    </div>
-                                                                                </div>
-
-                                                                                {{-- Carrera --}}
-                                                                                <div class="info-section mb-4">
-                                                                                    <div class="form-group mb-2">
-                                                                                        <label
-                                                                                            class="form-label-custom d-flex">
-                                                                                            🎓 Carrera
-                                                                                            <span
-                                                                                                class="required-asterisk ml-1">*</span>
-                                                                                        </label>
-                                                                                        <select name="id_carrera"
-                                                                                            class="form-control form-control-custom @error('id_carrera') is-invalid @enderror"
-                                                                                            required>
-                                                                                            <option value="">--
-                                                                                                Selecciona carrera --
-                                                                                            </option>
-                                                                                            @foreach ($carreras as $carrera)
-                                                                                                <option
-                                                                                                    value="{{ $carrera->id_carrera }}"
-                                                                                                    {{ old('id_carrera', $plan->id_carrera) == $carrera->id_carrera ? 'selected' : '' }}>
-                                                                                                    {{ $carrera->nombre }}
-                                                                                                </option>
-                                                                                            @endforeach
-                                                                                        </select>
-                                                                                        @error('id_carrera')
-                                                                                            <div class="invalid-feedback">
-                                                                                                {{ $message }}</div>
-                                                                                        @enderror
-                                                                                    </div>
-                                                                                </div>
-
-                                                                                {{-- Vigencia --}}
-                                                                                <div class="info-section mb-4">
-                                                                                    <div class="form-group">
-                                                                                        <label
-                                                                                            class="form-label-custom d-flex">
-                                                                                            ⚡ Estado del Plan
-                                                                                            <span
-                                                                                                class="required-asterisk ml-1">*</span>
-                                                                                        </label>
-                                                                                        <select name="vigencia"
-                                                                                            class="form-control form-control-custom @error('vigencia') is-invalid @enderror"
-                                                                                            required>
-                                                                                            <option value="">--
-                                                                                                Selecciona estado --
-                                                                                            </option>
-                                                                                            <option value="Vigente"
-                                                                                                {{ old('vigencia', $plan->vigencia) == 'Vigente' ? 'selected' : '' }}>
-                                                                                                Vigente
-                                                                                            </option>
-                                                                                            <option value="No vigente"
-                                                                                                {{ old('vigencia', $plan->vigencia) == 'No vigente' ? 'selected' : '' }}>
-                                                                                                No vigente
-                                                                                            </option>
-                                                                                        </select>
-                                                                                        @error('vigencia')
-                                                                                            <div class="invalid-feedback">
-                                                                                                {{ $message }}</div>
-                                                                                        @enderror
-                                                                                    </div>
-                                                                                </div>
-
-                                                                                {{-- Nota de campos obligatorios --}}
-                                                                                <div class="text-center">
-                                                                                    <small class="text-muted">
-                                                                                        <span
-                                                                                            class="required-asterisk">*</span>
-                                                                                        Campos obligatorios
-                                                                                    </small>
-                                                                                </div>
-
-                                                                            </div>
-                                                                        </div>
-
-                                                                        {{-- Footer --}}
-                                                                        <div
-                                                                            class="modal-footer modal-footer-custom border-top">
-                                                                            <button type="button"
-                                                                                class="btn btn-secondary"
-                                                                                data-dismiss="modal">
-                                                                                <i class="fas fa-times mr-2"></i>
-                                                                                Cancelar
-                                                                            </button>
-                                                                            <button type="submit"
-                                                                                class="btn btn-success">
-                                                                                <i class="fas fa-save mr-2"></i>
-                                                                                Actualizar Plan
-                                                                            </button>
-                                                                        </div>
-
-                                                                    </form>
-
-                                                                </div>
-                                                            </div>
-                                                        </div>
+                        <div class="text-center mt-3">
+                            <small class="text-muted">
+                                <span class="required-asterisk">*</span> Campos obligatorios
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer modal-footer-custom border-top">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                        <i class="fas fa-times mr-2"></i> Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-save mr-2"></i> Actualizar Plan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
                                                         <!-- Botón Eliminar -->
                                                         <button type="button" class="btn btn-danger btn-sm"
@@ -751,137 +719,145 @@
 
 
     <!-- Modal Nuevo Plan -->
-    <div class="modal fade" id="nuevoplanModal" tabindex="-1" role="dialog" aria-labelledby="nuevoplanLabel"
-        aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content border-0 shadow-lg">
-
-                <div class="modal-header modal-header-custom border-0">
-                    <div class="w-100 text-center">
-                        <h5 class="m-0 font-weight-bold" id="nuevoplanLabel">
-                            📖 Nuevo Plan de Estudio
-                        </h5>
-                        <p class="m-0 mt-2 mb-0" style="font-size: 0.9rem; opacity: 0.95;">
-                            Complete la información del plan de estudios
-                        </p>
-                    </div>
-                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Cerrar"
-                        style="position: absolute; right: 1.5rem; top: 1.5rem; font-size: 1.8rem; opacity: 0.9;">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+    <!-- Modal Nuevo Plan de Estudio -->
+<div class="modal fade" id="nuevoplanModal" tabindex="-1" role="dialog" aria-labelledby="nuevoplanLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header modal-header-custom border-0">
+                <div class="w-100 text-center">
+                    <h5 class="m-0 font-weight-bold" id="nuevoplanLabel">
+                        📖 Nuevo Plan de Estudio
+                    </h5>
+                    <p class="m-0 mt-2 mb-0" style="font-size: 0.9rem; opacity: 0.95;">
+                        Complete la información del plan de estudios
+                    </p>
                 </div>
-
-                <form action="{{ route('planes.store') }}" method="POST">
-                    @csrf
-                    <div class="modal-body modal-body-custom p-4">
-                        <div class="form-container p-4 bg-white rounded shadow-sm border">
-                            <div class="info-section mb-4 ">
-                                <div class="form-group mb-2">
-                                    <label form-label-custom d-flex>
-                                        📝 Nombre
-                                        <span class="required-asterisk ml-1">*</span>
-                                    </label>
-                                    <small class="form-text text-muted">
-                                        Ingrese un nombre descriptivo para el período escolar
-                                    </small>
-                                    <input type="text" placeholder="Ej: Plan 2024" name="nombre"
-                                        class="form-control form-control-custom @error('nombre') is-invalid @enderror"
-                                        value="{{ old('nombre') }}" required>
-                                    @error('nombre')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Cerrar"
+                    style="position: absolute; right: 1.5rem; top: 1.5rem; font-size: 1.8rem; opacity: 0.9;">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form action="{{ route('planes.store') }}" method="POST">
+                @csrf
+                <input type="hidden" name="is_create_plan" value="1">
+                <div class="modal-body modal-body-custom p-4">
+                    <div class="form-container p-4 bg-white rounded shadow-sm border">
+                        <!-- Sección: Información del Plan -->
+                        <div class="card shadow mb-3 border-0">
+                            <div class="card-header py-3 text-white card-header-custom">
+                                <h6 class="m-0 font-weight-bold text-danger">
+                                    <i class="fas fa-book"></i> Información del Plan
+                                </h6>
                             </div>
-
-                            <div class="info-section mb-4 ">
-                                <div class="form-group mb-2">
-                                    <label class="form-label-custom d-flex">
-                                        🎓 Carrera
-                                        <span class="required-asterisk ml-1">*</span>
-                                    </label>
-                                    <select name="id_carrera"
-                                        class="form-control form-control-custom @error('id_carrera') is-invalid @enderror">
-                                        <option value="">-- Selecciona carrera --</option>
-                                        @foreach ($carreras as $carrera)
-                                            <option value="{{ $carrera->id_carrera }}"
-                                                {{ old('id_carrera') == $carrera->id_carrera ? 'selected' : '' }}>
-                                                {{ $carrera->nombre }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    @error('id_carrera')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                            </div>
-
-
-                            <div class="info-section mb-4 ">
-                                <div class="form-group">
-                                    <label class="form-label-custom d-flex">
-                                        ⚡ Estado del Plan
-                                        <span class="required-asterisk ml-1">*</span>
-                                    </label>
-                                    <select name="vigencia"
-                                        class="form-control @error('vigencia') is-invalid @enderror" required>
-                                        <option value="">Selecciona</option>
-                                        <option value="Vigente" {{ old('vigencia') == 'Vigente' ? 'selected' : '' }}>
-                                            Vigente
-                                        </option>
-                                        <option value="No vigente"
-                                            {{ old('No vigente') == 'No vigente' ? 'selected' : '' }}>
-                                            No vigente
-                                        </option>
-                                    </select>
-                                    @error('vigencia')
-                                        <div class="invalid-feedback">
-                                            {{ $message }}
+                            <div class="card-body1 p-4">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="form-group mb-3">
+                                            <label class="form-label-custom d-flex">
+                                                Nombre del Plan
+                                                <span class="required-asterisk ml-1">*</span>
+                                            </label>
+                                            <input type="text" name="nombre"
+                                                class="form-control form-control-custom @error('nombre') @if(old('is_create_plan')) is-invalid @endif @enderror"
+                                                value="{{ old('nombre') }}" placeholder="Ej: Plan 2024" required>
+                                            <small class="form-text text-muted">Nombre descriptivo del plan de estudios.</small>
+                                            @error('nombre')
+                                                @if(old('is_create_plan'))
+                                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                                @endif
+                                            @enderror
                                         </div>
-                                    @enderror
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="text-center">
-                                <small class="text-muted">
-                                    <span class="required-asterisk">*</span> Campos obligatorios
-                                </small>
                             </div>
                         </div>
 
+                        <!-- Sección: Carrera y Estado -->
+                        <div class="card shadow mb-4 border-0">
+                            <div class="card-header py-3 text-white card-header-custom">
+                                <h6 class="m-0 font-weight-bold text-danger">
+                                    <i class="fas fa-university"></i> Datos Académicos
+                                </h6>
+                            </div>
+                            <div class="card-body1 p-4">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label class="form-label-custom d-flex">
+                                                Carrera
+                                                <span class="required-asterisk ml-1">*</span>
+                                            </label>
+                                            <select name="id_carrera"
+                                                class="form-control form-control-custom @error('id_carrera') @if(old('is_create_plan')) is-invalid @endif @enderror"
+                                                required>
+                                                <option value="">-- Seleccione una carrera --</option>
+                                                @foreach ($carreras as $carrera)
+                                                    <option value="{{ $carrera->id_carrera }}" {{ old('id_carrera') == $carrera->id_carrera ? 'selected' : '' }}>
+                                                        {{ $carrera->nombre }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                            @error('id_carrera')
+                                                @if(old('is_create_plan'))
+                                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                                @endif
+                                            @enderror
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label class="form-label-custom d-flex">
+                                                Estado del Plan
+                                                <span class="required-asterisk ml-1">*</span>
+                                            </label>
+                                            <select name="vigencia"
+                                                class="form-control form-control-custom @error('vigencia') @if(old('is_create_plan')) is-invalid @endif @enderror"
+                                                required>
+                                                <option value="">-- Seleccione estado --</option>
+                                                <option value="Vigente" {{ old('vigencia') == 'Vigente' ? 'selected' : '' }}>Vigente</option>
+                                                <option value="No vigente" {{ old('vigencia') == 'No vigente' ? 'selected' : '' }}>No vigente</option>
+                                            </select>
+                                            @error('vigencia')
+                                                @if(old('is_create_plan'))
+                                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                                @endif
+                                            @enderror
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
+                        <div class="text-center mt-3">
+                            <small class="text-muted">
+                                <span class="required-asterisk">*</span> Campos obligatorios
+                            </small>
+                        </div>
                     </div>
-                    <div class="modal-footer modal-footer-custom border-top">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                            <i class="fas fa-times mr-2"></i>
-                            Cancelar
-                        </button>
-                        <button type="submit" class="btn btn-success">
-                            <i class="fas fa-save mr-2"></i>
-                            Guardar Período
-                        </button>
-                    </div>
-                </form>
-            </div>
+                </div>
+                <div class="modal-footer modal-footer-custom border-top">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                        <i class="fas fa-times mr-2"></i> Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-save mr-2"></i> Guardar Plan
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
+</div>
 
-    <!-- Script para reabrir modal si hay errores -->
-    @if ($errors->any())
-        <script>
-            document.addEventListener("DOMContentLoaded", function() {
-                $('#nuevoplanModal').modal('show');
-            });
-        </script>
-    @endif
-
-
-    <!-- Script para reabrir modal si hay errores -->
-    @if ($errors->any())
-        <script>
-            document.addEventListener("DOMContentLoaded", function() {
-                $('#nuevoplanModal').modal('show');
-            });
-        </script>
-    @endif
+   <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        @if ($errors->any() && old('is_create_plan'))
+            $('#nuevoplanModal').modal('show');
+        @endif
+        @if ($errors->any() && old('plan_id'))
+            $('#editarModal{{ old("plan_id") }}').modal('show');
+        @endif
+    });
+</script>
 
     </div>
 

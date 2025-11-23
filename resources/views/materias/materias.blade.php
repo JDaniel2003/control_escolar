@@ -168,8 +168,7 @@
                                         <!-- Mostrar -->
                                         <select name="mostrar" onchange="this.form.submit()"
                                             class="form-control form-control-sm w-auto">
-                                            <option value="5" {{ request('mostrar') == 5 ? 'selected' : '' }}>5
-                                            </option>
+                                            
                                             <option value="10" {{ request('mostrar') == 10 ? 'selected' : '' }}>10
                                             </option>
                                             <option value="10" {{ request('mostrar') == 15 ? 'selected' : '' }}>15
@@ -222,6 +221,8 @@
                                     <div class="alert alert-success">{{ session('success') }}</div>
                                 @endif
 
+
+
                                 <div class="table-responsive">
                                     <table class="table table-bordered table-hover">
                                         <thead class="thead-dark text-center">
@@ -253,11 +254,9 @@
                                                             tabindex="-1" role="dialog"
                                                             aria-labelledby="unidadesModalLabel{{ $materia->id_materia }}"
                                                             aria-hidden="true">
-
                                                             <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable"
                                                                 role="document">
                                                                 <div class="modal-content shadow-sm border-0">
-
                                                                     {{-- Header --}}
                                                                     <div
                                                                         class="modal-header modal-header-custom border-0">
@@ -266,7 +265,7 @@
                                                                                 id="unidadesModalLabel{{ $materia->id_materia }}">
                                                                                 📑 Unidades de Aprendizaje
                                                                             </h5>
-                                                                            <p class="m-0 mt-2 mb-0 "
+                                                                            <p class="m-0 mt-2 mb-0"
                                                                                 style="font-size: 0.9rem; opacity: 0.95;">
                                                                                 Unidades de la materia
                                                                                 {{ $materia->nombre }}
@@ -279,18 +278,17 @@
                                                                             <span aria-hidden="true">&times;</span>
                                                                         </button>
                                                                     </div>
-
                                                                     {{-- Body --}}
                                                                     <div class="modal-body p-3"
                                                                         style="background-color: #f8f9fa;">
                                                                         <div class="container-fluid px-2">
-
                                                                             {{-- Información de la Materia --}}
                                                                             <div
                                                                                 class="bg-white rounded p-3 mb-3 shadow-sm">
                                                                                 <h6
                                                                                     class="text-danger font-weight-bold mb-2">
-                                                                                    Materia</h6>
+                                                                                    Materia
+                                                                                </h6>
                                                                                 <div class="text-center">
                                                                                     <span
                                                                                         class="font-weight-bold text-dark"
@@ -301,6 +299,13 @@
                                                                             </div>
 
                                                                             @if ($materia->unidades->count() > 0)
+                                                                                @php
+                                                                                    $unidades = $materia->unidades->sortBy(
+                                                                                        'numero_unidad',
+                                                                                    );
+                                                                                    $ultimaUnidad = $unidades->last();
+                                                                                @endphp
+
                                                                                 {{-- Formulario para actualizar todas las unidades --}}
                                                                                 <form
                                                                                     action="{{ route('unidades.actualizarTodo', $materia->id_materia) }}"
@@ -308,19 +313,33 @@
                                                                                     @csrf
                                                                                     @method('PUT')
 
-                                                                                    {{-- Tabla de Unidades --}}
+                                                                                    @if ($errors->any() && old('is_actualizar_unidades') == $materia->id_materia)
+                                                                                        <div
+                                                                                            class="alert alert-danger mb-3">
+                                                                                            <ul class="mb-0">
+                                                                                                @foreach ($errors->all() as $error)
+                                                                                                    <li>{{ $error }}
+                                                                                                    </li>
+                                                                                                @endforeach
+                                                                                            </ul>
+                                                                                        </div>
+                                                                                    @endif
+                                                                                    <input type="hidden"
+                                                                                        name="is_actualizar_unidades"
+                                                                                        value="{{ $materia->id_materia }}">
+
                                                                                     <div
                                                                                         class="bg-white rounded p-3 mb-3 shadow-sm">
+
                                                                                         <h6
                                                                                             class="text-danger font-weight-bold mb-3 d-flex align-items-center justify-content-between">
                                                                                             <span><i
                                                                                                     class="fas fa-book mr-2"></i>Unidades
                                                                                                 Registradas</span>
                                                                                             <span
-                                                                                                class="badge badge-info">{{ $materia->unidades->count() }}
+                                                                                                class="badge badge-info">{{ $unidades->count() }}
                                                                                                 Unidades</span>
                                                                                         </h6>
-
                                                                                         <div class="table-responsive">
                                                                                             <table
                                                                                                 class="table table-sm table-bordered mb-0 text-center">
@@ -350,7 +369,7 @@
                                                                                                     </tr>
                                                                                                 </thead>
                                                                                                 <tbody>
-                                                                                                    @foreach ($materia->unidades as $i => $unidad)
+                                                                                                    @foreach ($unidades as $i => $unidad)
                                                                                                         <tr>
                                                                                                             <td>
                                                                                                                 <input
@@ -360,186 +379,192 @@
                                                                                                                 <input
                                                                                                                     type="number"
                                                                                                                     name="unidades[{{ $i }}][numero_unidad]"
-                                                                                                                    class="form-control form-control-sm text-center"
+                                                                                                                    class="form-control form-control-sm text-center @error('unidades.' . $i . '.numero_unidad') is-invalid @enderror"
                                                                                                                     value="{{ $unidad->numero_unidad }}"
                                                                                                                     required>
+                                                                                                                @error('unidades.'
+                                                                                                                    . $i .
+                                                                                                                    '.numero_unidad')
+                                                                                                                    <div
+                                                                                                                        class="invalid-feedback d-block">
+                                                                                                                        {{ $message }}
+                                                                                                                    </div>
+                                                                                                                @enderror
                                                                                                             </td>
                                                                                                             <td>
                                                                                                                 <input
                                                                                                                     type="text"
                                                                                                                     name="unidades[{{ $i }}][nombre]"
-                                                                                                                    class="form-control form-control-sm"
-                                                                                                                    value="{{ $unidad->nombre }}"
+                                                                                                                    class="form-control form-control-sm @error('unidades.' . $i . '.nombre') is-invalid @enderror"
+                                                                                                                    value="{{ old('unidades.' . $i . '.nombre', $unidad->nombre) }}"
                                                                                                                     required>
+                                                                                                                @error('unidades.'
+                                                                                                                    . $i .
+                                                                                                                    '.nombre')
+                                                                                                                    <div
+                                                                                                                        class="invalid-feedback d-block">
+                                                                                                                        {{ $message }}
+                                                                                                                    </div>
+                                                                                                                @enderror
                                                                                                             </td>
                                                                                                             <td>
                                                                                                                 <input
                                                                                                                     type="number"
                                                                                                                     name="unidades[{{ $i }}][horas_saber]"
-                                                                                                                    class="form-control form-control-sm text-center horas-saber"
-                                                                                                                    value="{{ $unidad->horas_saber }}">
+                                                                                                                    class="form-control form-control-sm text-center horas-saber @error('unidades.' . $i . '.horas_saber') is-invalid @enderror"
+                                                                                                                    value="{{ old('unidades.' . $i . '.horas_saber', $unidad->horas_saber) }}">
+                                                                                                                @error('unidades.'
+                                                                                                                    . $i .
+                                                                                                                    '.horas_saber')
+                                                                                                                    <div
+                                                                                                                        class="invalid-feedback d-block">
+                                                                                                                        {{ $message }}
+                                                                                                                    </div>
+                                                                                                                @enderror
                                                                                                             </td>
                                                                                                             <td>
                                                                                                                 <input
                                                                                                                     type="number"
                                                                                                                     name="unidades[{{ $i }}][horas_saber_hacer]"
-                                                                                                                    class="form-control form-control-sm text-center horas-saber-hacer"
-                                                                                                                    value="{{ $unidad->horas_saber_hacer }}">
+                                                                                                                    class="form-control form-control-sm text-center horas-saber-hacer @error('unidades.' . $i . '.horas_saber_hacer') is-invalid @enderror"
+                                                                                                                    value="{{ old('unidades.' . $i . '.horas_saber_hacer', $unidad->horas_saber_hacer) }}">
+                                                                                                                @error('unidades.'
+                                                                                                                    . $i .
+                                                                                                                    '.horas_saber_hacer')
+                                                                                                                    <div
+                                                                                                                        class="invalid-feedback d-block">
+                                                                                                                        {{ $message }}
+                                                                                                                    </div>
+                                                                                                                @enderror
                                                                                                             </td>
                                                                                                             <td>
                                                                                                                 <input
                                                                                                                     type="number"
                                                                                                                     name="unidades[{{ $i }}][horas_totales]"
                                                                                                                     class="form-control form-control-sm text-center horas-totales bg-light"
-                                                                                                                    value="{{ $unidad->horas_totales }}"
+                                                                                                                    value="{{ ($unidad->horas_saber ?? 0) + ($unidad->horas_saber_hacer ?? 0) }}"
                                                                                                                     readonly>
                                                                                                             </td>
-                                                                                                            <!-- Botón para abrir el modal -->
                                                                                                             <td
                                                                                                                 class="text-center">
-                                                                                                                <button
-                                                                                                                    type="button"
-                                                                                                                    class="btn btn-danger btn-sm"
-                                                                                                                    data-toggle="modal"
-                                                                                                                    data-target="#eliminarModalUnidad{{ $unidad->id_unidad }}"
-                                                                                                                    title="Eliminar unidad">
-                                                                                                                    <i
-                                                                                                                        class="fas fa-trash"></i>
-                                                                                                                </button>
+                                                                                                                @if ($unidad->id_unidad == $ultimaUnidad->id_unidad)
+                                                                                                                    <button
+                                                                                                                        type="button"
+                                                                                                                        class="btn btn-danger btn-sm"
+                                                                                                                        data-toggle="modal"
+                                                                                                                        data-target="#eliminarModalUnidad{{ $unidad->id_unidad }}"
+                                                                                                                        title="Eliminar última unidad">
+                                                                                                                        <i
+                                                                                                                            class="fas fa-trash"></i>
+                                                                                                                    </button>
+                                                                                                                @else
+                                                                                                                    <span
+                                                                                                                        class="text-muted">—</span>
+                                                                                                                @endif
                                                                                                             </td>
-
-
-
                                                                                                         </tr>
                                                                                                     @endforeach
-
-                                                                                                    {{-- Fila de Totales --}}
                                                                                                     <tr>
                                                                                                         <td colspan="2"
                                                                                                             class="text-right font-weight-bold">
-                                                                                                            Totales
+                                                                                                            Totales</td>
+                                                                                                        <td
+                                                                                                            class="font-weight-bold text-primary">
+                                                                                                            {{ $unidades->sum('horas_saber') }}
                                                                                                         </td>
                                                                                                         <td
                                                                                                             class="font-weight-bold text-primary">
-                                                                                                            {{ $materia->unidades->sum('horas_saber') }}
-                                                                                                        </td>
-                                                                                                        <td
-                                                                                                            class="font-weight-bold text-primary">
-                                                                                                            {{ $materia->unidades->sum('horas_saber_hacer') }}
+                                                                                                            {{ $unidades->sum('horas_saber_hacer') }}
                                                                                                         </td>
                                                                                                         <td
                                                                                                             class="font-weight-bold text-danger">
-                                                                                                            {{ $materia->unidades->sum('horas_totales') }}
+                                                                                                            {{ $unidades->sum('horas_totales') }}
                                                                                                         </td>
                                                                                                         <td></td>
                                                                                                     </tr>
                                                                                                 </tbody>
                                                                                             </table>
                                                                                         </div>
-
                                                                                         <div class="text-right mt-3">
                                                                                             <button type="submit"
                                                                                                 class="btn btn-primary btn-sm px-4">
                                                                                                 <i
-                                                                                                    class="fas fa-save mr-1"></i>Guardar
-                                                                                                Cambios
+                                                                                                    class="fas fa-save mr-1"></i>
+                                                                                                Guardar Cambios
                                                                                             </button>
                                                                                         </div>
                                                                                     </div>
                                                                                 </form>
+
                                                                                 <!-- Modal de Confirmación para Eliminar Unidad -->
-                                                                                <div class="modal fade"
-                                                                                    id="eliminarModalUnidad{{ $unidad->id_unidad }}"
-                                                                                    tabindex="-1" role="dialog"
-                                                                                    aria-labelledby="eliminarModalLabelUnidad{{ $unidad->id_unidad }}"
-                                                                                    aria-hidden="true">
-                                                                                    <div class="modal-dialog modal-dialog-centered"
-                                                                                        role="document">
-                                                                                        <div
-                                                                                            class="modal-content shadow-sm border-0">
-
-                                                                                            <!-- Encabezado -->
-                                                                                            <div
-                                                                                                class="modal-header modal-header-custom border-0">
-                                                                                                <h5 class="modal-title w-100 text-center font-weight-bold m-0"
-                                                                                                    id="eliminarModalLabelUnidad{{ $unidad->id_unidad }}">
-                                                                                                    🗑️ Eliminar Unidad
-                                                                                                </h5>
-                                                                                                <button type="button"
-                                                                                                    class="close text-white"
-                                                                                                    data-dismiss="modal"
-                                                                                                    aria-label="Cerrar"
-                                                                                                    style="position: absolute; right: 1rem; top: 1rem; font-size: 1.5rem; opacity: 0.9;">
-                                                                                                    <span
-                                                                                                        aria-hidden="true">&times;</span>
-                                                                                                </button>
+                                                                                @foreach ($unidades as $unidad)
+                                                                                    @if ($unidad->id_unidad == $ultimaUnidad->id_unidad)
+                                                                                        <div class="modal fade"
+                                                                                            id="eliminarModalUnidad{{ $unidad->id_unidad }}"
+                                                                                            tabindex="-1"
+                                                                                            role="dialog"
+                                                                                            aria-labelledby="eliminarModalLabelUnidad{{ $unidad->id_unidad }}"
+                                                                                            aria-hidden="true">
+                                                                                            <div class="modal-dialog"
+                                                                                                role="document">
+                                                                                                <div
+                                                                                                    class="modal-content shadow-sm border-0">
+                                                                                                    <div
+                                                                                                        class="modal-header1 modal-header-custom border-0">
+                                                                                                        <div
+                                                                                                            class="w-100 text-center">
+                                                                                                            <h5 class="modal-title w-100 text-center font-weight-bold m-0"
+                                                                                                                id="eliminarModalLabelUnidad{{ $unidad->id_unidad }}">
+                                                                                                                🗑️
+                                                                                                                Eliminar
+                                                                                                                Unidad
+                                                                                                            </h5>
+                                                                                                        </div>
+                                                                                                        <button
+                                                                                                            type="button"
+                                                                                                            class="close"
+                                                                                                            data-dismiss="modal"
+                                                                                                            aria-label="Cerrar">
+                                                                                                            <span
+                                                                                                                aria-hidden="true">&times;</span>
+                                                                                                        </button>
+                                                                                                    </div>
+                                                                                                    <div
+                                                                                                        class="modal-body">
+                                                                                                        ¿Seguro que
+                                                                                                        deseas eliminar
+                                                                                                        la unidad
+                                                                                                        <strong>{{ $unidad->nombre }}</strong>?
+                                                                                                    </div>
+                                                                                                    <div
+                                                                                                        class="modal-footer">
+                                                                                                        <button
+                                                                                                            type="button"
+                                                                                                            class="btn btn-secondary"
+                                                                                                            data-dismiss="modal">
+                                                                                                            <i
+                                                                                                                class="fas fa-times mr-1"></i>
+                                                                                                            Cancelar
+                                                                                                        </button>
+                                                                                                        <form
+                                                                                                            action="{{ route('unidades.eliminar', $unidad->id_unidad) }}"
+                                                                                                            method="POST"
+                                                                                                            class="m-0 p-0 d-inline">
+                                                                                                            @csrf
+                                                                                                            @method('DELETE')
+                                                                                                            <button
+                                                                                                                type="submit"
+                                                                                                                class="btn btn-danger">
+                                                                                                                Eliminar
+                                                                                                            </button>
+                                                                                                        </form>
+                                                                                                    </div>
+                                                                                                </div>
                                                                                             </div>
-
-                                                                                            <!-- Cuerpo -->
-                                                                                            <div
-                                                                                                class="modal-body text-center py-4">
-                                                                                                <i class="fas fa-exclamation-triangle text-warning mb-3"
-                                                                                                    style="font-size: 3rem;"></i>
-                                                                                                <p class="mb-2">
-                                                                                                    ¿Estás seguro de que
-                                                                                                    deseas eliminar la
-                                                                                                    siguiente unidad?
-                                                                                                </p>
-                                                                                                <p
-                                                                                                    class="mb-0 font-weight-bold text-primary">
-                                                                                                    {{ $unidad->nombre }}
-                                                                                                </p>
-                                                                                                <small
-                                                                                                    class="text-muted d-block mt-2">
-                                                                                                    Unidad
-                                                                                                    {{ $unidad->numero_unidad }}
-                                                                                                    —
-                                                                                                    {{ $unidad->horas_totales }}
-                                                                                                    horas totales
-                                                                                                </small>
-                                                                                                <p
-                                                                                                    class="text-danger mt-3 mb-0">
-                                                                                                    <small><i
-                                                                                                            class="fas fa-info-circle"></i>
-                                                                                                        Esta acción no
-                                                                                                        se puede
-                                                                                                        deshacer.</small>
-                                                                                                </p>
-                                                                                            </div>
-
-                                                                                            <!-- Pie -->
-                                                                                            <div
-                                                                                                class="modal-footer border-top">
-                                                                                                <button type="button"
-                                                                                                    class="btn btn-secondary"
-                                                                                                    data-dismiss="modal">
-                                                                                                    <i
-                                                                                                        class="fas fa-times mr-1"></i>
-                                                                                                    Cancelar
-                                                                                                </button>
-
-                                                                                                <!-- Formulario independiente para eliminar -->
-                                                                                                <form
-                                                                                                    action="{{ route('unidades.eliminar', $unidad->id_unidad) }}"
-                                                                                                    method="POST"
-                                                                                                    class="m-0 p-0 d-inline">
-                                                                                                    @csrf
-                                                                                                    @method('DELETE')
-                                                                                                    <button
-                                                                                                        type="submit"
-                                                                                                        class="btn btn-danger">
-                                                                                                        <i
-                                                                                                            class="fas fa-trash mr-1"></i>
-                                                                                                        Eliminar
-                                                                                                    </button>
-                                                                                                </form>
-                                                                                            </div>
-
                                                                                         </div>
-                                                                                    </div>
-                                                                                </div>
+                                                                                    @endif
+                                                                                @endforeach
                                                                             @else
-                                                                                {{-- Sin Unidades --}}
                                                                                 <div class="alert alert-warning text-center mb-3"
                                                                                     role="alert">
                                                                                     <i
@@ -552,48 +577,68 @@
                                                                             {{-- Formulario para agregar nueva unidad --}}
                                                                             <div
                                                                                 class="bg-white rounded p-3 shadow-sm">
+                                                                                @if (session('unidad_success'))
+                                                                                    <div class="alert alert-success">
+                                                                                        {{ session('unidad_success') }}
+                                                                                    </div>
+                                                                                @endif
+                                                                                @if (session('unidad_error'))
+                                                                                    <div class="alert alert-danger">
+                                                                                        {{ session('unidad_error') }}
+                                                                                    </div>
+                                                                                @endif
                                                                                 <h6
                                                                                     class="text-danger font-weight-bold mb-3">
                                                                                     <i
-                                                                                        class="fas fa-plus-circle mr-2"></i>Agregar
-                                                                                    Nueva Unidad
+                                                                                        class="fas fa-plus-circle mr-2"></i>
+                                                                                    Agregar Nueva Unidad
                                                                                 </h6>
-
                                                                                 <form
                                                                                     action="{{ route('unidades.agregar', $materia->id_materia) }}"
                                                                                     method="POST">
                                                                                     @csrf
+
                                                                                     <div class="form-row text-center">
-                                                                                        <div class="col-md-1 mb-2">
-                                                                                            <label
-                                                                                                class="small text-muted mb-1">No.
-                                                                                                Unidad</label>
-                                                                                            <input type="number"
-                                                                                                name="numero_unidad"
-                                                                                                class="form-control form-control-sm"
-                                                                                                placeholder="Ej: 1"
-                                                                                                required>
-                                                                                        </div>
+                                                                                        <input type="hidden"
+                                                                                            name="numero_unidad"
+                                                                                            value="">
                                                                                         <div class="col-md-6 mb-2">
                                                                                             <label
                                                                                                 class="small text-muted mb-1">Nombre
-                                                                                                de la Unidad</label>
+                                                                                                de la Unidad <span
+                                                                                                    class="text-danger">*</span></label>
                                                                                             <input type="text"
                                                                                                 name="nombre"
-                                                                                                class="form-control form-control-sm"
+                                                                                                class="form-control form-control-sm @error('nombre') @if (old('materia_id_unidad') == $materia->id_materia && old('is_agregar_unidad')) is-invalid @endif @enderror"
+                                                                                                value="{{ old('nombre') }}"
                                                                                                 placeholder="Ej: Introducción a la programación"
                                                                                                 required>
+                                                                                            @error('nombre')
+                                                                                                @if (old('materia_id_unidad') == $materia->id_materia && old('is_agregar_unidad'))
+                                                                                                    <div
+                                                                                                        class="invalid-feedback d-block">
+                                                                                                        {{ $message }}
+                                                                                                    </div>
+                                                                                                @endif
+                                                                                            @enderror
                                                                                         </div>
-
                                                                                         <div class="col-md-2 mb-2">
                                                                                             <label
                                                                                                 class="small text-muted mb-1">Horas
                                                                                                 Saber</label>
                                                                                             <input type="number"
                                                                                                 name="horas_saber"
-                                                                                                class="form-control form-control-sm horas-saber-nueva"
-                                                                                                placeholder="0"
+                                                                                                class="form-control form-control-sm horas-saber-nueva @error('horas_saber') @if (old('materia_id_unidad') == $materia->id_materia && old('is_agregar_unidad')) is-invalid @endif @enderror"
+                                                                                                value="{{ old('horas_saber') }}"
                                                                                                 min="0">
+                                                                                            @error('horas_saber')
+                                                                                                @if (old('materia_id_unidad') == $materia->id_materia && old('is_agregar_unidad'))
+                                                                                                    <div
+                                                                                                        class="invalid-feedback d-block">
+                                                                                                        {{ $message }}
+                                                                                                    </div>
+                                                                                                @endif
+                                                                                            @enderror
                                                                                         </div>
                                                                                         <div class="col-md-2 mb-2">
                                                                                             <label
@@ -601,9 +646,17 @@
                                                                                                 Saber Hacer</label>
                                                                                             <input type="number"
                                                                                                 name="horas_saber_hacer"
-                                                                                                class="form-control form-control-sm horas-saber-hacer-nueva"
-                                                                                                placeholder="0"
+                                                                                                class="form-control form-control-sm horas-saber-hacer-nueva @error('horas_saber_hacer') @if (old('materia_id_unidad') == $materia->id_materia && old('is_agregar_unidad')) is-invalid @endif @enderror"
+                                                                                                value="{{ old('horas_saber_hacer') }}"
                                                                                                 min="0">
+                                                                                            @error('horas_saber_hacer')
+                                                                                                @if (old('materia_id_unidad') == $materia->id_materia && old('is_agregar_unidad'))
+                                                                                                    <div
+                                                                                                        class="invalid-feedback d-block">
+                                                                                                        {{ $message }}
+                                                                                                    </div>
+                                                                                                @endif
+                                                                                            @enderror
                                                                                         </div>
                                                                                         <div class="col-md-2 mb-2">
                                                                                             <label
@@ -612,57 +665,33 @@
                                                                                             <input type="number"
                                                                                                 name="horas_totales"
                                                                                                 class="form-control form-control-sm horas-totales-nueva bg-light"
-                                                                                                placeholder="0"
                                                                                                 readonly>
                                                                                         </div>
                                                                                     </div>
-                                                                                    <div class="text-center">
-                                                                                        <small class="text-muted">
-                                                                                            <span
-                                                                                                class="required-asterisk">*</span>
-                                                                                            Campos obligatorios
-                                                                                        </small>
-                                                                                    </div>
-
                                                                                     <div class="text-right">
                                                                                         <button type="submit"
                                                                                             class="btn btn-success btn-sm px-4">
                                                                                             <i
-                                                                                                class="fas fa-plus mr-1"></i>Agregar
-                                                                                            Unidad
+                                                                                                class="fas fa-plus mr-1"></i>
+                                                                                            Agregar Unidad
                                                                                         </button>
                                                                                     </div>
-
                                                                                 </form>
                                                                             </div>
-
                                                                         </div>
                                                                     </div>
-
                                                                     {{-- Footer --}}
                                                                     <div class="modal-footer py-2"
                                                                         style="background-color: #f8f9fa;">
                                                                         <button type="button"
                                                                             class="btn btn-secondary"
                                                                             data-dismiss="modal">
-                                                                            <i class="fas fa-times mr-2"></i>Cerrar
+                                                                            <i class="fas fa-times mr-2"></i> Cerrar
                                                                         </button>
                                                                     </div>
-
                                                                 </div>
                                                             </div>
                                                         </div>
-
-
-                                                        <!-- Formularios de eliminación -->
-                                                        @foreach ($materia->unidades as $unidad)
-                                                            <form id="formEliminar{{ $unidad->id_unidad }}"
-                                                                action="{{ route('unidades.eliminar', $unidad->id_unidad) }}"
-                                                                method="POST" style="display: none;">
-                                                                @csrf
-                                                                @method('DELETE')
-                                                            </form>
-                                                        @endforeach
                                                     </td>
                                                     <td>
                                                         {{ $materia->numeroPeriodo->tipoPeriodo->nombre ?? 'N/A' }}
@@ -898,14 +927,14 @@
 
 
                                                         <!-- Modal Editar Materia -->
+                                                        <!-- Modal Editar Materia -->
                                                         <div class="modal fade"
-                                                            id="editarModal{{ $materia->id_materia }}" tabindex="-1"
-                                                            role="dialog"
+                                                            id="editarModal{{ $materia->id_materia }}"
+                                                            tabindex="-1" role="dialog"
                                                             aria-labelledby="editarModalLabel{{ $materia->id_materia }}"
                                                             aria-hidden="true">
                                                             <div class="modal-dialog modal-lg" role="document">
                                                                 <div class="modal-content border-0 shadow-lg">
-
                                                                     <!-- Header con gradiente -->
                                                                     <div
                                                                         class="modal-header modal-header-custom border-0">
@@ -927,236 +956,374 @@
                                                                             <span aria-hidden="true">&times;</span>
                                                                         </button>
                                                                     </div>
-
                                                                     <!-- Formulario -->
                                                                     <form
                                                                         action="{{ route('materias.update', $materia->id_materia) }}"
                                                                         method="POST">
                                                                         @csrf
+                                                                        <input type="hidden" name="materia_id"
+                                                                            value="{{ $materia->id_materia }}">
                                                                         @method('PUT')
                                                                         <div class="modal-body modal-body-custom p-4">
-
                                                                             <!-- Contenedor principal -->
                                                                             <div
                                                                                 class="form-container p-4 bg-white rounded shadow-sm border">
 
+                                                                                @error('nombre')
+                                                                                    @if (old('materia_id') == $materia->id_materia)
+                                                                                        <div
+                                                                                            class="invalid-feedback d-block">
+                                                                                            {{ $message }}</div>
+                                                                                    @endif
+                                                                                @enderror
                                                                                 <!-- Sección 1: Identificación -->
-                                                                                <div class="info-section mb-4">
-                                                                                    <div class="row">
-                                                                                        <div class="col-md-4">
-                                                                                            <div class="form-group">
-                                                                                                <label
-                                                                                                    class="form-label-custom d-flex">
-                                                                                                    🔑 Clave
-                                                                                                    <span
-                                                                                                        class="required-asterisk ml-1">*</span>
-                                                                                                </label>
-                                                                                                <input type="text"
-                                                                                                    name="clave"
-                                                                                                    class="form-control form-control-custom"
-                                                                                                    value="{{ old('clave', $materia->clave) }}"
-                                                                                                    required>
-                                                                                                <small
-                                                                                                    class="form-text text-muted">Código
-                                                                                                    único
-                                                                                                    identificador</small>
+                                                                                <div class="card shadow mb-3 border-0">
+                                                                                    <div
+                                                                                        class="card-header py-3 text-white card-header-custom d-flex">
+                                                                                        <h6
+                                                                                            class="m-0 font-weight-bold text-danger">
+                                                                                            <i
+                                                                                                class="fas fa-id-card"></i>
+                                                                                            Identificación de la Materia
+                                                                                        </h6>
+                                                                                    </div>
+                                                                                    <div class="card-body1 p-4">
+                                                                                        <div class="row">
+                                                                                            <div class="col-md-4">
+                                                                                                <div
+                                                                                                    class="form-group mb-3">
+                                                                                                    <label
+                                                                                                        class="form-label-custom d-flex">
+                                                                                                        Clave
+                                                                                                        <span
+                                                                                                            class="required-asterisk ml-1">*</span>
+                                                                                                    </label>
+                                                                                                    <input
+                                                                                                        type="text"
+                                                                                                        name="clave"
+                                                                                                        class="form-control form-control-custom"
+                                                                                                        value="{{ old('clave', $materia->clave) }}"
+                                                                                                        required>
+                                                                                                    <small
+                                                                                                        class="form-text text-muted d-flex">Clave
+                                                                                                        única (Ej:
+                                                                                                        MAT-101)</small>
+                                                                                                    @error('clave')
+                                                                                                        @if (old('materia_id'))
+                                                                                                            <div
+                                                                                                                class="invalid-feedback d-block">
+                                                                                                                {{ $message }}
+                                                                                                            </div>
+                                                                                                        @endif
+                                                                                                    @enderror
+                                                                                                </div>
                                                                                             </div>
-                                                                                        </div>
-
-                                                                                        <div class="col-md-8">
-                                                                                            <div class="form-group">
-                                                                                                <label
-                                                                                                    class="form-label-custom d-flex">
-                                                                                                    📝 Nombre de la
-                                                                                                    Materia
-                                                                                                    <span
-                                                                                                        class="required-asterisk ml-1">*</span>
-                                                                                                </label>
-                                                                                                <input type="text"
-                                                                                                    name="nombre"
-                                                                                                    class="form-control form-control-custom"
-                                                                                                    value="{{ old('nombre', $materia->nombre) }}"
-                                                                                                    required>
-                                                                                                <small
-                                                                                                    class="form-text text-muted">Nombre
-                                                                                                    completo de la
-                                                                                                    asignatura</small>
+                                                                                            <div class="col-md-8">
+                                                                                                <div
+                                                                                                    class="form-group mb-0">
+                                                                                                    <label
+                                                                                                        class="form-label-custom d-flex">
+                                                                                                        Nombre de la
+                                                                                                        Materia
+                                                                                                        <span
+                                                                                                            class="required-asterisk ml-1">*</span>
+                                                                                                    </label>
+                                                                                                    <input
+                                                                                                        type="text"
+                                                                                                        name="nombre"
+                                                                                                        class="form-control form-control-custom"
+                                                                                                        value="{{ old('nombre', $materia->nombre) }}"
+                                                                                                        required>
+                                                                                                    <small
+                                                                                                        class="form-text text-muted d-flex">Nombre
+                                                                                                        completo de la
+                                                                                                        asignatura</small>
+                                                                                                    @error('nombre')
+                                                                                                        @if (old('materia_id'))
+                                                                                                            <div
+                                                                                                                class="invalid-feedback d-block">
+                                                                                                                {{ $message }}
+                                                                                                            </div>
+                                                                                                        @endif
+                                                                                                    @enderror
+                                                                                                </div>
                                                                                             </div>
                                                                                         </div>
                                                                                     </div>
                                                                                 </div>
 
                                                                                 <!-- Sección 2: Clasificación Académica -->
-                                                                                <div class="academic-section mb-4">
-                                                                                    <div class="row">
-                                                                                        <div class="col-md-6">
-                                                                                            <div class="form-group">
-                                                                                                <label
-                                                                                                    class="form-label-custom d-flex">🎯
-                                                                                                    Tipo de
-                                                                                                    Competencia</label>
-                                                                                                <select
-                                                                                                    name="id_tipo_competencia"
-                                                                                                    class="form-control form-control-custom">
-                                                                                                    <option
-                                                                                                        value="">
-                                                                                                        -- Seleccione
-                                                                                                        una competencia
-                                                                                                        --</option>
-                                                                                                    @foreach ($competencias as $competencia)
-                                                                                                        <option
-                                                                                                            value="{{ $competencia->id_tipo_competencia }}"
-                                                                                                            {{ $materia->id_tipo_competencia == $competencia->id_tipo_competencia ? 'selected' : '' }}>
-                                                                                                            {{ $competencia->nombre }}
-                                                                                                        </option>
-                                                                                                    @endforeach
-                                                                                                </select>
-                                                                                            </div>
-                                                                                        </div>
-
-                                                                                        <div class="col-md-6">
-                                                                                            <div class="form-group">
-                                                                                                <label
-                                                                                                    class="form-label-custom d-flex">🎓
-                                                                                                    Modalidad</label>
-                                                                                                <select
-                                                                                                    name="id_modalidad"
-                                                                                                    class="form-control form-control-custom">
-                                                                                                    <option
-                                                                                                        value="">
-                                                                                                        -- Seleccione
-                                                                                                        una modalidad --
-                                                                                                    </option>
-                                                                                                    @foreach ($modalidades as $modalidad)
-                                                                                                        <option
-                                                                                                            value="{{ $modalidad->id_modalidad }}"
-                                                                                                            {{ $materia->id_modalidad == $modalidad->id_modalidad ? 'selected' : '' }}>
-                                                                                                            {{ $modalidad->nombre }}
-                                                                                                        </option>
-                                                                                                    @endforeach
-                                                                                                </select>
-                                                                                            </div>
-                                                                                        </div>
+                                                                                <div class="card shadow mb-3 border-0">
+                                                                                    <div
+                                                                                        class="card-header py-3 text-white card-header-custom d-flex">
+                                                                                        <h6
+                                                                                            class="m-0 font-weight-bold text-danger">
+                                                                                            <i
+                                                                                                class="fas fa-graduation-cap"></i>
+                                                                                            Clasificación Académica
+                                                                                        </h6>
                                                                                     </div>
-
-                                                                                    <div class="row">
-                                                                                        <div class="col-md-6">
-                                                                                            <div class="form-group">
-                                                                                                <label
-                                                                                                    class="form-label-custom d-flex">🏫
-                                                                                                    Espacio
-                                                                                                    Formativo</label>
-                                                                                                <select
-                                                                                                    name="id_espacio_formativo"
-                                                                                                    class="form-control form-control-custom">
-                                                                                                    <option
-                                                                                                        value="">
-                                                                                                        -- Seleccione un
-                                                                                                        espacio --
-                                                                                                    </option>
-                                                                                                    @foreach ($espaciosformativos as $espacio)
+                                                                                    <div class="card-body1 p-4">
+                                                                                        <div class="row">
+                                                                                            <div class="col-md-6">
+                                                                                                <div
+                                                                                                    class="form-group mb-3">
+                                                                                                    <label
+                                                                                                        class="form-label-custom d-flex">
+                                                                                                        Tipo de
+                                                                                                        Competencia</label>
+                                                                                                    <select
+                                                                                                        name="id_tipo_competencia"
+                                                                                                        class="form-control form-control-custom">
                                                                                                         <option
-                                                                                                            value="{{ $espacio->id_espacio_formativo }}"
-                                                                                                            {{ $materia->id_espacio_formativo == $espacio->id_espacio_formativo ? 'selected' : '' }}>
-                                                                                                            {{ $espacio->nombre }}
+                                                                                                            value="">
+                                                                                                            --
+                                                                                                            Seleccione
+                                                                                                            una
+                                                                                                            competencia
+                                                                                                            --</option>
+                                                                                                        @foreach ($competencias as $competencia)
+                                                                                                            <option
+                                                                                                                value="{{ $competencia->id_tipo_competencia }}"
+                                                                                                                {{ $materia->id_tipo_competencia == $competencia->id_tipo_competencia ? 'selected' : '' }}>
+                                                                                                                {{ $competencia->nombre }}
+                                                                                                            </option>
+                                                                                                        @endforeach
+                                                                                                    </select>
+                                                                                                    @error('id_tipo_competencia')
+                                                                                                        @if (old('materia_id'))
+                                                                                                            <div
+                                                                                                                class="invalid-feedback d-block">
+                                                                                                                {{ $message }}
+                                                                                                            </div>
+                                                                                                        @endif
+                                                                                                    @enderror
+                                                                                                </div>
+                                                                                            </div>
+                                                                                            <div class="col-md-6">
+                                                                                                <div
+                                                                                                    class="form-group mb-3">
+                                                                                                    <label
+                                                                                                        class="form-label-custom d-flex">
+                                                                                                        Modalidad</label>
+                                                                                                    <select
+                                                                                                        name="id_modalidad"
+                                                                                                        class="form-control form-control-custom">
+                                                                                                        <option
+                                                                                                            value="">
+                                                                                                            --
+                                                                                                            Seleccione
+                                                                                                            una
+                                                                                                            modalidad --
                                                                                                         </option>
-                                                                                                    @endforeach
-                                                                                                </select>
+                                                                                                        @foreach ($modalidades as $modalidad)
+                                                                                                            <option
+                                                                                                                value="{{ $modalidad->id_modalidad }}"
+                                                                                                                {{ $materia->id_modalidad == $modalidad->id_modalidad ? 'selected' : '' }}>
+                                                                                                                {{ $modalidad->nombre }}
+                                                                                                            </option>
+                                                                                                        @endforeach
+                                                                                                    </select>
+                                                                                                    @error('id_modalidad')
+                                                                                                        @if (old('materia_id'))
+                                                                                                            <div
+                                                                                                                class="invalid-feedback d-block">
+                                                                                                                {{ $message }}
+                                                                                                            </div>
+                                                                                                        @endif
+                                                                                                    @enderror
+                                                                                                </div>
                                                                                             </div>
                                                                                         </div>
-
-                                                                                        <div class="col-md-6">
-                                                                                            <div class="form-group">
-                                                                                                <label
-                                                                                                    class="form-label-custom d-flex">📚
-                                                                                                    Plan de
-                                                                                                    Estudio</label>
-                                                                                                <select
-                                                                                                    name="id_plan_estudio"
-                                                                                                    class="form-control form-control-custom">
-                                                                                                    <option
-                                                                                                        value="">
-                                                                                                        -- Seleccione un
-                                                                                                        plan --</option>
-                                                                                                    @foreach ($planes as $plan)
+                                                                                        <div class="row">
+                                                                                            <div class="col-md-6">
+                                                                                                <div
+                                                                                                    class="form-group mb-3">
+                                                                                                    <label
+                                                                                                        class="form-label-custom d-flex">
+                                                                                                        Espacio
+                                                                                                        Formativo</label>
+                                                                                                    <select
+                                                                                                        name="id_espacio_formativo"
+                                                                                                        class="form-control form-control-custom">
                                                                                                         <option
-                                                                                                            value="{{ $plan->id_plan_estudio }}"
-                                                                                                            {{ $materia->id_plan_estudio == $plan->id_plan_estudio ? 'selected' : '' }}>
-                                                                                                            {{ $plan->nombre }}
+                                                                                                            value="">
+                                                                                                            --
+                                                                                                            Seleccione
+                                                                                                            un espacio
+                                                                                                            --</option>
+                                                                                                        @foreach ($espaciosformativos as $espacio)
+                                                                                                            <option
+                                                                                                                value="{{ $espacio->id_espacio_formativo }}"
+                                                                                                                {{ $materia->id_espacio_formativo == $espacio->id_espacio_formativo ? 'selected' : '' }}>
+                                                                                                                {{ $espacio->nombre }}
+                                                                                                            </option>
+                                                                                                        @endforeach
+                                                                                                    </select>
+                                                                                                    @error('id_espacio_formativo')
+                                                                                                        @if (old('is_create_materia'))
+                                                                                                            <div
+                                                                                                                class="invalid-feedback d-block">
+                                                                                                                {{ $message }}
+                                                                                                            </div>
+                                                                                                        @endif
+                                                                                                    @enderror
+                                                                                                </div>
+                                                                                            </div>
+                                                                                            <div class="col-md-6">
+                                                                                                <div
+                                                                                                    class="form-group mb-0">
+                                                                                                    <label
+                                                                                                        class="form-label-custom d-flex">
+                                                                                                        Plan de
+                                                                                                        Estudio</label>
+                                                                                                    <select
+                                                                                                        name="id_plan_estudio"
+                                                                                                        class="form-control form-control-custom">
+                                                                                                        <option
+                                                                                                            value="">
+                                                                                                            --
+                                                                                                            Seleccione
+                                                                                                            un plan --
                                                                                                         </option>
-                                                                                                    @endforeach
-                                                                                                </select>
+                                                                                                        @foreach ($planes as $plan)
+                                                                                                            <option
+                                                                                                                value="{{ $plan->id_plan_estudio }}"
+                                                                                                                {{ $materia->id_plan_estudio == $plan->id_plan_estudio ? 'selected' : '' }}>
+                                                                                                                {{ $plan->nombre }}
+                                                                                                            </option>
+                                                                                                        @endforeach
+                                                                                                    </select>
+                                                                                                    @error('id_plan_estudio')
+                                                                                                        @if (old('materia_id'))
+                                                                                                            <div
+                                                                                                                class="invalid-feedback d-block">
+                                                                                                                {{ $message }}
+                                                                                                            </div>
+                                                                                                        @endif
+                                                                                                    @enderror
+                                                                                                </div>
                                                                                             </div>
                                                                                         </div>
                                                                                     </div>
                                                                                 </div>
 
                                                                                 <!-- Sección 3: Carga Académica -->
-                                                                                <div class="workload-section mb-4">
-                                                                                    <div class="row">
-                                                                                        <div class="col-md-4">
-                                                                                            <div class="form-group">
-                                                                                                <label
-                                                                                                    class="form-label-custom d-flex">⭐
-                                                                                                    Créditos</label>
-                                                                                                <input type="number"
-                                                                                                    name="creditos"
-                                                                                                    class="form-control form-control-custom"
-                                                                                                    value="{{ old('creditos', $materia->creditos) }}"
-                                                                                                    min="0"
-                                                                                                    step="0.5">
-                                                                                                <small
-                                                                                                    class="form-text text-muted">Valor
-                                                                                                    en créditos</small>
+                                                                                <div class="card shadow mb-4 border-0">
+                                                                                    <div
+                                                                                        class="card-header py-3 text-white card-header-custom d-flex">
+                                                                                        <h6
+                                                                                            class="m-0 font-weight-bold text-danger">
+                                                                                            <i
+                                                                                                class="fas fa-clock"></i>
+                                                                                            Carga Académica
+                                                                                        </h6>
+                                                                                    </div>
+                                                                                    <div class="card-body1 p-4">
+                                                                                        <div class="row">
+                                                                                            <div class="col-md-4">
+                                                                                                <div
+                                                                                                    class="form-group mb-3">
+                                                                                                    <label
+                                                                                                        class="form-label-custom d-flex">
+                                                                                                        Créditos</label>
+                                                                                                    <input
+                                                                                                        type="number"
+                                                                                                        name="creditos"
+                                                                                                        class="form-control form-control-custom"
+                                                                                                        value="{{ old('creditos', $materia->creditos) }}"
+                                                                                                        min="0"
+                                                                                                        step="0.5">
+                                                                                                    <small
+                                                                                                        class="form-text text-muted">Valor
+                                                                                                        en créditos
+                                                                                                        (máx.
+                                                                                                        20)</small>
+                                                                                                    @error('creditos')
+                                                                                                        @if (old('materia_id'))
+                                                                                                            <div
+                                                                                                                class="invalid-feedback d-block">
+                                                                                                                {{ $message }}
+                                                                                                            </div>
+                                                                                                        @endif
+                                                                                                    @enderror
+                                                                                                </div>
                                                                                             </div>
-                                                                                        </div>
-
-                                                                                        <div class="col-md-4">
-                                                                                            <div class="form-group">
-                                                                                                <label
-                                                                                                    class="form-label-custom d-flex">⏰
-                                                                                                    Horas</label>
-                                                                                                <input type="number"
-                                                                                                    name="horas"
-                                                                                                    class="form-control form-control-custom"
-                                                                                                    value="{{ old('horas', $materia->horas) }}"
-                                                                                                    min="0">
-                                                                                                <small
-                                                                                                    class="form-text text-muted">Horas
-                                                                                                    totales</small>
+                                                                                            <div class="col-md-4">
+                                                                                                <div
+                                                                                                    class="form-group mb-3">
+                                                                                                    <label
+                                                                                                        class="form-label-custom d-flex">
+                                                                                                        Horas</label>
+                                                                                                    <input
+                                                                                                        type="number"
+                                                                                                        name="horas"
+                                                                                                        class="form-control form-control-custom"
+                                                                                                        value="{{ old('horas', $materia->horas) }}"
+                                                                                                        min="0">
+                                                                                                    <small
+                                                                                                        class="form-text text-muted">Horas
+                                                                                                        totales (máx.
+                                                                                                        500)</small>
+                                                                                                    @error('horas')
+                                                                                                        @if (old('materia_id'))
+                                                                                                            <div
+                                                                                                                class="invalid-feedback d-block">
+                                                                                                                {{ $message }}
+                                                                                                            </div>
+                                                                                                        @endif
+                                                                                                    @enderror
+                                                                                                </div>
                                                                                             </div>
-                                                                                        </div>
-
-                                                                                        <div class="col-md-4">
-                                                                                            <div class="form-group">
-                                                                                                <label
-                                                                                                    class="form-label-custom d-flex">📅
-                                                                                                    Número de
-                                                                                                    Período</label>
-                                                                                                <select
-                                                                                                    name="id_numero_periodo"
-                                                                                                    class="form-control form-control-custom">
-                                                                                                    <option
-                                                                                                        value="">
-                                                                                                        -- Seleccione --
-                                                                                                    </option>
-                                                                                                    @foreach ($periodos as $periodo)
+                                                                                            <div class="col-md-4">
+                                                                                                <div
+                                                                                                    class="form-group mb-0">
+                                                                                                    <label
+                                                                                                        class="form-label-custom d-flex">
+                                                                                                        Número de
+                                                                                                        Período</label>
+                                                                                                    <select
+                                                                                                        name="id_numero_periodo"
+                                                                                                        class="form-control form-control-custom">
                                                                                                         <option
-                                                                                                            value="{{ $periodo->id_numero_periodo }}"
-                                                                                                            {{ $materia->id_numero_periodo == $periodo->id_numero_periodo ? 'selected' : '' }}>
-                                                                                                            {{ $periodo->tipoPeriodo->nombre }}
-                                                                                                            -
-                                                                                                            {{ $periodo->numero }}
-                                                                                                        </option>
-                                                                                                    @endforeach
-                                                                                                </select>
+                                                                                                            value="">
+                                                                                                            --
+                                                                                                            Seleccione
+                                                                                                            --</option>
+                                                                                                        @foreach ($periodos as $periodo)
+                                                                                                            <option
+                                                                                                                value="{{ $periodo->id_numero_periodo }}"
+                                                                                                                {{ $materia->id_numero_periodo == $periodo->id_numero_periodo ? 'selected' : '' }}>
+                                                                                                                {{ $periodo->tipoPeriodo->nombre }}
+                                                                                                                -
+                                                                                                                {{ $periodo->numero }}
+                                                                                                            </option>
+                                                                                                        @endforeach
+                                                                                                    </select>
+                                                                                                    @error('id_numero_periodo')
+                                                                                                        @if (old('materia_id'))
+                                                                                                            <div
+                                                                                                                class="invalid-feedback d-block">
+                                                                                                                {{ $message }}
+                                                                                                            </div>
+                                                                                                        @endif
+                                                                                                    @enderror
+                                                                                                </div>
                                                                                             </div>
                                                                                         </div>
                                                                                     </div>
                                                                                 </div>
+
+                                                                                <!-- Nota de campos obligatorios -->
+                                                                                <div class="text-center mt-3">
+                                                                                    <small class="text-muted">
+                                                                                        <span
+                                                                                            class="required-asterisk">*</span>
+                                                                                        Campos obligatorios
+                                                                                    </small>
+                                                                                </div>
                                                                             </div>
                                                                         </div>
-
                                                                         <!-- Footer -->
                                                                         <div
                                                                             class="modal-footer modal-footer-custom border-top">
@@ -1204,11 +1371,11 @@
                                                                         <strong>{{ $materia->nombre }}</strong>?
                                                                     </div>
                                                                     <div class="modal-footer">
-                                                                        
+
                                                                         <button type="button"
                                                                             class="btn btn-secondary"
                                                                             data-dismiss="modal">Cancelar</button>
-                                                                            <form
+                                                                        <form
                                                                             action="{{ route('materias.destroy', $materia->id_materia) }}"
                                                                             method="POST">
                                                                             @csrf
@@ -1285,163 +1452,239 @@
                 <!-- Formulario -->
                 <form action="{{ route('materias.store') }}" method="POST">
                     @csrf
+                    <input type="hidden" name="is_create_materia" value="1">
+
                     <div class="modal-body modal-body-custom p-4">
 
                         <!-- Contenedor principal -->
                         <div class="form-container p-4 bg-white rounded shadow-sm border">
-
                             <!-- Sección 1: Identificación -->
-                            <div class="info-section mb-4 ">
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label class="form-label-custom d-flex">
-                                                🔑 Clave
-                                                <span class="required-asterisk ml-1">*</span>
-                                            </label>
-                                            <input type="text" name="clave"
-                                                class="form-control form-control-custom" placeholder="Ej: MAT-101"
-                                                required>
-                                            <small class="form-text text-muted">Código único identificador</small>
+                            <div class="card shadow mb-3 border-0">
+                                <div class="card-header py-3 text-white card-header-custom">
+                                    <h6 class="m-0 font-weight-bold text-danger">
+                                        <i class="fas fa-id-card"></i> Identificación de la Materia
+                                    </h6>
+                                </div>
+                                <div class="card-body1 p-4">
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="form-group mb-3">
+                                                <label class="form-label-custom d-flex">
+                                                    Clave
+                                                    <span class="required-asterisk ml-1">*</span>
+                                                </label>
+                                                <input type="text" name="clave" value="{{ old('clave') }}"
+                                                    class="form-control form-control-custom @error('clave') @if (old('is_create_materia')) is-invalid @endif @enderror"
+                                                    placeholder="Ej: MAT-101" required>
+                                                <small class="form-text text-muted">Código único (Ej: MAT-101)</small>
+                                                @error('clave')
+                                                    @if (old('is_create_materia'))
+                                                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                                                    @endif
+                                                @enderror
+                                            </div>
                                         </div>
-                                    </div>
 
-                                    <div class="col-md-8">
-                                        <div class="form-group">
-                                            <label class="form-label-custom d-flex">
-                                                📝 Nombre de la Materia
-                                                <span class="required-asterisk ml-1">*</span>
-                                            </label>
-                                            <input type="text" name="nombre"
-                                                class="form-control form-control-custom"
-                                                placeholder="Ej: Matemáticas Aplicadas" required>
-                                            <small class="form-text text-muted">Nombre completo de la
-                                                asignatura</small>
+                                        <div class="col-md-8">
+                                            <div class="form-group mb-0">
+                                                <label class="form-label-custom d-flex">
+                                                    Nombre de la Materia
+                                                    <span class="required-asterisk ml-1">*</span>
+                                                </label>
+                                                <input type="text" name="nombre" value="{{ old('nombre') }}"
+                                                    class="form-control form-control-custom @error('nombre') @if (old('is_create_materia')) is-invalid @endif @enderror"
+                                                    placeholder="Ej: Matemáticas Aplicadas" required>
+                                                <small class="form-text text-muted">Nombre completo de la
+                                                    asignatura</small>
+                                                @error('nombre')
+                                                    @if (old('is_create_materia'))
+                                                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                                                    @endif
+                                                @enderror
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
                             <!-- Sección 2: Clasificación Académica -->
-                            <div class="academic-section mb-4">
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label class="form-label-custom d-flex">
-                                                🎯 Tipo de Competencia
-                                            </label>
-                                            <select name="id_tipo_competencia"
-                                                class="form-control form-control-custom">
-                                                <option value="">-- Seleccione una competencia --</option>
-                                                @foreach ($competencias as $competencia)
-                                                    <option value="{{ $competencia->id_tipo_competencia }}">
-                                                        {{ $competencia->nombre }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label class="form-label-custom d-flex">
-                                                🎓 Modalidad
-                                            </label>
-                                            <select name="id_modalidad" class="form-control form-control-custom">
-                                                <option value="">-- Seleccione una modalidad --</option>
-                                                @foreach ($modalidades as $modalidad)
-                                                    <option value="{{ $modalidad->id_modalidad }}">
-                                                        {{ $modalidad->nombre }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                    </div>
+                            <div class="card shadow mb-3 border-0">
+                                <div class="card-header py-3 text-white card-header-custom">
+                                    <h6 class="m-0 font-weight-bold text-danger">
+                                        <i class="fas fa-graduation-cap"></i> Clasificación Académica
+                                    </h6>
                                 </div>
+                                <div class="card-body1 p-4">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group mb-3">
+                                                <label class="form-label-custom d-flex">
+                                                    Tipo de Competencia
+                                                </label>
+                                                <select name="id_tipo_competencia"
+                                                    class="form-control form-control-custom @error('id_tipo_competencia') @if (old('is_create_materia')) is-invalid @endif @enderror">
+                                                    <option value="">-- Seleccione una competencia --</option>
+                                                    @foreach ($competencias as $competencia)
+                                                        <option value="{{ $competencia->id_tipo_competencia }}"
+                                                            {{ old('id_tipo_competencia') == $competencia->id_tipo_competencia ? 'selected' : '' }}>
+                                                            {{ $competencia->nombre }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                                @error('id_tipo_competencia')
+                                                    @if (old('is_create_materia'))
+                                                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                                                    @endif
+                                                @enderror
+                                            </div>
+                                        </div>
 
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label class="form-label-custom d-flex">
-                                                🏫 Espacio Formativo
-                                            </label>
-                                            <select name="id_espacio_formativo"
-                                                class="form-control form-control-custom">
-                                                <option value="">-- Seleccione un espacio --</option>
-                                                @foreach ($espaciosformativos as $espacio)
-                                                    <option value="{{ $espacio->id_espacio_formativo }}">
-                                                        {{ $espacio->nombre }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
+                                        <div class="col-md-6">
+                                            <div class="form-group mb-3">
+                                                <label class="form-label-custom d-flex">
+                                                    Modalidad
+                                                </label>
+                                                <select name="id_modalidad"
+                                                    class="form-control form-control-custom @error('id_modalidad') @if (old('is_create_materia')) is-invalid @endif @enderror">
+                                                    <option value="">-- Seleccione una modalidad --</option>
+                                                    @foreach ($modalidades as $modalidad)
+                                                        <option value="{{ $modalidad->id_modalidad }}"
+                                                            {{ old('id_modalidad') == $modalidad->id_modalidad ? 'selected' : '' }}>
+                                                            {{ $modalidad->nombre }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                                @error('id_modalidad')
+                                                    @if (old('is_create_materia'))
+                                                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                                                    @endif
+                                                @enderror
+                                            </div>
                                         </div>
                                     </div>
 
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label class="form-label-custom d-flex">
-                                                📚 Plan de Estudio
-                                            </label>
-                                            <select name="id_plan_estudio" class="form-control form-control-custom">
-                                                <option value="">-- Seleccione un plan --</option>
-                                                @foreach ($planes as $plan)
-                                                    <option value="{{ $plan->id_plan_estudio }}">
-                                                        {{ $plan->nombre }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group mb-3">
+                                                <label class="form-label-custom d-flex">
+                                                    Espacio Formativo
+                                                </label>
+                                                <select name="id_espacio_formativo"
+                                                    class="form-control form-control-custom @error('id_espacio_formativo') @if (old('is_create_materia')) is-invalid @endif @enderror">
+                                                    <option value="">-- Seleccione un espacio --</option>
+                                                    @foreach ($espaciosformativos as $espacio)
+                                                        <option value="{{ $espacio->id_espacio_formativo }}"
+                                                            {{ old('id_espacio_formativo') == $espacio->id_espacio_formativo ? 'selected' : '' }}>
+                                                            {{ $espacio->nombre }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                                @error('id_espacio_formativo')
+                                                    @if (old('is_create_materia'))
+                                                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                                                    @endif
+                                                @enderror
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <div class="form-group mb-0">
+                                                <label class="form-label-custom d-flex">
+                                                    Plan de Estudio
+                                                </label>
+                                                <select name="id_plan_estudio"
+                                                    class="form-control form-control-custom @error('id_plan_estudio') @if (old('is_create_materia')) is-invalid @endif @enderror">
+                                                    <option value="">-- Seleccione un plan --</option>
+                                                    @foreach ($planes as $plan)
+                                                        <option value="{{ $plan->id_plan_estudio }}"
+                                                            {{ old('id_plan_estudio') == $plan->id_plan_estudio ? 'selected' : '' }}>
+                                                            {{ $plan->nombre }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                                @error('id_plan_estudio')
+                                                    @if (old('is_create_materia'))
+                                                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                                                    @endif
+                                                @enderror
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
                             <!-- Sección 3: Carga Académica -->
-                            <div class="workload-section mb-4">
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label class="form-label-custom d-flex">
-                                                ⭐ Créditos
-                                            </label>
-                                            <input type="number" name="creditos"
-                                                class="form-control form-control-custom" placeholder="0"
-                                                min="0" step="0.5">
-                                            <small class="form-text text-muted">Valor en créditos</small>
+                            <div class="card shadow mb-4 border-0">
+                                <div class="card-header py-3 text-white card-header-custom">
+                                    <h6 class="m-0 font-weight-bold text-danger">
+                                        <i class="fas fa-clock"></i> Carga Académica
+                                    </h6>
+                                </div>
+                                <div class="card-body1 p-4">
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="form-group mb-3">
+                                                <label class="form-label-custom d-flex">
+                                                    Créditos
+                                                </label>
+                                                <input type="number" name="creditos" value="{{ old('creditos') }}"
+                                                    class="form-control form-control-custom @error('creditos') @if (old('is_create_materia')) is-invalid @endif @enderror"
+                                                    placeholder="0" min="0" max="20" step="0.5">
+                                                <small class="form-text text-muted">Valor en créditos (máx. 20)</small>
+                                                @error('creditos')
+                                                    @if (old('is_create_materia'))
+                                                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                                                    @endif
+                                                @enderror
+                                            </div>
                                         </div>
-                                    </div>
 
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label class="form-label-custom d-flex">
-                                                ⏰ Horas
-                                            </label>
-                                            <input type="number" name="horas"
-                                                class="form-control form-control-custom" placeholder="0"
-                                                min="0">
-                                            <small class="form-text text-muted">Horas totales</small>
+                                        <div class="col-md-4">
+                                            <div class="form-group mb-3">
+                                                <label class="form-label-custom d-flex">
+                                                    Horas
+                                                </label>
+                                                <input type="number" name="horas" value="{{ old('horas') }}"
+                                                    class="form-control form-control-custom @error('horas') @if (old('is_create_materia')) is-invalid @endif @enderror"
+                                                    placeholder="0" min="0" max="500">
+                                                <small class="form-text text-muted">Horas totales (máx. 500)</small>
+                                                @error('horas')
+                                                    @if (old('is_create_materia'))
+                                                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                                                    @endif
+                                                @enderror
+                                            </div>
                                         </div>
-                                    </div>
 
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label class="form-label-custom d-flex">
-                                                📅 Numero de Período
-                                            </label>
-                                            <select name="id_numero_periodo" class="form-control form-control-custom">
-                                                <option value="">-- Seleccione --</option>
-                                                @foreach ($periodos as $periodo)
-                                                    <option value="{{ $periodo->id_numero_periodo }}">
-                                                        {{ $periodo->tipoPeriodo->nombre }} - {{ $periodo->numero }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
+                                        <div class="col-md-4">
+                                            <div class="form-group mb-0">
+                                                <label class="form-label-custom d-flex">
+                                                    Número de Período
+                                                </label>
+                                                <select name="id_numero_periodo"
+                                                    class="form-control form-control-custom @error('id_numero_periodo') @if (old('is_create_materia')) is-invalid @endif @enderror">
+                                                    <option value="">-- Seleccione --</option>
+                                                    @foreach ($periodos as $periodo)
+                                                        <option value="{{ $periodo->id_numero_periodo }}"
+                                                            {{ old('id_numero_periodo') == $periodo->id_numero_periodo ? 'selected' : '' }}>
+                                                            {{ $periodo->tipoPeriodo->nombre }} -
+                                                            {{ $periodo->numero }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                                @error('id_numero_periodo')
+                                                    @if (old('is_create_materia'))
+                                                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                                                    @endif
+                                                @enderror
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
                             <!-- Nota de campos obligatorios -->
-                            <div class="text-center">
+                            <div class="text-center mt-3">
                                 <small class="text-muted">
                                     <span class="required-asterisk">*</span> Campos obligatorios
                                 </small>
@@ -1469,33 +1712,58 @@
 
     <!-- JS para autocalcular horas totales y eliminar unidades -->
     <script>
-        // Autocalcular horas totales
-        document.addEventListener("input", function(e) {
-            if (e.target.classList.contains("horas-saber") ||
-                e.target.classList.contains("horas-saber-hacer")) {
+        document.addEventListener("DOMContentLoaded", function() {
+            // Abrir modal de crear materia
+            @if ($errors->any() && old('is_create_materia'))
+                $('#nuevaMateriaModal').modal('show');
+            @endif
 
-                let row = e.target.closest("tr, .form-row");
-                if (!row) return;
+            // Abrir modal de editar materia
+            @if ($errors->any() && old('materia_id'))
+                $('#editarModal{{ old('materia_id') }}').modal('show');
+            @endif
 
-                let saber = parseInt(row.querySelector(".horas-saber")?.value) || 0;
-                let hacer = parseInt(row.querySelector(".horas-saber-hacer")?.value) || 0;
+            // ✅ Abrir modal de unidades tras éxito (crear, editar, eliminar)
+            @if (session('abrir_unidades'))
+                $('#unidadesModal{{ session('abrir_unidades') }}').modal('show');
+            @endif
 
-                let totalInput = row.querySelector(".horas-totales");
-                if (totalInput) {
-                    totalInput.value = saber + hacer;
+            // ✅ Abrir modal de unidades tras error en agregar
+            @if ($errors->any() && old('materia_id_unidad'))
+                $('#unidadesModal{{ old('materia_id_unidad') }}').modal('show');
+            @endif
+
+            // ✅ Abrir modal de unidades tras error en actualizar todo
+            @if ($errors->any() && old('is_actualizar_unidades'))
+                $('#unidadesModal{{ old('is_actualizar_unidades') }}').modal('show');
+            @endif
+
+            // Autocalcular horas
+            document.addEventListener("input", function(e) {
+                if (e.target.classList.contains("horas-saber") || e.target.classList.contains(
+                        "horas-saber-hacer")) {
+                    let row = e.target.closest("tr, .form-row");
+                    if (!row) return;
+                    let saber = parseInt(row.querySelector(".horas-saber")?.value) || 0;
+                    let hacer = parseInt(row.querySelector(".horas-saber-hacer")?.value) || 0;
+                    let totalInput = row.querySelector(".horas-totales, .horas-totales-nueva");
+                    if (totalInput) totalInput.value = saber + hacer;
                 }
-            }
+            });
         });
-
-        // Función segura para eliminar unidad
-        function eliminarUnidad(formId) {
-            if (confirm('¿Seguro que deseas eliminar esta unidad?')) {
-                document.getElementById(formId).submit();
-            }
-        }
     </script>
 
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            @if ($errors->any() && old('is_create_materia'))
+                $('#nuevaMateriaModal').modal('show');
+            @endif
 
+            @if ($errors->any() && old('materia_id'))
+                $('#editarModal{{ old('materia_id') }}').modal('show');
+            @endif
+        });
+    </script>
     <!-- Bootstrap core JavaScript-->
     <script src="{{ asset('libs/jquery/jquery.min.js') }}"></script>
     <script src="{{ asset('libs/bootstrap/js/bootstrap.bundle.min.js') }}"></script>

@@ -217,12 +217,6 @@
                                     }
                                 });
                             </script>
-
-
-
-
-
-
                             <!-- Tabla -->
 
                             <div class="card-body1">
@@ -533,96 +527,183 @@
                                                             <i class="fas fa-edit"></i> Editar
                                                         </button>
 
-                                                        <div class="modal fade"
-                                                            id="editarModal{{ $carrera->id_carrera }}" tabindex="-1"
-                                                            role="dialog"
-                                                            aria-labelledby="editarModalLabel{{ $carrera->id_carrera }}"
-                                                            aria-hidden="true">
-                                                            <div class="modal-dialog modal-lg" role="document">
-                                                                <div class="modal-content border-0 shadow-lg">
+                                                        @foreach ($carreras as $carrera)
+                                                            <div class="modal fade"
+                                                                id="editarModal{{ $carrera->id_carrera }}"
+                                                                tabindex="-1" role="dialog"
+                                                                aria-labelledby="editarModalLabel{{ $carrera->id_carrera }}"
+                                                                aria-hidden="true">
+                                                                <div class="modal-dialog modal-lg" role="document">
+                                                                    <div class="modal-content border-0 shadow-lg">
 
-                                                                    <div
-                                                                        class="modal-header modal-header-custom border-0">
-                                                                        <div class="w-100">
-                                                                            <div class="text-center">
-                                                                                <h5 class="m-0 font-weight-bold"
-                                                                                    id="editarModalLabel{{ $carrera->id_carrera }}">
-                                                                                    ✏️ Editar Carrera</h5>
-                                                                                <p class="text-center m-0 mt-2"
-                                                                                    style="font-size: 0.9rem; opacity: 0.95;">
-                                                                                    Modifique la información de la
-                                                                                    carrera
-                                                                                </p>
+                                                                        <!-- Header con gradiente -->
+                                                                        <div
+                                                                            class="modal-header modal-header-custom border-0">
+                                                                            <div class="w-100">
+                                                                                <div class="text-center">
+                                                                                    <h5 class="m-0 font-weight-bold"
+                                                                                        id="editarModalLabel{{ $carrera->id_carrera }}">
+                                                                                        ✏️ Editar Carrera
+                                                                                    </h5>
+                                                                                    <p class="m-0 mt-2 mb-0"
+                                                                                        style="font-size: 0.9rem; opacity: 0.95;">
+                                                                                        Modifique la información de la
+                                                                                        carrera
+                                                                                    </p>
+                                                                                </div>
                                                                             </div>
+                                                                            <button type="button"
+                                                                                class="close text-white"
+                                                                                data-dismiss="modal"
+                                                                                aria-label="Cerrar"
+                                                                                style="position: absolute; right: 1.5rem; top: 1.5rem; font-size: 1.8rem; opacity: 0.9;">
+                                                                                <span aria-hidden="true">&times;</span>
+                                                                            </button>
                                                                         </div>
-                                                                        <button type="button"
-                                                                            class="close text-white"
-                                                                            data-dismiss="modal" aria-label="Cerrar"
-                                                                            style="position: absolute; right: 1.5rem; top: 1.5rem; font-size: 1.8rem; opacity: 0.9;">
-                                                                            <span aria-hidden="true">&times;</span>
-                                                                        </button>
-                                                                    </div>
-                                                                    <form
-                                                                        action="{{ route('carreras.update', $carrera->id_carrera) }}"
-                                                                        method="POST">
-                                                                        @csrf
-                                                                        @method('PUT')
 
-                                                                        <div class="modal-body modal-body-custom p-4">
+                                                                        <form
+                                                                            action="{{ route('carreras.update', $carrera->id_carrera) }}"
+                                                                            method="POST">
+                                                                            @csrf
+                                                                            @method('PUT')
+                                                                            <input type="hidden" name="carrera_id"
+                                                                                value="{{ $carrera->id_carrera }}">
+
                                                                             <div
-                                                                                class="form-container p-4 bg-white rounded shadow-sm border">
+                                                                                class="modal-body modal-body-custom p-4">
+                                                                                <div
+                                                                                    class="form-container p-4 bg-white rounded shadow-sm border">
 
-                                                                                <div class="form-group">
-                                                                                    <label
-                                                                                        style="text-align: left; display: block;">📝
-                                                                                        Nombre de la Carrera</label>
-                                                                                    <input type="text"
-                                                                                        placeholder="Ejemplo: Ingeniería en Sistemas Computacionales"
-                                                                                        name="nombre"
-                                                                                        class="form-control"
-                                                                                        value="{{ $carrera->nombre }}"
-                                                                                        required>
-                                                                                    @error('nombre')
-                                                                                        <div class="invalid-feedback">
-                                                                                            {{ $message }}</div>
-                                                                                    @enderror
-                                                                                </div>
-                                                                                <div class="form-group">
-                                                                                    <label
-                                                                                        style="text-align: left; display: block;">
-                                                                                        🕖 Duración de la
-                                                                                        Carrera</label>
-                                                                                    <input type="text"
-                                                                                        name="duracion"
-                                                                                        placeholder="Ejemplo: 5 años"
-                                                                                        class="form-control"
-                                                                                        value="{{ $carrera->duracion }}"
-                                                                                        required>
-                                                                                    @error('duracion')
-                                                                                        <div class="invalid-feedback">
-                                                                                            {{ $message }}</div>
-                                                                                    @enderror
-                                                                                </div>
+                                                                                    @if ($errors->any() && old('carrera_id') == $carrera->id_carrera)
+                                                                                        <div
+                                                                                            class="alert alert-danger">
+                                                                                            <ul class="mb-0">
+                                                                                                @foreach ($errors->all() as $error)
+                                                                                                    <li>{{ $error }}
+                                                                                                    </li>
+                                                                                                @endforeach
+                                                                                            </ul>
+                                                                                        </div>
+                                                                                    @endif
 
+                                                                                    <!-- Sección 1: Información de la Carrera -->
+                                                                                    <div
+                                                                                        class="card shadow mb-4 border-0">
+                                                                                        <div
+                                                                                            class="card-header py-3 text-white card-header-custom d-flex">
+                                                                                            <h6
+                                                                                                class="m-0 font-weight-bold  text-danger">
+                                                                                                <i
+                                                                                                    class="fas fa-graduation-cap"></i>
+                                                                                                Información de la
+                                                                                                Carrera
+                                                                                            </h6>
+                                                                                        </div>
+                                                                                        <div class="card-body1 p-4">
+                                                                                            <div
+                                                                                                class="form-group mb-3">
+                                                                                                <label
+                                                                                                    class="form-label-custom d-flex">
+                                                                                                    Nombre de la Carrera
+                                                                                                    <span
+                                                                                                        class="required-asterisk ml-1">*</span>
+                                                                                                </label>
+                                                                                                <small
+                                                                                                    class="form-text text-muted d-flex">
+                                                                                                    Ingrese el nombre
+                                                                                                    completo de la
+                                                                                                    carrera
+                                                                                                </small>
+                                                                                                <input type="text"
+                                                                                                    name="nombre"
+                                                                                                    placeholder="Ejemplo: Ingeniería en Sistemas Computacionales"
+                                                                                                    value="{{ old('nombre', $carrera->nombre) }}"
+                                                                                                    class="form-control form-control-custom @error('nombre') @if (old('carrera_id') == $carrera->id_carrera) is-invalid @endif @enderror"
+                                                                                                    required>
+                                                                                                @error('nombre')
+                                                                                                    @if (old('carrera_id') == $carrera->id_carrera)
+                                                                                                        <div
+                                                                                                            class="invalid-feedback d-block">
+                                                                                                            {{ $message }}
+                                                                                                        </div>
+                                                                                                    @endif
+                                                                                                @enderror
+                                                                                            </div>
+
+                                                                                            <div
+                                                                                                class="form-group mb-0">
+                                                                                                <label
+                                                                                                    class="form-label-custom d-flex">
+                                                                                                    Duración de la
+                                                                                                    Carrera
+                                                                                                    <span
+                                                                                                        class="required-asterisk ml-1">*</span>
+                                                                                                </label>
+                                                                                                <input type="text"
+                                                                                                    name="duracion"
+                                                                                                    placeholder="Ejemplo: 4 años"
+                                                                                                    value="{{ old('duracion', $carrera->duracion) }}"
+                                                                                                    class="form-control form-control-custom @error('duracion') @if (old('carrera_id') == $carrera->id_carrera) is-invalid @endif @enderror"
+                                                                                                    required>
+                                                                                                @error('duracion')
+                                                                                                    @if (old('carrera_id') == $carrera->id_carrera)
+                                                                                                        <div
+                                                                                                            class="invalid-feedback d-block">
+                                                                                                            {{ $message }}
+                                                                                                        </div>
+                                                                                                    @endif
+                                                                                                @enderror
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </div>
+
+                                                                                    <!-- Nota de campos obligatorios -->
+                                                                                    <div class="text-center mt-3">
+                                                                                        <small class="text-muted">
+                                                                                            <span
+                                                                                                class="required-asterisk">*</span>
+                                                                                            Campos obligatorios
+                                                                                        </small>
+                                                                                    </div>
+
+                                                                                </div>
                                                                             </div>
+
                                                                             <div
-                                                                                class="modal-footer modal-footer-custom">
+                                                                                class="modal-footer modal-footer-custom border-top">
                                                                                 <button type="button"
                                                                                     class="btn btn-secondary"
                                                                                     data-dismiss="modal">
+                                                                                    <i class="fas fa-times mr-2"></i>
                                                                                     Cancelar
                                                                                 </button>
                                                                                 <button type="submit"
                                                                                     class="btn btn-success">
-                                                                                    ✓ Actualizar Carrera
+                                                                                    <i class="fas fa-save mr-2"></i>
+                                                                                    Actualizar Carrera
                                                                                 </button>
                                                                             </div>
-                                                                        </div>
-                                                                    </form>
-
+                                                                        </form>
+                                                                    </div>
                                                                 </div>
                                                             </div>
-                                                        </div>
+                                                            <script>
+                                                                $(document).ready(function() {
+                                                                    // Espera un poco para asegurar que todos los modales existan
+                                                                    setTimeout(function() {
+                                                                        $('.modal').each(function() {
+                                                                            // Inicializa el modal con las opciones deseadas
+                                                                            $(this).modal({
+                                                                                backdrop: 'static',
+                                                                                keyboard: false,
+                                                                                show: false // no mostrar al cargar
+                                                                            });
+                                                                        });
+                                                                    }, 500);
+                                                                });
+                                                            </script>
+                                                        @endforeach
+
 
 
                                                         <form action="{{ route('carreras.destroy', $carrera) }}"
@@ -725,22 +806,21 @@
 
 
 
-
-    <!-- Modal Nuevo Período -->
+    <!-- ========== MODAL NUEVA CARRERA ========== -->
     <div class="modal fade" id="nuevacarreraModal" tabindex="-1" role="dialog"
-        aria-labelledby="nuevoPeriodoLabel" aria-hidden="true">
+        aria-labelledby="nuevacarreraLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content border-0 shadow-lg">
 
+                <!-- Header con gradiente -->
                 <div class="modal-header modal-header-custom border-0">
                     <div class="w-100">
                         <div class="text-center">
-
                             <h5 class="m-0 font-weight-bold" id="nuevacarreraLabel">
                                 🎓 Nueva Carrera
                             </h5>
                             <p class="m-0 mt-2 mb-0" style="font-size: 0.9rem; opacity: 0.95;">
-                                Complete la información correspondiente de la Carrera
+                                Complete la información de la nueva carrera
                             </p>
                         </div>
                     </div>
@@ -750,27 +830,74 @@
                     </button>
                 </div>
 
-
                 <form action="{{ route('carreras.store') }}" method="POST">
                     @csrf
+                    <input type="hidden" name="is_create" value="1">
+
                     <div class="modal-body modal-body-custom p-4">
                         <div class="form-container p-4 bg-white rounded shadow-sm border">
-                            <div class="form-group mb-3">
-                                <label>📝 Nombre de la Carrera</label>
-                                <small class="form-text text-muted">
-                                    Ingrese un nombre para la nueva carrera
-                                </small>
-                                <input type="text" placeholder="Ejemplo: Ingeniería en Sistemas Computacionales"
-                                    name="nombre" class="form-control" required>
+
+
+
+                            <!-- Sección 1: Información de la Carrera -->
+                            <div class="card shadow mb-4 border-0">
+                                <div class="card-header py-3 text-white card-header-custom">
+                                    <h6 class="m-0 font-weight-bold text-danger">
+                                        <i class="fas fa-graduation-cap"></i> Información de la Carrera
+                                    </h6>
+                                </div>
+                                <div class="card-body1 p-4">
+                                    <div class="form-group mb-3">
+                                        <label class="form-label-custom d-flex">
+                                            Nombre de la Carrera
+                                            <span class="required-asterisk ml-1">*</span>
+                                        </label>
+                                        <small class="form-text text-muted">
+                                            Ingrese el nombre completo de la carrera
+                                        </small>
+                                        <input type="text" name="nombre"
+                                            placeholder="Ejemplo: Ingeniería en Sistemas Computacionales"
+                                            value="{{ old('nombre') }}"
+                                            class="form-control form-control-custom @error('nombre') @if (old('is_create')) is-invalid @endif @enderror"
+                                            required>
+                                        @error('nombre')
+                                            @if (old('is_create'))
+                                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                                            @endif
+                                        @enderror
+                                    </div>
+
+                                    <div class="form-group mb-0">
+                                        <label class="form-label-custom d-flex">
+                                            Duración de la Carrera
+                                            <span class="required-asterisk ml-1">*</span>
+                                        </label>
+                                        <small class="form-text text-muted">
+                                            Especifique la duración (Ej: "4 años", "8 semestres")
+                                        </small>
+                                        <input type="text" name="duracion" placeholder="Ejemplo: 4 años"
+                                            value="{{ old('duracion') }}"
+                                            class="form-control form-control-custom @error('duracion') @if (old('is_create')) is-invalid @endif @enderror"
+                                            required>
+                                        @error('duracion')
+                                            @if (old('is_create'))
+                                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                                            @endif
+                                        @enderror
+                                    </div>
+                                </div>
                             </div>
 
-                            <div class="form-group mb-3">
-                                <label>🕖 Duración de la Carrera</label>
-                                <input type="text" placeholder="Ejemplo: 5 años" name="duracion"
-                                    class="form-control">
+                            <!-- Nota de campos obligatorios -->
+                            <div class="text-center mt-3">
+                                <small class="text-muted">
+                                    <span class="required-asterisk">*</span> Campos obligatorios
+                                </small>
                             </div>
+
                         </div>
                     </div>
+
                     <div class="modal-footer modal-footer-custom border-top">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">
                             <i class="fas fa-times mr-2"></i>
@@ -785,7 +912,22 @@
             </div>
         </div>
     </div>
-    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+
+            // Abrir modal de CREAR si hay errores
+            @if ($errors->any() && old('is_create'))
+                $('#nuevacarreraModal').modal('show');
+                console.log('Abriendo modal de crear carrera por errores');
+            @endif
+
+            // Abrir modal de EDITAR si hay errores
+            @if ($errors->any() && old('carrera_id'))
+                $('#editarModal{{ old('carrera_id') }}').modal('show');
+                console.log('Abriendo modal de editar carrera por errores');
+            @endif
+        });
+    </script>
 
 
     <!-- Bootstrap core JavaScript-->
@@ -810,7 +952,6 @@
             }, 500);
         });
     </script>
-
 
 </body>
 

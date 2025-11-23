@@ -55,7 +55,16 @@ class PlanEstudioController extends Controller
     {
         $request->validate([
             'nombre' => 'required|string|max:100|unique:planes_estudio,nombre',
-            'id_carrera' => 'nullable|exists:carreras,id_carrera',
+            'id_carrera' => 'required|exists:carreras,id_carrera',
+            'vigencia' => 'required|in:Vigente,No vigente',
+        ], [
+            'nombre.required' => 'El nombre del plan de estudio es obligatorio.',
+            'nombre.unique' => 'Ya existe un plan de estudio con ese nombre.',
+            'nombre.max' => 'El nombre no puede exceder 100 caracteres.',
+            'id_carrera.required' => 'La carrera es obligatoria.',
+            'id_carrera.exists' => 'La carrera seleccionada no es válida.',
+            'vigencia.required' => 'El estado del plan es obligatorio.',
+            'vigencia.in' => 'El estado debe ser "Vigente" o "No vigente".',
         ]);
 
         PlanEstudio::create($request->all());
@@ -70,7 +79,16 @@ class PlanEstudioController extends Controller
 
         $request->validate([
             'nombre' => 'required|string|max:100|unique:planes_estudio,nombre,' . $plan->id_plan_estudio . ',id_plan_estudio',
-            'id_carrera' => 'nullable|exists:carreras,id_carrera',
+            'id_carrera' => 'required|exists:carreras,id_carrera',
+            'vigencia' => 'required|in:Vigente,No vigente',
+        ], [
+            'nombre.required' => 'El nombre del plan de estudio es obligatorio.',
+            'nombre.unique' => 'Ya existe otro plan de estudio con ese nombre.',
+            'nombre.max' => 'El nombre no puede exceder 100 caracteres.',
+            'id_carrera.required' => 'La carrera es obligatoria.',
+            'id_carrera.exists' => 'La carrera seleccionada no es válida.',
+            'vigencia.required' => 'El estado del plan es obligatorio.',
+            'vigencia.in' => 'El estado debe ser "Vigente" o "No vigente".',
         ]);
 
         $plan->update($request->all());

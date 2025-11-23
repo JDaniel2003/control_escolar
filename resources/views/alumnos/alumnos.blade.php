@@ -1811,9 +1811,18 @@
                     <div class="form-container p-4 bg-white rounded shadow-sm border">
                         <form action="{{ route('alumnos.store') }}" method="POST">
                             @csrf
-
+                            <input type="hidden" name="is_create_alumno" value="1">
                             {{-- Acordeón para secciones --}}
                             <div class="accordion" id="alumnoAccordion">
+                                @if ($errors->any() && old('is_create_alumno'))
+                        <div class="alert alert-danger mb-3">
+                            <ul class="mb-0">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
 
 
                                 {{-- =================== DATOS PERSONALES =================== --}}
@@ -1839,6 +1848,11 @@
                                                     <input type="text" name="datos_personales[nombres]"
                                                         class="form-control form-control-sm" placeholder="Nombres"
                                                         required>
+                                                        @error('datos_personales.nombres')
+                                                @if(old('is_create_alumno'))
+                                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                                @endif
+                                            @enderror
                                                 </div>
                                                 <div class="flex-grow-1" style="min-width: 200px;">
                                                     <label class="form-label-custom small mb-1">
@@ -1847,6 +1861,11 @@
                                                     <input type="text" name="datos_personales[primer_apellido]"
                                                         class="form-control form-control-sm"
                                                         placeholder="Primer apellido" required>
+                                                        @error('datos_personales.primer_apellido')
+                                                @if(old('is_create_alumno'))
+                                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                                @endif
+                                            @enderror
                                                 </div>
                                                 <div class="flex-grow-1" style="min-width: 200px;">
                                                     <label class="form-label-custom small mb-1">Segundo
@@ -1862,17 +1881,22 @@
                                                     <label class="form-label-custom small mb-1">CURP</label>
                                                     <input type="text" name="curp" maxlength="18"
                                                         class="form-control form-control-sm"
-                                                        placeholder="18 caracteres">
+                                                        placeholder="18 caracteres" required>
                                                 </div>
                                                 <div class="flex-grow-1" style="min-width: 200px;">
                                                     <label class="form-label-custom small mb-1">Fecha de
                                                         Nacimiento</label>
-                                                    <input type="date" name="fecha_nacimiento"
-                                                        class="form-control form-control-sm">
+                                                    <input type="date" name="fecha_nacimiento" id="fecha_nacimiento_create"
+                                                        class="form-control form-control-sm" required>
+                                                        @error('datos_personales.fecha_nacimiento')
+                                                @if(old('is_create_alumno'))
+                                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                                @endif
+                                            @enderror
                                                 </div>
                                                 <div class="flex-grow-1" style="width: 50px;">
                                                     <label class="form-label-custom small mb-1">Edad</label>
-                                                    <input type="number" name="edad" min="0"
+                                                    <input type="number" name="edad" id="edad_create" min="18" max="100" readonly
                                                         class="form-control form-control-sm" placeholder="Años">
                                                 </div>
                                                 <div class="flex-grow-1" style="min-width: 200px;">
@@ -2437,6 +2461,16 @@
             });
         });
     </script>
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        @if ($errors->any() && old('is_create_alumno'))
+            $('#nuevoAlumnoModal').modal('show');
+        @endif
+        @if ($errors->any() && old('alumno_id'))
+            $('#editarModal{{ old("alumno_id") }}').modal('show');
+        @endif
+    });
+</script>
 
 
 
@@ -2485,6 +2519,32 @@
                     seccion.style.display = 'none';
                 }
             }
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Función para calcular la edad a partir de la fecha de nacimiento
+            function calcularEdad(fechaNacimiento) {
+                const hoy = new Date();
+                const nacimiento = new Date(fechaNacimiento);
+                let edad = hoy.getFullYear() - nacimiento.getFullYear();
+                const mes = hoy.getMonth() - nacimiento.getMonth();
+                if (mes < 0 || (mes === 0 && hoy.getDate() < nacimiento.getDate())) {
+                    edad--;
+                }
+                return edad >= 0 ? edad : '';
+            }
+
+            // === Para el modal de CREAR ===
+            const fechaNacCreate = document.getElementById('fecha_nacimiento_create');
+            const edadCreate = document.getElementById('edad_create');
+            if (fechaNacCreate && edadCreate) {
+                fechaNacCreate.addEventListener('change', function() {
+                    edadCreate.value = calcularEdad(this.value);
+                });
+            }
+
+            
         });
     </script>
 </body>

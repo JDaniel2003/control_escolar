@@ -71,18 +71,36 @@ if ($request->filled('fecha_fin')) {
 {
     // 1️⃣ Validación básica
     $request->validate([
-        'nombre' => [
-            'required',
-            'string',
-            'max:255',
-            'unique:periodos_escolares,nombre',
-            'regex:/^[A-ZÁÉÍÓÚÑ]+-[A-ZÁÉÍÓÚÑ]+ \d{4}$/'
-        ],
-        'id_tipo_periodo' => 'required|exists:tipos_periodos,id_tipo_periodo',
-        'fecha_inicio' => 'required|date',
-        'fecha_fin' => 'required|date|after_or_equal:fecha_inicio',
-        'estado' => 'required|in:Abierto,Cerrado',
-    ]);
+    'nombre' => [
+        'required',
+        'string',
+        'max:255',
+        'unique:periodos_escolares,nombre',
+        'regex:/^[A-ZÁÉÍÓÚÑ]+-[A-ZÁÉÍÓÚÑ]+ \d{4}$/'
+    ],
+    'id_tipo_periodo' => 'required|exists:tipos_periodos,id_tipo_periodo',
+    'fecha_inicio' => 'required|date',
+    'fecha_fin' => 'required|date|after_or_equal:fecha_inicio',
+    'estado' => 'required|in:Abierto,Cerrado',
+], [
+    'nombre.required' => 'El nombre del período es obligatorio.',
+    'nombre.unique' => 'Ya existe un período escolar con este nombre.',
+    'nombre.regex' => 'El nombre debe tener el formato: EJEMPLO-EJEMPLO 2024 (mayúsculas y año).',
+    
+    'id_tipo_periodo.required' => 'Debes seleccionar un tipo de período.',
+    'id_tipo_periodo.exists' => 'El tipo de período seleccionado no es válido.',
+    
+    'fecha_inicio.required' => 'La fecha de inicio es obligatoria.',
+    'fecha_inicio.date' => 'La fecha de inicio debe ser una fecha válida.',
+    
+    'fecha_fin.required' => 'La fecha de fin es obligatoria.',
+    'fecha_fin.date' => 'La fecha de fin debe ser una fecha válida.',
+    'fecha_fin.after_or_equal' => 'La fecha de fin debe ser igual o mayor que la fecha de inicio.',
+
+    'estado.required' => 'Debes seleccionar un estado.',
+    'estado.in' => 'El estado solo puede ser Abierto o Cerrado.',
+]);
+
 
     // 2️⃣ Obtener duración del tipo de período
     $tipo = TipoPeriodo::findOrFail($request->id_tipo_periodo);
@@ -118,20 +136,15 @@ if ($request->filled('fecha_fin')) {
         $nombreMesEsperado = ucfirst($mesFinEsperado->translatedFormat('F \d\e Y'));
         
         return back()
-            ->withErrors([
-                'fecha_fin' => sprintf(
-                    'La duración del período debe ser de %d meses. ' .
-                    'Con fecha inicio: %s (%s de %d), la fecha fin debe estar en %s (cualquier día). ' .
-                    'Actualmente la duración es de %d meses.',
-                    $duracionMeses,
-                    $fechaInicio->format('d/m/Y'),
-                    ucfirst($fechaInicio->translatedFormat('F')),
-                    $anioInicio,
-                    $nombreMesEsperado,
-                    $mesesReales
-                )
-            ])
-            ->withInput();
+    ->withErrors([
+        'fecha_fin' => sprintf(
+            'La duración del período debe ser de %d meses, pero actualmente estás ingresando %d meses.',
+            $duracionMeses,
+            $mesesReales
+        )
+    ])
+    ->withInput();
+
     }
 
 
@@ -185,24 +198,36 @@ public function calcularFechaFin(Request $request)
 {
     // 1️⃣ Validación básica
     $request->validate([
-        'nombre' => [
-            'required',
-            'string',
-            'max:255',
-            'regex:/^[A-ZÁÉÍÓÚÑ]+-[A-ZÁÉÍÓÚÑ]+ \d{4}$/'
-        ],
-        'id_tipo_periodo' => 'required|exists:tipos_periodos,id_tipo_periodo',
-        'fecha_inicio' => 'required|date',
-        'fecha_fin' => 'required|date|after_or_equal:fecha_inicio',
-        'estado' => 'required|in:Abierto,Cerrado',
-    ], [
-        
-        'nombre.regex' => 'El nombre debe tener el formato JULIO-DICIEMBRE 2024.',
-        'nombre.required' => 'El campo nombre es obligatorio.',
-        'id_tipo_periodo.required' => 'Debes seleccionar un tipo de período.',
-        'id_tipo_periodo.exists' => 'El tipo de período seleccionado no es válido.',
-        'fecha_fin.after_or_equal' => 'La fecha de fin debe ser posterior a la fecha de inicio.',
-    ]);
+    'nombre' => [
+        'required',
+        'string',
+        'max:255',
+        'unique:periodos_escolares,nombre,' . $id . ',id_periodo_escolar',
+        'regex:/^[A-ZÁÉÍÓÚÑ]+-[A-ZÁÉÍÓÚÑ]+ \d{4}$/'
+    ],
+    'id_tipo_periodo' => 'required|exists:tipos_periodos,id_tipo_periodo',
+    'fecha_inicio' => 'required|date',
+    'fecha_fin' => 'required|date|after_or_equal:fecha_inicio',
+    'estado' => 'required|in:Abierto,Cerrado',
+], [
+    'nombre.required' => 'El nombre del período es obligatorio.',
+    'nombre.unique' => 'Ya existe otro período con este nombre.',
+    'nombre.regex' => 'El nombre debe tener el formato: EJEMPLO-EJEMPLO 2024.',
+    
+    'id_tipo_periodo.required' => 'Debes seleccionar un tipo de período.',
+    'id_tipo_periodo.exists' => 'El tipo de período seleccionado no es válido.',
+    
+    'fecha_inicio.required' => 'La fecha de inicio es obligatoria.',
+    'fecha_inicio.date' => 'La fecha de inicio debe ser una fecha válida.',
+    
+    'fecha_fin.required' => 'La fecha de fin es obligatoria.',
+    'fecha_fin.date' => 'La fecha de fin debe ser una fecha válida.',
+    'fecha_fin.after_or_equal' => 'La fecha de fin debe ser igual o mayor que la fecha de inicio.',
+
+    'estado.required' => 'Debes seleccionar un estado.',
+    'estado.in' => 'El estado solo puede estar en Abierto o Cerrado.',
+]);
+
 
     // 2️⃣ Obtener duración del tipo de período
     $tipo = TipoPeriodo::findOrFail($request->id_tipo_periodo);
@@ -237,20 +262,15 @@ public function calcularFechaFin(Request $request)
         $nombreMesEsperado = ucfirst($mesFinEsperado->translatedFormat('F \d\e Y'));
         
         return back()
-            ->withErrors([
-                'fecha_fin' => sprintf(
-                    'La duración del período debe ser de %d meses. ' .
-                    'Con fecha inicio: %s (%s de %d), la fecha fin debe estar en %s (cualquier día). ' .
-                    'Actualmente la duración es de %d meses.',
-                    $duracionMeses,
-                    $fechaInicio->format('d/m/Y'),
-                    ucfirst($fechaInicio->translatedFormat('F')),
-                    $anioInicio,
-                    $nombreMesEsperado,
-                    $mesesReales
-                )
-            ])
-            ->withInput();
+    ->withErrors([
+        'fecha_fin' => sprintf(
+            'La duración del período debe ser de %d meses, pero actualmente estás ingresando %d meses.',
+            $duracionMeses,
+            $mesesReales
+        )
+    ])
+    ->withInput();
+
     }
 
     // 4️⃣ Actualizar el período

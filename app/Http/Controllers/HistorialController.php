@@ -71,6 +71,7 @@ class HistorialController extends Controller
             ->orderBy('fecha_fin', 'desc') // el más recientemente cerrado
             ->first();
         $grupos = Grupo::whereIn('periodo', PeriodoEscolar::where('estado', 'Abierto')->pluck('id_periodo_escolar'))->get();
+        $gruposcerrado = Grupo::whereIn('periodo', $ultimoPeriodoCerrado)->get();
         $numerosPeriodo = \App\Models\NumeroPeriodo::with('tipoPeriodo')->get();
         $statusAcademicos = StatusAcademico::all();
         $historialStatus = HistorialStatus::all();
@@ -81,6 +82,7 @@ class HistorialController extends Controller
             'periodosAbiertos', 
             'ultimoPeriodoCerrado',
             'grupos',
+            'gruposcerrado',
             'numerosPeriodo',
             'statusAcademicos',
             'historialStatus'

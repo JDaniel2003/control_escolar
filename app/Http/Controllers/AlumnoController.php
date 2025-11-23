@@ -25,6 +25,7 @@ use App\Models\Parentesco;
 use App\Models\PlanEstudio;
 use App\Models\Subsistema;
 use App\Models\TipoEscuela;
+use Illuminate\Support\Facades\Validator;
 
 class AlumnoController extends Controller
 {
@@ -134,6 +135,85 @@ if ($request->filled('busqueda')) {
 
 public function store(Request $request)
 {
+
+    $validator = Validator::make($request->all(), [
+            // Datos personales
+            'datos_personales.nombres' => 'required|string|max:100',
+            'datos_personales.primer_apellido' => 'required|string|max:100',
+            'curp' => 'nullable|string|size:18|unique:datos_personales,curp',
+            'fecha_nacimiento' => 'nullable|date',
+            'id_estado_civil' => 'nullable|exists:estados_civiles,id_estado_civil',
+            'id_genero' => 'nullable|exists:generos,id_genero',
+            'id_tipo_sangre' => 'nullable|exists:tipos_sangre,id_tipo_sangre',
+            'id_lengua_indigena' => 'nullable|exists:lenguas_indigenas,id_lengua_indigena',
+            'id_discapacidad' => 'nullable|exists:discapacidades,id_discapacidad',
+            'correo' => 'nullable|email|max:255',
+            'datos_personales.telefono' => 'nullable|string|regex:/^[0-9]{10}$/',
+            'numero_seguridad_social' => 'nullable|string|size:11',
+
+            // Domicilio alumno
+            'domicilio_alumno.calle' => 'required|string|max:255',
+            'domicilio_alumno.colonia' => 'required|string|max:255',
+            'domicilio_alumno.comunidad' => 'required|string|max:255',
+            'domicilio_alumno.municipio' => 'required|string|max:100',
+            'domicilio_alumno.id_estado' => 'required|exists:estados,id_estado',
+            'codigo_postal' => 'nullable|integer|digits:5',
+
+            // Escuela procedencia
+            'promedio_egreso' => 'required|numeric|min:0|max:10',
+            'id_subsistema' => 'nullable|exists:subsistemas,id_subsistema',
+            'id_tipo_escuela' => 'nullable|exists:tipos_escuela,id_tipo_escuela',
+            'id_area_especializacion' => 'nullable|exists:areas_especializacion,id_area_especializacion',
+            'escuela.id_estado' => 'nullable|exists:estados,id_estado',
+            'escuela.localidad' => 'nullable|string|max:255',
+            'id_beca' => 'nullable|exists:becas,id_beca',
+
+            // Tutor
+            'tutor.nombres' => 'nullable|string|max:255',
+            'id_parentesco' => 'nullable|exists:parentescos,id_parentesco',
+            'tutor.telefono' => 'nullable|string|regex:/^[0-9]{10}$/',
+            'domicilio_tutor.calle' => 'nullable|string|max:255',
+            'domicilio_tutor.colonia' => 'nullable|string|max:255',
+            'domicilio_tutor.municipio' => 'nullable|string|max:100',
+            'domicilio_tutor.id_estado' => 'nullable|exists:estados,id_estado',
+
+            // Estatus académico
+            'id_historial_status' => 'required|exists:historial_status,id_historial_status',
+            'matricula' => 'nullable|string|max:50|unique:datos_academicos,matricula',
+            'id_carrera' => 'required_if:id_historial_status,1,2,3,4,5,6,8,9|exists:carreras,id_carrera',
+            'id_plan_estudio' => 'nullable|exists:planes_estudio,id_plan_estudio',
+            'id_generacion' => 'nullable|exists:generaciones,id_generacion',
+            'servicios_social' => 'nullable|in:0,1',
+        ], [
+            'datos_personales.nombres.required' => 'El nombre es obligatorio.',
+            'datos_personales.primer_apellido.required' => 'El primer apellido es obligatorio.',
+            'curp.size' => 'La CURP debe tener 18 caracteres.',
+            'curp.unique' => 'Ya existe un alumno con esa CURP.',
+            'promedio_egreso.required' => 'El promedio de egreso es obligatorio.',
+            'promedio_egreso.min' => 'El promedio debe ser al menos 0.',
+            'promedio_egreso.max' => 'El promedio no puede ser mayor a 10.',
+            'correo.email' => 'El correo electrónico no es válido.',
+            'datos_personales.telefono.regex' => 'El teléfono debe tener 10 dígitos numéricos.',
+            'numero_seguridad_social.size' => 'El N° de Seguridad Social debe tener 11 dígitos.',
+            'domicilio_alumno.calle.required' => 'La calle del domicilio es obligatoria.',
+            'domicilio_alumno.colonia.required' => 'La colonia es obligatoria.',
+            'domicilio_alumno.comunidad.required' => 'La comunidad es obligatoria.',
+            'domicilio_alumno.municipio.required' => 'El municipio es obligatorio.',
+            'domicilio_alumno.id_estado.required' => 'El estado del domicilio es obligatorio.',
+            'codigo_postal.digits' => 'El código postal debe tener 5 dígitos.',
+            'id_historial_status.required' => 'El estatus académico es obligatorio.',
+            'id_historial_status.exists' => 'El estatus seleccionado no es válido.',
+            'id_carrera.required_if' => 'La carrera es obligatoria para este estatus académico.',
+            'matricula.unique' => 'Ya existe un alumno con esa matrícula.',
+            'servicios_social.in' => 'El valor de Servicio Social no es válido.',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->route('alumnos.index')
+                ->withErrors($validator)
+                ->withInput()
+                ->with('is_create_alumno', 1);
+        }
     // 🔹 Crear domicilio del alumno
     $domicilioAlumno = \App\Models\DomicilioAlumno::create([
         'calle' => $request->domicilio_alumno['calle'] ?? null,
@@ -266,6 +346,85 @@ public function update(Request $request, $id)
     // Buscar el alumno
     $alumno = Alumno::findOrFail($id);
 
+
+    $validator = Validator::make($request->all(), [
+            // Datos personales
+            'datos_personales.nombres' => 'required|string|max:100',
+            'datos_personales.primer_apellido' => 'required|string|max:100',
+            'curp' => 'nullable|string|size:18|unique:datos_personales,curp,' . optional($alumno->datosPersonales)->id_datos_personales . ',id_datos_personales',
+            'fecha_nacimiento' => 'nullable|date',
+            'id_estado_civil' => 'nullable|exists:estados_civiles,id_estado_civil',
+            'id_genero' => 'nullable|exists:generos,id_genero',
+            'id_tipo_sangre' => 'nullable|exists:tipos_sangre,id_tipo_sangre',
+            'id_lengua_indigena' => 'nullable|exists:lenguas_indigenas,id_lengua_indigena',
+            'id_discapacidad' => 'nullable|exists:discapacidades,id_discapacidad',
+            'correo' => 'nullable|email|max:255',
+            'datos_personales.telefono' => 'nullable|string|regex:/^[0-9]{10}$/',
+            'numero_seguridad_social' => 'nullable|string|size:11',
+
+            // Domicilio alumno
+            'domicilio_alumno.calle' => 'required|string|max:255',
+            'domicilio_alumno.colonia' => 'required|string|max:255',
+            'domicilio_alumno.comunidad' => 'required|string|max:255',
+            'domicilio_alumno.municipio' => 'required|string|max:100',
+            'domicilio_alumno.id_estado' => 'required|exists:estados,id_estado',
+            'codigo_postal' => 'nullable|integer|digits:5',
+
+            // Escuela procedencia
+            'promedio_egreso' => 'required|numeric|min:0|max:10',
+            'id_subsistema' => 'nullable|exists:subsistemas,id_subsistema',
+            'id_tipo_escuela' => 'nullable|exists:tipos_escuela,id_tipo_escuela',
+            'id_area_especializacion' => 'nullable|exists:areas_especializacion,id_area_especializacion',
+            'escuela.id_estado' => 'nullable|exists:estados,id_estado',
+            'escuela.localidad' => 'nullable|string|max:255',
+            'id_beca' => 'nullable|exists:becas,id_beca',
+
+            // Tutor
+            'tutor.nombres' => 'nullable|string|max:255',
+            'id_parentesco' => 'nullable|exists:parentescos,id_parentesco',
+            'tutor.telefono' => 'nullable|string|regex:/^[0-9]{10}$/',
+            'domicilio_tutor.calle' => 'nullable|string|max:255',
+            'domicilio_tutor.colonia' => 'nullable|string|max:255',
+            'domicilio_tutor.municipio' => 'nullable|string|max:100',
+            'domicilio_tutor.id_estado' => 'nullable|exists:estados,id_estado',
+
+            // Estatus académico
+            'id_historial_status' => 'required|exists:historial_status,id_historial_status',
+            'matricula' => 'nullable|string|max:50|unique:datos_academicos,matricula,' . optional($alumno->datosAcademicos)->id_datos_academicos . ',id_datos_academicos',
+            'id_carrera' => 'required_if:id_historial_status,1,2,3,4,5,6,8,9|exists:carreras,id_carrera',
+            'id_plan_estudio' => 'nullable|exists:planes_estudio,id_plan_estudio',
+            'id_generacion' => 'nullable|exists:generaciones,id_generacion',
+            'servicios_social' => 'nullable|in:0,1',
+        ], [
+            'datos_personales.nombres.required' => 'El nombre es obligatorio.',
+            'datos_personales.primer_apellido.required' => 'El primer apellido es obligatorio.',
+            'curp.size' => 'La CURP debe tener 18 caracteres.',
+            'curp.unique' => 'Ya existe un alumno con esa CURP.',
+            'promedio_egreso.required' => 'El promedio de egreso es obligatorio.',
+            'promedio_egreso.min' => 'El promedio debe ser al menos 0.',
+            'promedio_egreso.max' => 'El promedio no puede ser mayor a 10.',
+            'correo.email' => 'El correo electrónico no es válido.',
+            'datos_personales.telefono.regex' => 'El teléfono debe tener 10 dígitos numéricos.',
+            'numero_seguridad_social.size' => 'El N° de Seguridad Social debe tener 11 dígitos.',
+            'domicilio_alumno.calle.required' => 'La calle del domicilio es obligatoria.',
+            'domicilio_alumno.colonia.required' => 'La colonia es obligatoria.',
+            'domicilio_alumno.comunidad.required' => 'La comunidad es obligatoria.',
+            'domicilio_alumno.municipio.required' => 'El municipio es obligatorio.',
+            'domicilio_alumno.id_estado.required' => 'El estado del domicilio es obligatorio.',
+            'codigo_postal.digits' => 'El código postal debe tener 5 dígitos.',
+            'id_historial_status.required' => 'El estatus académico es obligatorio.',
+            'id_historial_status.exists' => 'El estatus seleccionado no es válido.',
+            'id_carrera.required_if' => 'La carrera es obligatoria para este estatus académico.',
+            'matricula.unique' => 'Ya existe un alumno con esa matrícula.',
+            'servicios_social.in' => 'El valor de Servicio Social no es válido.',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->route('alumnos.index')
+                ->withErrors($validator)
+                ->withInput()
+                ->with('alumno_id', $id);
+        }
     // 🔹 Actualizar domicilio del alumno
     if ($alumno->datosPersonales && $alumno->datosPersonales->domicilioAlumno) {
         $alumno->datosPersonales->domicilioAlumno->update([

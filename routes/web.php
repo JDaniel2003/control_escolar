@@ -18,13 +18,14 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AdministracionCarreraController;
 use App\Http\Controllers\CoordinadorController;
 use App\Http\Controllers\DocenteController;
 use App\Http\Controllers\DocentesController;
 use App\Http\Controllers\EstudianteController;
 use App\Http\Controllers\GrupoController;
 use App\Http\Controllers\UserController;
-
+use App\Models\AdministracionCarrera;
 
 // Redirigir raíz al login
 Route::get('/', function () {
@@ -353,3 +354,4 @@ Route::post('/calificaciones/matriz-completa', [CalificacionController::class, '
     ->name('calificaciones.guardar');
 
     Route::resource('grupos', GrupoController::class);
+    Route::resource('administracion-carreras', AdministracionCarreraController::class);

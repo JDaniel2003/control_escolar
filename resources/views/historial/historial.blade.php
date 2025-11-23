@@ -736,7 +736,7 @@
                                             <select name="id_grupo_origen" id="grupoOrigen" class="form-control"
                                                 required>
                                                 <option value="">-- Selecciona grupo --</option>
-                                                @foreach ($grupos as $g)
+                                                @foreach ($gruposcerrado as $g)
                                                     <option value="{{ $g->id_grupo }}">{{ $g->nombre }} -
                                                         {{ $g->carrera->nombre ?? 'N/A' }}</option>
                                                 @endforeach
