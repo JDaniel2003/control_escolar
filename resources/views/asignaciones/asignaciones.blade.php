@@ -19,7 +19,7 @@
     <link rel="icon" type="image/png" href="{{ asset('libs/sbadmin/img/up_logo.png') }}">
     <!-- Custom styles for this template-->
     <link href="{{ asset('libs/sbadmin/css/sb-admin-2.min.css') }}" rel="stylesheet">
-    
+
 </head>
 
 <body id="page-top">
@@ -36,16 +36,46 @@
         aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
-                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span>
+                <div class="modal-header bg-danger">
+
+                    <div class="w-100 text-center">
+                        <h5 class="m-0 font-weight-bold" id="logoutModalLabel">
+                            <i class="fas fa-sign-out-alt mr-2"></i>
+                            Cerrar Sesión
+                        </h5>
+                    </div>
+                    <button class="close text-white" type="button" data-dismiss="modal" aria-label="Close"
+                        style="position: absolute; right: 1rem; top: 1rem; opacity: 0.9;">
+                        <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
+
+                <!-- Body -->
+                <div class="modal-body text-center">
+                    <div class="mb-3">
+                        <i class="fas fa-exclamation-circle text-warning" style="font-size: 4rem;"></i>
+                    </div>
+                    <h6 class="font-weight-bold mb-3">¿Desea cerrar su sesión?</h6>
+                    <p class="text-muted mb-0">
+                        Al cerrar sesión, será redirigido a la página de inicio de sesión.
+                    </p>
+                </div>
+
+                <!-- Footer -->
                 <div class="modal-footer">
-                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-                    <a class="btn btn-primary" href="{{ route('login') }}">Login</a>
+                    <button class="btn btn-secondary px-4" type="button" data-dismiss="modal">
+                        <i class="fas fa-times mr-2"></i>
+                        Cancelar
+                    </button>
+
+                    <!-- Formulario para cerrar sesión -->
+                    <form action="{{ route('logout') }}" method="POST" style="display: inline;">
+                        @csrf
+                        <button type="submit" class="btn btn-danger px-4">
+                            <i class="fas fa-sign-out-alt mr-2"></i>
+                            Cerrar Sesión
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>
@@ -228,12 +258,8 @@
                                     <div class="alert alert-success">{{ session('success') }}</div>
                                 @endif
 
-                                @if ($errors->has('error'))
-                                    <div class="alert alert-danger">{{ $errors->first('error') }}</div>
-                                @endif
-
                                 <!-- TEMPORAL: Obtener carreras directamente si no vienen del controlador -->
-                                
+
 
                                 <div class="table-responsive">
                                     <table class="table table-bordered table-hover">
@@ -336,6 +362,15 @@
                 </div>
 
                 <form action="{{ route('asignaciones.store') }}" method="POST" id="formNuevaAsignacion">
+                    @if ($errors->any() && session('is_create_asignacion'))
+                        <div class="alert alert-danger m-3">
+                            <ul class="mb-0">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
                     @csrf
                     <div class="modal-body modal-body-custom p-4">
                         <div class="form-container p-4 bg-white rounded shadow-sm border">
@@ -398,9 +433,10 @@
                                                         Docente
                                                         <span class="required-asterisk ml-1">*</span>
                                                     </label>
-                                                    <select name="id_docente" id="docente_nueva" class="form-control form-control-custom" required>
-    <option value="">-- Seleccione un docente --</option>
-</select>
+                                                    <select name="id_docente" id="docente_nueva"
+                                                        class="form-control form-control-custom" required>
+                                                        <option value="">-- Seleccione un docente --</option>
+                                                    </select>
                                                 </div>
                                             </div>
                                             <div class="col-md-6">
@@ -499,19 +535,20 @@
 
                 <form action="{{ route('asignaciones.masiva.store-materias') }}" method="POST"
                     id="formAsignacionMasiva">
+                    @if ($errors->any() && session('is_create_masiva'))
+    <div class="alert alert-danger m-3">
+        <ul class="mb-0">
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
                     @csrf
                     <div class="modal-body modal-body-custom p-4">
                         <div class="form-container p-4 bg-white rounded shadow-sm border">
 
-                            @if ($errors->any())
-                                <div class="alert alert-danger">
-                                    <ul class="mb-0">
-                                        @foreach ($errors->all() as $error)
-                                            <li>{{ $error }}</li>
-                                        @endforeach
-                                    </ul>
-                                </div>
-                            @endif
+                           
 
                             <!-- Sección 1: Selección de Grupo y Número de Período -->
                             <div class="card shadow mb-2 border-0">
@@ -642,113 +679,113 @@
     @foreach ($asignaciones as $asignacion)
         <!-- Modal Detalle -->
         <!-- Modal Detalle -->
-<div class="modal fade" id="detalleModal{{ $asignacion->id_asignacion }}" tabindex="-1" role="dialog"
-    aria-labelledby="detalleModalLabel{{ $asignacion->id_asignacion }}" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content border-0 shadow-lg">
-            <div class="modal-header modal-header-custom border-0">
-                <div class="w-100">
-                    <div class="text-center">
-                        <h5 class="m-0 font-weight-bold"
-                            id="detalleModalLabel{{ $asignacion->id_asignacion }}">
-                            Detalles de la Asignación
-                        </h5>
-                        <p class="m-0 mt-2 mb-0" style="font-size: 0.9rem; opacity: 0.95;">
-                            Información completa de la asignación docente
-                        </p>
-                    </div>
-                </div>
-                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Cerrar"
-                    style="position: absolute; right: 1.5rem; top: 1.5rem; font-size: 1.8rem; opacity: 0.9;">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-
-            <div class="modal-body modal-body-custom p-4">
-                <div class="form-container p-4 bg-white rounded shadow-sm border">
-
-                    <div class="card shadow mb-4 border-0">
-                        <div class="card-header py-3 text-white card-header-custom">
-                            <h6 class="m-0 font-weight-bold text-danger">
-                                <i class="fas fa-chalkboard-teacher mr-2"></i>
-                                Información de la Asignación
-                            </h6>
-                        </div>
-
-                        <div class="card-body1 p-4 text-center">
-                            <!-- PERÍODO / SEMESTRE / CUATRIMESTRE -->
-                                <div class="col-md-10 text-center mb-3">
-                                    <label class="text-muted text-uppercase d-block">Número de Período:</label>
-
-                                    @php
-                                        $num = $asignacion->materia->numeroPeriodo->numero ?? null;
-                                        $tipo = $asignacion->materia->numeroPeriodo->tipoPeriodo->nombre ?? null;
-                                    @endphp
-
-                                    <div class="text-muted d-block font-weight-bold">
-                                        @if ($num)
-                                            {{ $num }}° 
-                                            @if ($tipo)
-                                                {{ $tipo }}
-                                            @endif
-                                        @else
-                                            N/A
-                                        @endif
-                                    </div>
-                                </div>
-                            <div class="row">
-
-                                
-                                <!-- DOCENTE -->
-                                <div class="col-md-6 mb-3">
-                                    <label class="text-muted text-uppercase d-block">Docente:</label>
-                                    <div class="text-muted d-block font-weight-bold">
-                                        {{ $asignacion->docente->nombre_completo ?? 'N/A' }}
-                                    </div>
-                                </div>
-
-                                <!-- MATERIA -->
-                                <div class="col-md-6 mb-3">
-                                    <label class="text-muted text-uppercase d-block">Materia:</label>
-                                    <div class="text-muted d-block font-weight-bold">
-                                        {{ $asignacion->materia->nombre ?? 'N/A' }}
-                                    </div>
-                                </div>
-
-                                <!-- GRUPO -->
-                                <div class="col-md-6 mb-3">
-                                    <label class="text-muted text-uppercase d-block">Grupo:</label>
-                                    <div class="text-muted d-block font-weight-bold">
-                                        {{ $asignacion->grupo->nombre ?? 'N/A' }}
-                                    </div>
-                                </div>
-
-                                <!-- PERÍODO ESCOLAR -->
-                                <div class="col-md-6 mb-3">
-                                    <label class="text-muted text-uppercase d-block">Período Escolar:</label>
-                                    <div class="text-muted d-block font-weight-bold">
-                                        {{ $asignacion->periodoEscolar->nombre ?? 'N/A' }}
-                                    </div>
-                                </div>
-
-                                
-
+        <div class="modal fade" id="detalleModal{{ $asignacion->id_asignacion }}" tabindex="-1" role="dialog"
+            aria-labelledby="detalleModalLabel{{ $asignacion->id_asignacion }}" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content border-0 shadow-lg">
+                    <div class="modal-header modal-header-custom border-0">
+                        <div class="w-100">
+                            <div class="text-center">
+                                <h5 class="m-0 font-weight-bold"
+                                    id="detalleModalLabel{{ $asignacion->id_asignacion }}">
+                                    Detalles de la Asignación
+                                </h5>
+                                <p class="m-0 mt-2 mb-0" style="font-size: 0.9rem; opacity: 0.95;">
+                                    Información completa de la asignación docente
+                                </p>
                             </div>
                         </div>
+                        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Cerrar"
+                            style="position: absolute; right: 1.5rem; top: 1.5rem; font-size: 1.8rem; opacity: 0.9;">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+
+                    <div class="modal-body modal-body-custom p-4">
+                        <div class="form-container p-4 bg-white rounded shadow-sm border">
+
+                            <div class="card shadow mb-4 border-0">
+                                <div class="card-header py-3 text-white card-header-custom">
+                                    <h6 class="m-0 font-weight-bold text-danger">
+                                        <i class="fas fa-chalkboard-teacher mr-2"></i>
+                                        Información de la Asignación
+                                    </h6>
+                                </div>
+
+                                <div class="card-body1 p-4 text-center">
+                                    <!-- PERÍODO / SEMESTRE / CUATRIMESTRE -->
+                                    <div class="col-md-10 text-center mb-3">
+                                        <label class="text-muted text-uppercase d-block">Número de Período:</label>
+
+                                        @php
+                                            $num = $asignacion->materia->numeroPeriodo->numero ?? null;
+                                            $tipo = $asignacion->materia->numeroPeriodo->tipoPeriodo->nombre ?? null;
+                                        @endphp
+
+                                        <div class="text-muted d-block font-weight-bold">
+                                            @if ($num)
+                                                {{ $num }}°
+                                                @if ($tipo)
+                                                    {{ $tipo }}
+                                                @endif
+                                            @else
+                                                N/A
+                                            @endif
+                                        </div>
+                                    </div>
+                                    <div class="row">
+
+
+                                        <!-- DOCENTE -->
+                                        <div class="col-md-6 mb-3">
+                                            <label class="text-muted text-uppercase d-block">Docente:</label>
+                                            <div class="text-muted d-block font-weight-bold">
+                                                {{ $asignacion->docente->nombre_completo ?? 'N/A' }}
+                                            </div>
+                                        </div>
+
+                                        <!-- MATERIA -->
+                                        <div class="col-md-6 mb-3">
+                                            <label class="text-muted text-uppercase d-block">Materia:</label>
+                                            <div class="text-muted d-block font-weight-bold">
+                                                {{ $asignacion->materia->nombre ?? 'N/A' }}
+                                            </div>
+                                        </div>
+
+                                        <!-- GRUPO -->
+                                        <div class="col-md-6 mb-3">
+                                            <label class="text-muted text-uppercase d-block">Grupo:</label>
+                                            <div class="text-muted d-block font-weight-bold">
+                                                {{ $asignacion->grupo->nombre ?? 'N/A' }}
+                                            </div>
+                                        </div>
+
+                                        <!-- PERÍODO ESCOLAR -->
+                                        <div class="col-md-6 mb-3">
+                                            <label class="text-muted text-uppercase d-block">Período Escolar:</label>
+                                            <div class="text-muted d-block font-weight-bold">
+                                                {{ $asignacion->periodoEscolar->nombre ?? 'N/A' }}
+                                            </div>
+                                        </div>
+
+
+
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="modal-footer modal-footer-custom border-top">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                            <i class="fas fa-times mr-2"></i> Cerrar
+                        </button>
                     </div>
 
                 </div>
             </div>
-
-            <div class="modal-footer modal-footer-custom border-top">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                    <i class="fas fa-times mr-2"></i> Cerrar
-                </button>
-            </div>
-
         </div>
-    </div>
-</div>
 
         <!-- Modal Editar -->
         <div class="modal fade" id="editarModal{{ $asignacion->id_asignacion }}" tabindex="-1" role="dialog"
@@ -774,6 +811,15 @@
 
                     <form action="{{ route('asignaciones.update', $asignacion->id_asignacion) }}" method="POST"
                         id="formEditar{{ $asignacion->id_asignacion }}">
+                        @if ($errors->any() && session('asignacion_edit_id') == $asignacion->id_asignacion)
+    <div class="alert alert-danger m-3">
+        <ul class="mb-0">
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
                         @csrf
                         @method('PUT')
                         <div class="modal-body modal-body-custom p-4">
@@ -959,13 +1005,24 @@
         </div>
     @endforeach
 
-    @if ($errors->any())
-        <script>
-            document.addEventListener("DOMContentLoaded", function() {
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Modal de asignación simple
+            @if (session('is_create_asignacion'))
                 $('#nuevaAsignacionModal').modal('show');
-            });
-        </script>
-    @endif
+            @endif
+
+            // Modal de asignación MASIVA 👈
+            @if (session('is_create_masiva'))
+                $('#asignacionMasivaModal').modal('show');
+            @endif
+
+            // Modal de edición
+            @if (session('asignacion_edit_id'))
+                $('#editarModal{{ session('asignacion_edit_id') }}').modal('show');
+            @endif
+        });
+    </script>
 
     <!-- Bootstrap core JavaScript-->
     <script src="{{ asset('libs/jquery/jquery.min.js') }}"></script>
@@ -976,7 +1033,6 @@
 
     <!-- JavaScript para la funcionalidad de asignaciones -->
     <script>
-        
         $(document).ready(function() {
             // Configuración inicial
             const grupos = @json($grupos);
@@ -986,37 +1042,39 @@
             console.log('Grupos cargados:', grupos);
             console.log('Docentes cargados:', docentes);
             console.log('Períodos cargados:', periodos);
-$('#carrera_nueva').change(function() {
-    const carreraId = $(this).val();
+            $('#carrera_nueva').change(function() {
+                const carreraId = $(this).val();
 
-    // Cargar grupos
-    cargarGrupos(carreraId, '#grupo_nueva', '#periodo_escolar_nueva_display', '#periodo_escolar_nueva');
+                // Cargar grupos
+                cargarGrupos(carreraId, '#grupo_nueva', '#periodo_escolar_nueva_display',
+                    '#periodo_escolar_nueva');
 
-    // Limpiar docentes
-    $('#docente_nueva').html('<option value="">-- Seleccione un docente --</option>');
+                // Limpiar docentes
+                $('#docente_nueva').html('<option value="">-- Seleccione un docente --</option>');
 
-    // Cargar docentes de la carrera
-    if (carreraId) {
-        $.get(`/docentes-por-carrera/${carreraId}`)
-            .done(function(docentes) {
-                docentes.forEach(doc => {
-                    $('#docente_nueva').append(
-                        `<option value="${doc.id_docente}">${doc.nombre_completo}</option>`
-                    );
-                });
-            })
-            .fail(function() {
-                console.error('Error al cargar docentes por carrera');
-                $('#docente_nueva').html('<option value="">Error al cargar docentes</option>');
+                // Cargar docentes de la carrera
+                if (carreraId) {
+                    $.get(`/docentes-por-carrera/${carreraId}`)
+                        .done(function(docentes) {
+                            docentes.forEach(doc => {
+                                $('#docente_nueva').append(
+                                    `<option value="${doc.id_docente}">${doc.nombre_completo}</option>`
+                                );
+                            });
+                        })
+                        .fail(function() {
+                            console.error('Error al cargar docentes por carrera');
+                            $('#docente_nueva').html(
+                                '<option value="">Error al cargar docentes</option>');
+                        });
+                }
+
+                // También puedes recargar materias si ya hay número de período
+                const numeroPeriodoId = $('#numero_periodo_nueva').val();
+                if (carreraId && numeroPeriodoId) {
+                    cargarMateriasIndividual(carreraId, numeroPeriodoId, '#materias-container-nueva');
+                }
             });
-    }
-
-    // También puedes recargar materias si ya hay número de período
-    const numeroPeriodoId = $('#numero_periodo_nueva').val();
-    if (carreraId && numeroPeriodoId) {
-        cargarMateriasIndividual(carreraId, numeroPeriodoId, '#materias-container-nueva');
-    }
-});
             // ========== FUNCIONES COMPARTIDAS ==========
 
             // Función para cargar grupos por carrera y autocompletar período
@@ -1078,7 +1136,7 @@ $('#carrera_nueva').change(function() {
 
             // Función para cargar materias individual (para modales individuales)
             function cargarMateriasIndividual(carreraId, numeroPeriodoId, contenedorId, materiaSeleccionada =
-            null) {
+                null) {
                 console.log('Cargando materias individual para carrera:', carreraId, 'período:', numeroPeriodoId);
 
                 $(contenedorId).html(
@@ -1196,7 +1254,7 @@ $('#carrera_nueva').change(function() {
                         const carreraId = $('#carrera_editar_{{ $asignacion->id_asignacion }}')
                             .val();
                         const grupoSeleccionado =
-                        "{{ $asignacion->id_grupo }}"; // 🔹 Corregido: ahora se envía como string
+                            "{{ $asignacion->id_grupo }}"; // 🔹 Corregido: ahora se envía como string
 
                         // Cargar grupos con el seleccionado
                         function cargarGrupos(carreraId, selectGrupoId, displayPeriodoId,
@@ -1219,7 +1277,7 @@ $('#carrera_nueva').change(function() {
                                     response.forEach(grupo => {
                                         if (grupoSeleccionado &&
                                             grupoSeleccionado == grupo.id_grupo
-                                            ) {
+                                        ) {
                                             html +=
                                                 `<option value="${grupo.id_grupo}" selected>${grupo.nombre}</option>`;
                                         } else {
@@ -1235,7 +1293,7 @@ $('#carrera_nueva').change(function() {
                                 error: function() {
                                     $(selectGrupoId).html(
                                         '<option value="">Error al cargar grupos</option>'
-                                        );
+                                    );
                                 }
                             });
                         }
@@ -1349,58 +1407,58 @@ $('#carrera_nueva').change(function() {
 
             // Función para cargar materias en modal masivo
             function cargarMateriasMasivas(carreraId, idNumeroPeriodo) {
-    console.log('Cargando materias masivas para carrera:', carreraId, 'período:', idNumeroPeriodo);
+                console.log('Cargando materias masivas para carrera:', carreraId, 'período:', idNumeroPeriodo);
 
-    $('#materias-container').html(
-        '<div class="text-center"><i class="fas fa-spinner fa-spin fa-2x text-primary"></i><p class="mt-2">Cargando materias y docentes...</p></div>'
-    );
+                $('#materias-container').html(
+                    '<div class="text-center"><i class="fas fa-spinner fa-spin fa-2x text-primary"></i><p class="mt-2">Cargando materias y docentes...</p></div>'
+                );
 
-    const urlMaterias = `/asignaciones/masiva/materias-carrera-periodo/${carreraId}/${idNumeroPeriodo}`;
-    const urlDocentes = `/docentes-por-carrera/${carreraId}`;
+                const urlMaterias = `/asignaciones/masiva/materias-carrera-periodo/${carreraId}/${idNumeroPeriodo}`;
+                const urlDocentes = `/docentes-por-carrera/${carreraId}`;
 
-    // Ejecutar ambas peticiones en paralelo
-    Promise.all([
-        $.ajax({
-            url: urlMaterias,
-            method: 'GET',
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
-                'Accept': 'application/json'
-            }
-        }),
-        $.ajax({
-            url: urlDocentes,
-            method: 'GET',
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
-                'Accept': 'application/json'
-            }
-        })
-    ])
-    .then(([materias, docentesFiltrados]) => {
-        console.log('Materias recibidas:', materias);
-        console.log('Docentes filtrados por carrera:', docentesFiltrados);
+                // Ejecutar ambas peticiones en paralelo
+                Promise.all([
+                        $.ajax({
+                            url: urlMaterias,
+                            method: 'GET',
+                            headers: {
+                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                                'Accept': 'application/json'
+                            }
+                        }),
+                        $.ajax({
+                            url: urlDocentes,
+                            method: 'GET',
+                            headers: {
+                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                                'Accept': 'application/json'
+                            }
+                        })
+                    ])
+                    .then(([materias, docentesFiltrados]) => {
+                        console.log('Materias recibidas:', materias);
+                        console.log('Docentes filtrados por carrera:', docentesFiltrados);
 
-        let html = '';
+                        let html = '';
 
-        if (materias.length === 0) {
-            html = `
+                        if (materias.length === 0) {
+                            html = `
                 <div class="alert alert-warning">
                     <i class="fas fa-exclamation-triangle"></i> 
                     No hay materias para esta carrera y período seleccionados
                 </div>`;
-        } else {
-            const carreraSeleccionada = $('#carrera option:selected').text().trim();
-            const periodoSeleccionado = $('#numero_periodo option:selected').text().trim();
+                        } else {
+                            const carreraSeleccionada = $('#carrera option:selected').text().trim();
+                            const periodoSeleccionado = $('#numero_periodo option:selected').text().trim();
 
-            html += `
+                            html += `
                 <div class="alert alert-success mb-3">
                     <i class="fas fa-check-circle"></i> 
                     Se encontraron ${materias.length} materias para ${carreraSeleccionada} - ${periodoSeleccionado}
                 </div>`;
 
-            materias.forEach((materia) => {
-                html += `
+                            materias.forEach((materia) => {
+                                html += `
                 <div class="materia-item">
                     <div class="row align-items-center">
                         <div class="col-md-1 text-center">
@@ -1417,35 +1475,36 @@ $('#carrera_nueva').change(function() {
                             <select name="docentes[${materia.id_materia}]" class="form-control form-control-sm docente-select">
                                 <option value="">-- Seleccione un docente --</option>`;
 
-                // ✅ Usamos docentesFiltrados (solo de la carrera)
-                if (Array.isArray(docentesFiltrados) && docentesFiltrados.length > 0) {
-                    docentesFiltrados.forEach(docente => {
-                        html += `<option value="${docente.id_docente}">${docente.nombre_completo}</option>`;
-                    });
-                } else {
-                    html += `<option disabled>Sin docentes disponibles</option>`;
-                }
+                                // ✅ Usamos docentesFiltrados (solo de la carrera)
+                                if (Array.isArray(docentesFiltrados) && docentesFiltrados.length > 0) {
+                                    docentesFiltrados.forEach(docente => {
+                                        html +=
+                                            `<option value="${docente.id_docente}">${docente.nombre_completo}</option>`;
+                                    });
+                                } else {
+                                    html += `<option disabled>Sin docentes disponibles</option>`;
+                                }
 
-                html += `
+                                html += `
                             </select>
                         </div>
                     </div>
                 </div>`;
-            });
-        }
+                            });
+                        }
 
-        $('#materias-container').html(html);
-    })
-    .catch((error) => {
-        console.error('Error al cargar materias o docentes:', error);
-        $('#materias-container').html(`
+                        $('#materias-container').html(html);
+                    })
+                    .catch((error) => {
+                        console.error('Error al cargar materias o docentes:', error);
+                        $('#materias-container').html(`
             <div class="alert alert-danger">
                 <i class="fas fa-times-circle"></i> 
                 Error al cargar los datos. Por favor, intente nuevamente.
             </div>
         `);
-    });
-}
+                    });
+            }
 
             // Seleccionar/Deseleccionar todas en modal masivo
             $('#selectAll').click(function() {
@@ -1456,7 +1515,7 @@ $('#carrera_nueva').change(function() {
                 checkboxes.each(function() {
                     $(this).prop('checked', !allChecked);
                     $(this).trigger(
-                    'change'); // Disparar el evento change para actualizar los selects
+                        'change'); // Disparar el evento change para actualizar los selects
                 });
 
                 $(this).html(allChecked ?
@@ -1510,7 +1569,7 @@ $('#carrera_nueva').change(function() {
                     if (!docenteSelect.val() || docenteSelect.val() === '') {
                         todasTienenDocente = false;
                         const materiaNombre = $(this).closest('.materia-item').find('strong')
-                    .text();
+                            .text();
                         materiasSinDocente.push(materiaNombre);
                     }
                 });

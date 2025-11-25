@@ -663,6 +663,7 @@
                                                             <thead class="thead-dark text-center">
                                                                 <tr>
                                                                     <th style="width: 80px;">ID</th>
+                                                                    <th>Clave</th>
                                                                     <th>Nombre</th>
                                                                     <th style="width: 150px;">Acciones</th>
                                                                 </tr>
@@ -679,6 +680,11 @@
                                                                                 value="estados">
                                                                             <td class="text-center">
                                                                                 {{ $estado->id_estado }}</td>
+                                                                                <td>
+                                                                                <input type="number" name="clave"
+                                                                                    class="form-control"
+                                                                                    value="{{ $estado->clave }}">
+                                                                            </td>
                                                                             <td>
                                                                                 <input type="text" name="nombre"
                                                                                     class="form-control"

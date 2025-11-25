@@ -207,7 +207,7 @@
 
                                                         </td>
                                                         <td>
-                                                            @if ($calif >= 6)
+                                                            @if ($calif >= 7)
                                                                 <span class="badge badge-success">Aprobado</span>
                                                             @else
                                                                 <span class="badge badge-danger">Reprobado</span>
@@ -252,12 +252,15 @@
     <div class="modal fade" id="modalCalificarGrupo" tabindex="-1" role="dialog">
         <div class="modal-dialog modal-fullscreen" role="document">
             <div class="modal-content">
-                <div class="modal-header bg-gradient-success text-white">
+                <div class="modal-header modal-header-custom border-0">
+                    <div class="w-100 text-center">
                     <h5 class="mb-0 font-weight-bold">
-                        <i class="fas fa-clipboard-check mr-2"></i>Captura de Calificaciones
+                        <i class="fas fa-graduation-cap mr-2"></i>Captura de Calificaciones
                     </h5>
-                    <button type="button" class="close text-white" data-dismiss="modal">
-                        <span>&times;</span>
+                    </div>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Cerrar"
+                        style="position: absolute; right: 1.5rem; top: 1.5rem; font-size: 1.8rem; opacity: 0.9;">
+                        <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body p-3">
@@ -270,7 +273,7 @@
                             <div class="card-header bg-light">
                                 <strong><i class="fas fa-filter mr-2"></i>Seleccionar Grupo y Materia</strong>
                             </div>
-                            <div class="card-body">
+                            <div class="card-body1">
                                 <div class="row">
                                     <div class="col-md-4">
                                         <label class="font-weight-bold">Período Escolar <span
@@ -323,7 +326,7 @@
                         <div id="contenedorMatriz" style="display: none;">
                             <div class="card">
                                 <div
-                                    class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                                    class="card-header text-white d-flex justify-content-between align-items-center">
                                     <div>
                                         <strong><i class="fas fa-table mr-2"></i>Matriz de Calificaciones</strong>
                                         <span id="infoMateria" class="ml-3"></span>
@@ -338,16 +341,16 @@
                                     <div id="contenedorTabla" style="overflow-x: auto; max-height: 600px;">
                                         <table class="table table-bordered table-hover table-sm mb-0"
                                             id="tablaCalificaciones">
-                                            <thead class="thead-dark" style="position: sticky; top: 0; z-index: 100;">
+                                            <thead  style="position: sticky; top: 0; z-index: 100;" class="text-center">
                                                 <tr>
                                                     <th rowspan="2"
-                                                        style="position: sticky; left: 0; background: #343a40; z-index: 101; min-width: 50px;"
+                                                        style="position: sticky; left: 0; background: #ffffff; z-index: 101; min-width: 50px;"
                                                         class="text-center">#</th>
                                                     <th rowspan="2"
-                                                        style="position: sticky; left: 50px; background: #343a40; z-index: 101; min-width: 120px;">
+                                                        style="position: sticky; left: 50px; background: #ffffff; z-index: 101; min-width: 120px;" class="text-center">
                                                         Matrícula</th>
                                                     <th rowspan="2"
-                                                        style="position: sticky; left: 170px; background: #343a40; z-index: 101; min-width: 250px;">
+                                                        style="position: sticky; left: 170px; background: #ffffff; z-index: 101; min-width: 250px;" class="text-center">
                                                         Alumno</th>
                                                     <!-- Se llenarán dinámicamente las unidades y evaluaciones -->
                                                 </tr>
@@ -545,14 +548,14 @@
                         `<th class="unidad-header" style="min-width: 200px;">${unidad.nombre}</th>`;
                 });
 
-                headersUnidades += `<th class="bg-info text-white" style="min-width: 120px;">📊 Promedio</th>`;
+                headersUnidades += `<th class="bg-info text-white">📊 Promedio</th>`;
                 headersUnidades +=
-                    `<th class="unidad-header bg-warning" style="min-width: 200px;">🎓 Extraordinario Especial</th>`;
+                    `<th class="unidad-header bg-warning" style="min-width: 200px;">🎓 Calificación Final</th>`;
 
                 thead.innerHTML = `
-            <th style="position: sticky; left: 0; background: #343a40; z-index: 101; min-width: 50px;" class="text-center">#</th>
-            <th style="position: sticky; left: 50px; background: #343a40; z-index: 101; min-width: 120px;">Matrícula</th>
-            <th style="position: sticky; left: 170px; background: #343a40; z-index: 101; min-width: 250px;">Alumno</th>
+            <th style="position: sticky; left: 0; ; z-index: 101; min-width: 50px;" class="text-center">#</th>
+            <th style="position: sticky; left: 50px; ; z-index: 101; min-width: 120px;">Matrícula</th>
+            <th style="position: sticky; left: 170px; ; z-index: 101; min-width: 250px;">Alumno</th>
             ${headersUnidades}
         `;
 
@@ -575,7 +578,7 @@
                     Object.values(alumno.calificaciones).forEach(calif => {
                         if (calif.tipo_evaluacion === 'Extraordinario' && 
                             calif.calificacion !== null && 
-                            calif.calificacion < 6) {
+                            calif.calificacion < 7) {
                             reproboExtraordinario = true;
                         }
                     });
@@ -596,7 +599,7 @@
 
                         const calificacion = calificacionData.calificacion;
                         const yaCapturado = calificacion !== null;
-                        const esAprobatoria = calificacion >= 6;
+                        const esAprobatoria = calificacion >= 7;
                         const puedeCapturar = calificacionData.puede_capturar && !tieneCalifEspecial && !reproboExtraordinario;
                         const siguienteEval = calificacionData.siguiente_evaluacion;
 
@@ -662,16 +665,16 @@
                                         </small>
                                         ${historialCompleto.length > 1 ? `
                                         <small class="text-muted mt-1" style="font-size: 0.7rem;">
-                                            📋 ${historialCompleto.length} evaluaciones
+                                            
                                         </small>
                                         ` : ''}
                                         ${esAprobatoria ? `
                                         <small class="text-success mt-1" style="font-size: 0.8rem;">
-                                            ✅ Aprobado
+                                            
                                         </small>
                                         ` : (tipoEvaluacion === 'Extraordinario' ? `
                                         <small class="text-danger mt-1" style="font-size: 0.8rem;">
-                                            ❌ Reprobado
+                                            
                                         </small>
                                         ` : `
                                         <small class="text-muted mt-1" style="font-size: 0.8rem;">
@@ -717,14 +720,14 @@
                     } else {
                         const promedioGeneral = alumno.promedio_general;
                         if (promedioGeneral !== null && promedioGeneral !== undefined && !isNaN(promedioGeneral)) {
-                            const esAprobado = promedioGeneral >= 6;
+                            const esAprobado = promedioGeneral >= 7;
                             html += `
                             <td class="text-center p-2 bg-light" style="vertical-align: middle;">
                                 <span class="badge" style="font-size: 1.2rem; padding: 0.6rem; background: ${esAprobado ? '#17a2b8' : '#6c757d'};">
                                     ${promedioGeneral}
                                 </span>
                                 <small class="d-block mt-1 text-muted" style="font-size: 0.7rem;">
-                                    Promedio ${esAprobado ? '✅' : '⚠️'}
+                                    
                                 </small>
                             </td>`;
                         } else {
@@ -740,7 +743,7 @@
                     };
 
                     if (tieneCalifEspecial) {
-                        const esAprob = alumno.calificacion_especial >= 6;
+                        const esAprob = alumno.calificacion_especial >= 7;
                         html += `
                         <td class="text-center p-2" style="vertical-align: middle; background: #fff3cd; border-left: 3px solid #6f42c1;">
                             <div class="d-flex flex-column align-items-center">
@@ -752,13 +755,13 @@
                                 </small>
                                 ${esAprob ? `
                                     <small class="text-success mt-1">
-                                        <i class="fas fa-check-circle"></i> Aprobado
+                                        <i class="fas fa-check-circle"></i>
                                     </small>` : `
                                     <small class="text-danger mt-1">
-                                        <i class="fas fa-times-circle"></i> Reprobado
+                                        <i class="fas fa-times-circle"></i>
                                     </small>`}
                                 <small class="text-muted mt-1" style="font-size: 0.7rem;">
-                                    📚 Calificación general de la materia
+                                    
                                 </small>
                             </div>
                         </td>`;
@@ -770,7 +773,7 @@
                             <td class="text-center p-2" style="vertical-align: middle; background: #fff3cd; border-left: 3px solid #dc3545;">
                                 <div class="d-flex flex-column align-items-center mb-2">
                                     <span class="badge badge-danger mb-2" style="font-size: 0.85rem;">
-                                        ⚠️ Reprobó Extraordinario
+                                        
                                     </span>
                                 </div>
                                 <input type="number" 
@@ -783,7 +786,7 @@
                                     🎓 ${evalEspecial.nombre}
                                 </small>
                                 <small class="d-block text-danger mt-1" style="font-size: 0.65rem; font-weight: bold;">
-                                    📚 Última oportunidad - Examen completo
+                                    
                                 </small>
                             </td>`;
                         } else {
@@ -797,7 +800,7 @@
                             const califData = alumno.calificaciones[key];
                             if (califData &&
                                 califData.calificacion !== null &&
-                                califData.calificacion < 6 &&
+                                califData.calificacion < 7 &&
                                 califData.tipo_evaluacion === 'Extraordinario') {
                                 hayExtraordinarioReprobado = true;
                             }
@@ -1066,6 +1069,21 @@
                     });
                 });
             }
+        });
+    </script>
+     <script>
+        $(document).ready(function() {
+            // Espera un poco para asegurar que todos los modales existan
+            setTimeout(function() {
+                $('.modal').each(function() {
+                    // Inicializa el modal con las opciones deseadas
+                    $(this).modal({
+                        backdrop: 'static',
+                        keyboard: false,
+                        show: false // no mostrar al cargar
+                    });
+                });
+            }, 500);
         });
     </script>
 </body>

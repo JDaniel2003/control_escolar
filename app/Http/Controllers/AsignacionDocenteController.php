@@ -72,9 +72,9 @@ class AsignacionDocenteController extends Controller
         // Paginación
         $mostrar = $request->get('mostrar', 10);
         if ($mostrar == 'todo') {
-            $asignaciones = $query->get();
+            $asignaciones = $query->orderBy('id_asignacion', 'desc')->get();
         } else {
-            $asignaciones = $query->paginate($mostrar);
+            $asignaciones = $query->orderBy('id_asignacion', 'desc')->paginate($mostrar);
         }
 
         // Obtener datos para los filtros
@@ -122,15 +122,17 @@ class AsignacionDocenteController extends Controller
         ]);
 
         // Verificar que no exista la misma asignación
-        $existe = AsignacionDocente::where('id_docente', $request->id_docente)
-            ->where('id_materia', $request->id_materia)
+        $existe = AsignacionDocente::where('id_materia', $request->id_materia)
             ->where('id_grupo', $request->id_grupo)
             ->where('id_periodo_escolar', $request->id_periodo_escolar)
             ->exists();
 
         if ($existe) {
-            return back()->withErrors(['error' => 'Esta asignación ya existe'])->withInput();
-        }
+    return redirect()->route('asignaciones.index')
+        ->withErrors(['error' => 'Asignacion ya existente.'])
+        ->withInput()
+        ->with('is_create_asignacion', 1); // 👈 Flag para modal de CREAR SIMPLE
+}
 
         try {
             AsignacionDocente::create([
@@ -164,16 +166,18 @@ class AsignacionDocenteController extends Controller
         ]);
 
         // Verificar que no exista la misma asignación (excluyendo la actual)
-        $existe = AsignacionDocente::where('id_docente', $request->id_docente)
-            ->where('id_materia', $request->id_materia)
+        $existe = AsignacionDocente::where('id_materia', $request->id_materia)
             ->where('id_grupo', $request->id_grupo)
             ->where('id_periodo_escolar', $request->id_periodo_escolar)
             ->where('id_asignacion', '!=', $id)
             ->exists();
 
-        if ($existe) {
-            return back()->withErrors(['error' => 'Esta asignación ya existe'])->withInput();
-        }
+       if ($existe) {
+    return redirect()->route('asignaciones.index')
+        ->withErrors(['error' => 'Ya existe una asignación con esa materia, grupo y período.'])
+        ->withInput()
+        ->with('asignacion_edit_id', $id);
+}
 
         try {
             $asignacion->update([
@@ -206,59 +210,30 @@ class AsignacionDocenteController extends Controller
     // MÉTODO CORREGIDO: Asignación masiva de materias con docentes
     public function storeMasivoMaterias(Request $request)
 {
-    // Log para debug
-    Log::info("=== INICIO ASIGNACIÓN MASIVA ===");
-    Log::info("REQUEST ALL:", $request->all());
-
-    // Validación
+    // Validación inicial
     $request->validate([
         'id_grupo' => 'required|exists:grupos,id_grupo',
         'id_periodo_escolar' => 'required|exists:periodos_escolares,id_periodo_escolar',
         'materias' => 'required|array|min:1',
         'materias.*' => 'exists:materias,id_materia',
-        // Validamos que el array 'docentes' exista, pero no es obligatorio que tenga valores
         'docentes' => 'array',
     ], [
         'materias.required' => 'Debe seleccionar al menos una materia',
         'materias.min' => 'Debe seleccionar al menos una materia',
     ]);
 
+    $materiasSeleccionadas = $request->input('materias', []);
+    $docentesAsignados = $request->input('docentes', []);
+
     $errores = [];
     $asignacionesCreadas = 0;
     $asignacionesSinDocente = 0;
 
-    // ✅ Obtenemos el array de materias seleccionadas
-    $materiasSeleccionadas = $request->input('materias', []);
-
-    // ✅ Obtenemos el array de docentes asignados a cada materia
-    $docentesAsignados = $request->input('docentes', []); // Este es el array correcto
-
     DB::beginTransaction();
 
     try {
-        // Iterar sobre cada materia seleccionada
         foreach ($materiasSeleccionadas as $idMateria) {
-
-            Log::info("========================================");
-            Log::info("PROCESANDO MATERIA: $idMateria");
-
-            // Obtener el ID del docente asignado a esta materia desde el array 'docentes'
-            // El array 'docentes' tiene la estructura: [id_materia => id_docente]
-            $idDocente = $docentesAsignados[$idMateria] ?? null; // Si no hay docente, será null
-
-            Log::info("Docente asignado: " . ($idDocente ?? 'NULL'));
-
-            // Validar existencia del docente si se proporcionó
-            if ($idDocente !== null && $idDocente > 0) {
-                $docenteExiste = Docente::where('id_docente', $idDocente)->exists();
-                if (!$docenteExiste) {
-                    $materia = Materia::find($idMateria);
-                    $errores[] = "El docente con ID $idDocente para la materia '{$materia->nombre}' no existe";
-                    continue;
-                }
-            }
-
-            // Verificar si ya existe la asignación
+            // Verificar si ya existe
             $existe = AsignacionDocente::where('id_materia', $idMateria)
                 ->where('id_grupo', $request->id_grupo)
                 ->where('id_periodo_escolar', $request->id_periodo_escolar)
@@ -266,59 +241,64 @@ class AsignacionDocenteController extends Controller
 
             if ($existe) {
                 $materia = Materia::find($idMateria);
-                $errores[] = "La materia '{$materia->nombre}' ya está asignada a este grupo y período";
+                $errores[] = "La materia '{$materia->nombre}' ya tiene asignacion.";
                 continue;
             }
 
-            // Crear la asignación
-            $asignacionData = [
+            // Validar docente si se proporcionó
+            $idDocente = $docentesAsignados[$idMateria] ?? null;
+            if ($idDocente !== null && $idDocente > 0) {
+                if (!Docente::where('id_docente', $idDocente)->exists()) {
+                    $materia = Materia::find($idMateria);
+                    $errores[] = "El docente seleccionado para la materia '{$materia->nombre}' no existe.";
+                    continue;
+                }
+            }
+
+            // Crear asignación
+            AsignacionDocente::create([
                 'id_docente' => $idDocente,
                 'id_materia' => $idMateria,
                 'id_grupo' => $request->id_grupo,
                 'id_periodo_escolar' => $request->id_periodo_escolar,
-            ];
-
-            Log::info("🔥 CREANDO ASIGNACIÓN:", $asignacionData);
-
-            $asignacion = AsignacionDocente::create($asignacionData);
-            Log::info("✅ ASIGNACIÓN CREADA con ID: " . $asignacion->id_asignacion);
+            ]);
 
             $asignacionesCreadas++;
-
             if ($idDocente === null) {
                 $asignacionesSinDocente++;
             }
         }
 
-        // Si hubo errores, hacer rollback
-        if (!empty($errores)) {
-            DB::rollBack();
-            Log::warning("❌ ROLLBACK POR ERRORES:", $errores);
-            return back()->withErrors(['error' => implode('. ', $errores)])->withInput();
-        }
-
         DB::commit();
 
-        $mensaje = "Se crearon $asignacionesCreadas asignaciones exitosamente";
-        if ($asignacionesSinDocente > 0) {
-            $mensaje .= ". $asignacionesSinDocente materias quedaron sin docente asignado";
+        // Caso 1: Todas fallaron → Reabrir modal con errores
+        if ($asignacionesCreadas === 0) {
+            return redirect()->back()
+                ->withErrors($errores)
+                ->withInput()
+                ->with('is_create_masiva', 1);
         }
 
-        Log::info("=== ✅ ASIGNACIÓN MASIVA EXITOSA ===");
-        Log::info($mensaje);
+        // Caso 2: Al menos una se creó → Mensaje de éxito en vista principal
+        $mensaje = "Se crearon $asignacionesCreadas asignaciones exitosamente";
+        if ($asignacionesSinDocente > 0) {
+            $mensaje .= ". $asignacionesSinDocente materias quedaron sin docente.";
+        }
 
-        return redirect()->route('asignaciones.index')->with('success', $mensaje);
+        // Si hay errores, también los mostramos en la vista principal
+        if (!empty($errores)) {
+            $mensaje .= ". Errores: " . implode('. ', $errores);
+        }
+
+        return redirect()->route('asignaciones.index')
+            ->with('success', $mensaje);
 
     } catch (\Exception $e) {
         DB::rollBack();
-
-        Log::error('=== ❌ ERROR EN ASIGNACIÓN MASIVA ===', [
-            'error' => $e->getMessage(),
-            'linea' => $e->getLine(),
-            'archivo' => $e->getFile()
-        ]);
-
-        return back()->withErrors(['error' => 'Error al guardar las asignaciones: ' . $e->getMessage()])->withInput();
+        return redirect()->back()
+            ->withErrors(['Error inesperado: ' . $e->getMessage()])
+            ->withInput()
+            ->with('is_create_masiva', 1);
     }
 }
 

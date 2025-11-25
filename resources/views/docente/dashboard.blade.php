@@ -26,24 +26,55 @@
     </div>
 
     <!-- Logout Modal-->
-    <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <!-- Logout Modal -->
+    <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">¿Listo para salir?</h5>
-                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span>
+                <div class="modal-header bg-danger">
+
+                    <div class="w-100 text-center">
+                        <h5 class="m-0 font-weight-bold" id="logoutModalLabel">
+                            <i class="fas fa-sign-out-alt mr-2"></i>
+                            Cerrar Sesión
+                        </h5>
+                    </div>
+                    <button class="close text-white" type="button" data-dismiss="modal" aria-label="Close"
+                        style="position: absolute; right: 1rem; top: 1rem; opacity: 0.9;">
+                        <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body">Selecciona "Cerrar Sesión" si estás listo para finalizar tu sesión actual.</div>
+
+                <!-- Body -->
+                <div class="modal-body text-center">
+                    <div class="mb-3">
+                        <i class="fas fa-exclamation-circle text-warning" style="font-size: 4rem;"></i>
+                    </div>
+                    <h6 class="font-weight-bold mb-3">¿Desea cerrar su sesión?</h6>
+                    <p class="text-muted mb-0">
+                        Al cerrar sesión, será redirigido a la página de inicio de sesión.
+                    </p>
+                </div>
+
+                <!-- Footer -->
                 <div class="modal-footer">
-                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancelar</button>
-                    <a class="btn btn-primary" href="{{ route('login') }}">Cerrar Sesión</a>
+                    <button class="btn btn-secondary px-4" type="button" data-dismiss="modal">
+                        <i class="fas fa-times mr-2"></i>
+                        Cancelar
+                    </button>
+
+                    <!-- Formulario para cerrar sesión -->
+                    <form action="{{ route('logout') }}" method="POST" style="display: inline;">
+                        @csrf
+                        <button type="submit" class="btn btn-danger px-4">
+                            <i class="fas fa-sign-out-alt mr-2"></i>
+                            Cerrar Sesión
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
-
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dangerb">
         <div class="d-flex align-items-center">
@@ -67,7 +98,7 @@
         <div class="position-absolute" style="top: 10px; right: 20px; z-index: 1000;">
             <div class="d-flex align-items-center text-white">
                 <span class="mr-3 small">{{ Auth::user()->rol->nombre }}</span>
-                <a href="#" class="text-white text-decoration-none logout-link" data-toggle="modal" data-target="#logoutModal">
+                <a href="" class="text-white text-decoration-none logout-link" data-toggle="modal" data-target="#logoutModal">
                     Cerrar Sesión <i class="fas fa-sign-out-alt ml-1"></i>
                 </a>
             </div>
@@ -89,5 +120,12 @@
 
         {{--<p>Nivel: {{ auth()->user()->getNivel() }}</p>--}}
     </div>
+    
+    <!-- Bootstrap core JavaScript-->
+    <script src="{{ asset('libs/jquery/jquery.min.js') }}"></script>
+    <script src="{{ asset('libs/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+
+    <!-- Custom scripts for all pages-->
+    <script src="{{ asset('libs/sbadmin/js/sb-admin-2.min.js') }}"></script>
 </body>
 </html>

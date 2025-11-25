@@ -214,7 +214,7 @@ class CatalogosController extends Controller
     {
         $tabla = $request->input('tabla');
         $model = $this->getModel($tabla);
-        $data = $request->only(['nombre', 'nombres', 'duracion', 'descripcion', 'incorporacion']);
+        $data = $request->only(['nombre', 'nombres', 'duracion', 'descripcion', 'incorporacion', 'clave']);
         $model::create($data);
 
         return back()
@@ -226,7 +226,7 @@ class CatalogosController extends Controller
     {
         $tabla = $request->input('tabla');
         $model = $this->getModel($tabla)::find($id);
-        $model->update($request->only(['nombre', 'nombres', 'duracion', 'descripcion', 'incorporacion']));
+        $model->update($request->only(['nombre', 'nombres', 'duracion', 'descripcion', 'incorporacion', 'clave']));
 
         return back()
             ->with('success', 'Registro actualizado correctamente.')

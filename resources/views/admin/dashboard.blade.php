@@ -32,21 +32,51 @@
 
         </div>
     </div>
+    <!-- Logout Modal -->
     <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
         aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">¿Seguro de cerrar sesión?</h5>
-                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span>
+                <div class="modal-header bg-danger">
+
+                    <div class="w-100 text-center">
+                        <h5 class="m-0 font-weight-bold" id="logoutModalLabel">
+                            <i class="fas fa-sign-out-alt mr-2"></i>
+                            Cerrar Sesión
+                        </h5>
+                    </div>
+                    <button class="close text-white" type="button" data-dismiss="modal" aria-label="Close"
+                        style="position: absolute; right: 1rem; top: 1rem; opacity: 0.9;">
+                        <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body">Seleccione "si" a continuación si está listo para finalizar su sesión actual.
+
+                <!-- Body -->
+                <div class="modal-body text-center">
+                    <div class="mb-3">
+                        <i class="fas fa-exclamation-circle text-warning" style="font-size: 4rem;"></i>
+                    </div>
+                    <h6 class="font-weight-bold mb-3">¿Desea cerrar su sesión?</h6>
+                    <p class="text-muted mb-0">
+                        Al cerrar sesión, será redirigido a la página de inicio de sesión.
+                    </p>
                 </div>
+
+                <!-- Footer -->
                 <div class="modal-footer">
-                    <button class="btn btn-secondary" type="button" data-dismiss="modal">No</button>
-                    <a class="btn btn-primary" href="{{ route('login') }}">Si</a>
+                    <button class="btn btn-secondary px-4" type="button" data-dismiss="modal">
+                        <i class="fas fa-times mr-2"></i>
+                        Cancelar
+                    </button>
+
+                    <!-- Formulario para cerrar sesión -->
+                    <form action="{{ route('logout') }}" method="POST" style="display: inline;">
+                        @csrf
+                        <button type="submit" class="btn btn-danger px-4">
+                            <i class="fas fa-sign-out-alt mr-2"></i>
+                            Cerrar Sesión
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>
@@ -65,35 +95,16 @@
 
         <div class="collapse navbar-collapse ml-4">
             <ul class="navbar-nav" style="padding-left: 20%;">
-                <li class="nav-item"> <!-- bg-success -->
-                    <a class="nav-link navbar-active-item px-3 mr-1">Inicio</a>
+                <li class="nav-item"><a class="nav-link navbar-active-item px-3 mr-1">Inicio</a></li>
+                <li class="nav-item"><a class="nav-link text-white px-3 mr-1" href="{{ route('periodos.index') }}">Períodos Escolares</a></li>
+                <li class="nav-item"><a class="nav-link text-white px-3 mr-1" href="{{ route('carreras.index') }}">Carreras</a></li>
+                <li class="nav-item"><a class="nav-link text-white px-3 mr-1" href="{{ route('materias.index') }}">Materias</a></li>
+                <li class="nav-item"><a class="nav-link text-white px-3 mr-1" href="{{ route('planes.index') }}">Planes de estudio</a></li>
+                <li class="nav-item"><a class="nav-link text-white px-3 mr-1" href="{{ route('alumnos.index') }}">Alumnos</a></li>
+                <li class="nav-item"><a class="nav-link text-white px-3 mr-1" href="{{ route('asignaciones.index') }}">Asignaciones Docentes</a></li>
+                <li class="nav-item"><a class="nav-link text-white px-3" href="{{ route('historial.index') }}">Historial</a></li>
+                <li class="nav-item"><a class="nav-link text-white px-3 mr-1" href="{{ route('calificaciones.index') }}">Calificaciones</a></li>
 
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link  text-white px-3 mr-1" href="{{ route('periodos.index') }}">Períodos
-                        Escolares</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link text-white px-3 mr-1" href="{{ route('carreras.index') }}">Carreras</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link text-white px-3 mr-1" href="{{ route('materias.index') }}">Materias</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link text-white px-3 mr-1" href="{{ route('planes.index') }}">Planes de estudio</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link text-white px-3 mr-1" href="{{ route('alumnos.index') }}">Alumnos</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link text-white px-3 mr-1" href="#">Asignaciones Docentes</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link text-white px-3" href="{{ route('historial.index') }}">Historial</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link text-white px-3" href="#">Calificaciones</a>
-                </li>
             </ul>
         </div>
         <div class="position-absolute" style="top: 10px; right: 20px; z-index: 1000;">
@@ -140,7 +151,7 @@
                                 </div>
 
                                 <!-- DOCENTES -->
-                                <div onclick="window.location.href='{{ route('asignaciones.index') }}'"
+                                <div onclick="window.location.href='{{ route('docente.index') }}'"
                                     class="col-md-6 col-lg-4 mb-4">
                                     <div class="logout-link card border-success h-100"
                                         style="border-width: 3px; border-radius: 25px;">
@@ -151,8 +162,20 @@
                                     </div>
                                 </div>
 
+                                <div onclick="window.location.href='{{ route('usuarios.index') }}'"
+                                    class="col-md-6 col-lg-4 mb-4">
+                                    <div class="logout-link card border-success h-100"
+                                        style="border-width: 3px; border-radius: 25px;">
+                                        <div class="card-body d-flex justify-content-between align-items-center py-4">
+                                            <h5 class="card-title font-weight-bold mb-0">USUARIOS</h5>
+                                            <i class="fas fa-chalkboard-teacher fa-2x text-success"></i>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <!-- CALIFICACIONES -->
-                                <div class="col-md-6 col-lg-4 mb-4">
+                                <div onclick="window.location.href='{{ route('calificaciones.index') }}'"
+                                    class="col-md-6 col-lg-4 mb-4">
                                     <div class="logout-link card border-success h-100"
                                         style="border-width: 3px; border-radius: 25px;">
                                         <div class="card-body d-flex justify-content-between align-items-center py-4">
@@ -188,7 +211,8 @@
                                 </div>
 
                                  <!-- GRUPOS -->
-                                <div class="col-md-6 col-lg-4 mb-4">
+                                <div onclick="window.location.href='{{ route('grupos.index') }}'"
+                                    class="col-md-6 col-lg-4 mb-4">
                                     <div class="logout-link card border-success h-100"
                                         style="border-width: 3px; border-radius: 25px;">
                                         <div class="card-body d-flex justify-content-between align-items-center py-4">
@@ -199,7 +223,8 @@
                                 </div>
 
                                 <!-- INSCRIPCIONES -->
-                                <div class="col-md-6 col-lg-4 mb-4">
+                                <div onclick="window.location.href='{{ route('historial.index') }}'"
+                                    class="col-md-6 col-lg-4 mb-4">
                                     <div class="logout-link card border-success h-100"
                                         style="border-width: 3px; border-radius: 25px;">
                                         <div class="card-body d-flex justify-content-between align-items-center py-4">
@@ -221,7 +246,8 @@
                                     </div>
                                 </div>
 
-                                <div class="col-md-6 col-lg-4 mb-4">
+                                <div onclick="window.location.href='{{ route('historial.index') }}'"
+                                    class="col-md-6 col-lg-4 mb-4">
                                     <div class="logout-link card border-success h-100"
                                         style="border-width: 3px; border-radius: 25px;">
                                         <div class="card-body d-flex justify-content-between align-items-center py-4">
@@ -257,7 +283,8 @@
                                     </div>
                                 </div>
 
-                                <div class="col-md-6 col-lg-4 mb-4">
+                                <div onclick="window.location.href='{{ route('historial.index') }}'"
+                                    class="col-md-6 col-lg-4 mb-4">
                                     <div class="logout-link card border-success h-100"
                                         style="border-width: 3px; border-radius: 25px;">
                                         <div class="card-body d-flex justify-content-between align-items-center py-4">
@@ -267,11 +294,23 @@
                                     </div>
                                 </div>
 
-                                <div class="col-md-6 col-lg-4 mb-4">
+                                <div onclick="window.location.href='{{ route('asignaciones.index') }}'"
+                                    class="col-md-6 col-lg-4 mb-4">
                                     <div class="logout-link card border-success h-100"
                                         style="border-width: 3px; border-radius: 25px;">
                                         <div class="card-body d-flex justify-content-between align-items-center py-4">
                                             <h5 class="card-title font-weight-bold mb-0">ASIGNACIONES DOCENTES</h5>
+                                            <i class="fas fa-clipboard-check fa-2x text-success"></i>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div onclick="window.location.href='{{ route('administracion-carreras.index') }}'"
+                                    class="col-md-6 col-lg-4 mb-4">
+                                    <div class="logout-link card border-success h-100"
+                                        style="border-width: 3px; border-radius: 25px;">
+                                        <div class="card-body d-flex justify-content-between align-items-center py-4">
+                                            <h5 class="card-title font-weight-bold mb-0">ADMINISTRACIÓN DE CARRERAS</h5>
                                             <i class="fas fa-clipboard-check fa-2x text-success"></i>
                                         </div>
                                     </div>

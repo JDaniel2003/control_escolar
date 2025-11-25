@@ -1002,6 +1002,13 @@ class CalificacionController extends Controller
     public function misAsignaciones()
 {
     // Obtener el ID del docente desde el usuario autenticado
+    $usuario = auth()->user();
+
+// Si no hay sesión o no tiene docente → redirige al login
+if (!$usuario || !$usuario->docente) {
+    return redirect()->route('login')->withErrors('Debes iniciar sesión primero.');
+}
+
     $idDocente = auth()->user()->docente->id_docente;
 
     if (!$idDocente) {
@@ -1026,7 +1033,7 @@ class CalificacionController extends Controller
                 'grupo' => $asignacion->grupo?->nombre ?? 'Sin grupo',
                 'periodo' => $asignacion->grupo?->periodoEscolar?->nombre ?? 'Sin período',
                 'id_grupo' => $asignacion->id_grupo,
-                'id_periodo' => $asignacion->grupo?->periodoEscolar?->id_periodo_escolar, // ← Usa el ID, no el nombre
+                'id_periodo' => $asignacion->grupo?->periodoEscolar?->nombre, // ← Usa el ID, no el nombre
             ];
         });
 

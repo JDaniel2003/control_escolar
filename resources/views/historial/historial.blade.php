@@ -116,41 +116,33 @@
                             </div>
 
                             <!-- Filtros -->
-                            <div class="card-header border-bottom justify-content-between"
-                                style="padding: 0.75rem 1.25rem;">
-                                <div class="container mb-4 d-flex ">
-                                    <div class="p-3 border rounded bg-light d-inline-block shadow-sm">
-                                        <form id="filtrosForm" method="GET"
-                                            action="{{ route('historial.index') }}"
-                                            class="d-flex flex-wrap gap-2 align-items-center">
-                                            <div style="width: 500px;">
-                                                <input type="text" id="searchInput"
-                                                    class="form-control form-control-sm border-secondary"
-                                                    placeholder="🔍 Buscar">
-                                            </div>
-                                            <select name="mostrar" onchange="this.form.submit()"
-                                                class="form-control form-control-sm w-auto">
-                                                <option value="10"
-                                                    {{ request('mostrar') == 10 ? 'selected' : '' }}>10
-                                                </option>
-                                                <option value="13"
-                                                    {{ request('mostrar') == 13 ? 'selected' : '' }}>13
-                                                </option>
-                                                <option value="25"
-                                                    {{ request('mostrar') == 25 ? 'selected' : '' }}>25
-                                                </option>
-                                                <option value="50"
-                                                    {{ request('mostrar') == 50 ? 'selected' : '' }}>50
-                                                </option>
-                                                <option value="todo"
-                                                    {{ request('mostrar') == 'todo' ? 'selected' : '' }}>Todo</option>
-                                            </select>
-                                            <a href="{{ route('historial.index', ['mostrar' => 'todo']) }}"
-                                                class="btn btn-sm btn-outline-secondary d-flex align-items-center">
-                                                <i class="fas fa-list me-1"></i> Mostrar todo
-                                            </a>
-                                        </form>
-                                    </div>
+                            <div class="container mb-4 d-flex justify-content-center">
+                                <div class="p-3 border rounded bg-light d-inline-block shadow-sm">
+                                    <form id="filtrosForm" method="GET" action="{{ route('historial.index') }}"
+                                        class="d-flex flex-wrap gap-2 align-items-center">
+                                        <div style="width: 500px;">
+                                            <input type="text" id="searchInput"
+                                                class="form-control form-control-sm" placeholder="🔍 Buscar">
+                                        </div>
+                                        <select name="mostrar" onchange="this.form.submit()"
+                                            class="form-control form-control-sm w-auto">
+                                            <option value="10" {{ request('mostrar') == 10 ? 'selected' : '' }}>10
+                                            </option>
+                                            <option value="13" {{ request('mostrar') == 13 ? 'selected' : '' }}>13
+                                            </option>
+                                            <option value="25" {{ request('mostrar') == 25 ? 'selected' : '' }}>25
+                                            </option>
+                                            <option value="50" {{ request('mostrar') == 50 ? 'selected' : '' }}>50
+                                            </option>
+                                            <option value="todo"
+                                                {{ request('mostrar') == 'todo' ? 'selected' : '' }}>Todo</option>
+                                        </select>
+                                        <a href="{{ route('historial.index', ['mostrar' => 'todo']) }}"
+                                            class="btn btn-sm btn-outline-secondary d-flex align-items-center">
+                                            <i class="fas fa-list me-1"></i> Mostrar todo
+                                        </a>
+                                    </form>
+
 
                                 </div>
 
@@ -211,20 +203,60 @@
                                                 <td>
                                                     <button class="btn btn-info btn-sm" data-toggle="modal"
                                                         data-target="#verHistorialModal{{ $registro->id_historial }}">
-                                                        <i class="fas fa-eye"></i>
+                                                        <i class="fas fa-eye"></i> Ver
                                                     </button>
                                                     <button class="btn btn-warning btn-sm" data-toggle="modal"
                                                         data-target="#editarHistorialModal{{ $registro->id_historial }}">
-                                                        <i class="fas fa-edit"></i>
+                                                        <i class="fas fa-edit"></i> Editar
                                                     </button>
-                                                    <form
-                                                        action="{{ route('historial.destroy', $registro->id_historial) }}"
-                                                        method="POST" style="display:inline-block;"
-                                                        onsubmit="return confirm('¿Seguro que deseas eliminar este registro?');">
-                                                        @csrf @method('DELETE')
-                                                        <button type="submit" class="btn btn-danger btn-sm"><i
-                                                                class="fas fa-trash-alt"></i></button>
-                                                    </form>
+                                                    <button type="button" class="btn btn-danger btn-sm"
+                                                        data-toggle="modal"
+                                                        data-target="#eliminarModal{{ $registro->id_historial }}">
+                                                        <i class="fas fa-trash-alt"></i> Eliminar
+                                                    </button>
+                                                    <!-- Modal Eliminar Historial -->
+                                                    <div class="modal fade"
+                                                        id="eliminarModal{{ $registro->id_historial }}"
+                                                        tabindex="-1" role="dialog"
+                                                        aria-labelledby="eliminarModalLabel{{ $registro->id_historial }}"
+                                                        aria-hidden="true">
+                                                        <div class="modal-dialog" role="document">
+                                                            <div class="modal-content">
+                                                                <div class="modal-header1 modal-header-custom border-0">
+                                                                    <div class="w-100 text-center">
+                                                                        <h5 class="m-0 font-weight-bold"
+                                                                            id="eliminarModalLabel{{ $registro->id_historial }}">
+                                                                            🗑️ Eliminar Registro del Historial
+                                                                        </h5>
+                                                                    </div>
+                                                                    <button type="button" class="close"
+                                                                        data-dismiss="modal" aria-label="Cerrar">
+                                                                        <span aria-hidden="true">&times;</span>
+                                                                    </button>
+                                                                </div>
+                                                                <div class="modal-body">
+                                                                    ¿Seguro que deseas eliminar el registro del
+                                                                    historial
+                                                                    <strong>{{ $registro->nombre ?? 'este registro' }}</strong>?
+                                                                </div>
+                                                                <div class="modal-footer">
+                                                                    <button type="button" class="btn btn-secondary"
+                                                                        data-dismiss="modal">
+                                                                        Cancelar
+                                                                    </button>
+                                                                    <form
+                                                                        action="{{ route('historial.destroy', $registro->id_historial) }}"
+                                                                        method="POST">
+                                                                        @csrf
+                                                                        @method('DELETE')
+                                                                        <button type="submit" class="btn btn-danger">
+                                                                            Eliminar
+                                                                        </button>
+                                                                    </form>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         @empty
@@ -861,7 +893,7 @@
                             <div class="card-body">
                                 <div class="row">
                                     <div class="col-md-5">
-                                        <label class="font-weight-bold">Número de Control / Matrícula</label>
+                                        <label class="font-weight-bold">Matrícula</label>
                                         <div class="input-group">
                                             <div class="input-group-prepend"><span class="input-group-text"><i
                                                         class="fas fa-search"></i></span></div>
@@ -954,6 +986,7 @@
                                             @endforeach
                                         </select>
                                     </div>
+                                    
 
                                     <div class="col-md-6">
                                         <label class="font-weight-bold">Fecha de Inscripción</label>
@@ -1666,8 +1699,7 @@
                             idAlumno.value = data.id_alumno;
                             nombreAlumnoDisplay.textContent = data.nombre;
                             matriculaDisplay.textContent = matricula;
-                            carreraDisplay.textContent = data.carrera || 'N/A';
-                            grupoDisplay.textContent = data.grupo || 'N/A';
+                            carreraDisplay.textContent = data.carrera;
                             alumnoInfo.style.display = 'block';
                         } else {
                             idAlumno.value = '';
@@ -2188,6 +2220,21 @@
                 resetearVista();
                 btnGuardar.disabled = true;
             });
+        });
+    </script>
+     <script>
+        $(document).ready(function() {
+            // Espera un poco para asegurar que todos los modales existan
+            setTimeout(function() {
+                $('.modal').each(function() {
+                    // Inicializa el modal con las opciones deseadas
+                    $(this).modal({
+                        backdrop: 'static',
+                        keyboard: false,
+                        show: false // no mostrar al cargar
+                    });
+                });
+            }, 500);
         });
     </script>
 </body>

@@ -26,20 +26,51 @@
         </div>
     </div>
 
-    <!-- Logout Modal-->
-    <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <!-- Logout Modal -->
+    <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">¿Listo para salir?</h5>
-                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span>
+                <div class="modal-header bg-danger">
+
+                    <div class="w-100 text-center">
+                        <h5 class="m-0 font-weight-bold" id="logoutModalLabel">
+                            <i class="fas fa-sign-out-alt mr-2"></i>
+                            Cerrar Sesión
+                        </h5>
+                    </div>
+                    <button class="close text-white" type="button" data-dismiss="modal" aria-label="Close"
+                        style="position: absolute; right: 1rem; top: 1rem; opacity: 0.9;">
+                        <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body">Selecciona "Cerrar Sesión" si estás listo para finalizar tu sesión actual.</div>
+
+                <!-- Body -->
+                <div class="modal-body text-center">
+                    <div class="mb-3">
+                        <i class="fas fa-exclamation-circle text-warning" style="font-size: 4rem;"></i>
+                    </div>
+                    <h6 class="font-weight-bold mb-3">¿Desea cerrar su sesión?</h6>
+                    <p class="text-muted mb-0">
+                        Al cerrar sesión, será redirigido a la página de inicio de sesión.
+                    </p>
+                </div>
+
+                <!-- Footer -->
                 <div class="modal-footer">
-                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancelar</button>
-                    <a class="btn btn-primary" href="{{ route('login') }}">Cerrar Sesión</a>
+                    <button class="btn btn-secondary px-4" type="button" data-dismiss="modal">
+                        <i class="fas fa-times mr-2"></i>
+                        Cancelar
+                    </button>
+
+                    <!-- Formulario para cerrar sesión -->
+                    <form action="{{ route('logout') }}" method="POST" style="display: inline;">
+                        @csrf
+                        <button type="submit" class="btn btn-danger px-4">
+                            <i class="fas fa-sign-out-alt mr-2"></i>
+                            Cerrar Sesión
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>
@@ -102,8 +133,8 @@
                                         <div class="alert alert-info border-left-info" role="alert">
                                             <div class="text-center py-3">
                                                 <i class="fas fa-info-circle fa-3x mb-3 text-info"></i>
-                                                <h5 class="font-weight-bold">No tienes asignaciones registradas</h5>
-                                                <p class="mb-0">Comunícate con el coordinador para asignarte materias.</p>
+                                                <h5 class="font-weight-bold">Actualmente no tienes ninguna asignación</h5>
+                                                <p class="mb-0">Comunícate con el Personal Administrativo para asignarte materias.</p>
                                             </div>
                                         </div>
                                     @else
@@ -175,6 +206,7 @@
                         <input type="hidden" id="calificacionesJsonInput" name="calificaciones_json">
 
                         <!-- Filtros -->
+                        <div class="card mb-3">
                         <div class="row mb-4">
                             <div class="col-md-4">
                                 <label class="font-weight-bold text-gray-700 small">Período</label>
@@ -195,18 +227,26 @@
                                 </select>
                             </div>
                         </div>
+                        </div>
 
                         <!-- Contenedor de la matriz -->
                         <div id="contenedorMatriz" style="display: none;">
-                            <div class="alert alert-info border-left-info">
-                                <i class="fas fa-info-circle mr-2"></i>
-                                <span id="infoMateria" class="font-weight-bold">Cargando materia...</span>
-                                <span class="float-right badge badge-primary badge-pill" id="totalAlumnos">0 alumnos</span>
-                            </div>
+                            <div
+                                    class="card-header text-white d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong><i class="fas fa-table mr-2"></i>Matriz de Calificaciones</strong>
+                                        <span id="infoMateria" class="ml-3"></span>
+                                    </div>
+                                    <div>
+                                        <span class="badge badge-light">
+                                            Total alumnos: <strong id="totalAlumnos">0</strong>
+                                        </span>
+                                    </div>
+                                </div>
 
                             <div class="table-responsive">
-                                <table id="tablaCalificaciones" class="table table-bordered table-sm">
-                                    <thead>
+                                <table id="tablaCalificaciones" class="table table-bordered table-hover table-sm mb-0">
+                                    <thead style="position: sticky; top: 0; z-index: 100;" class="text-center">
                                         <tr></tr>
                                     </thead>
                                     <tbody id="bodyMatriz">
@@ -347,7 +387,7 @@
                     headersUnidades += `<th class="unidad-header">${unidad.nombre}</th>`;
                 });
                 headersUnidades += `<th class="bg-info text-white">📊 Promedio</th>`;
-                headersUnidades += `<th class="unidad-header bg-warning">🎓 Extraordinario Especial</th>`;
+                headersUnidades += `<th class="unidad-header bg-warning">🎓 Calificación Final</th>`;
 
                 $('#tablaCalificaciones thead tr').html(`
                     <th class="text-center">#</th>
@@ -368,7 +408,7 @@
                     Object.values(alumno.calificaciones).forEach(calif => {
                         if (calif.tipo_evaluacion === 'Extraordinario' && 
                             calif.calificacion !== null && 
-                            calif.calificacion < 6) {
+                            calif.calificacion < 7) {
                             reproboExtraordinario = true;
                         }
                     });
@@ -389,7 +429,7 @@
 
                         const calificacion = calificacionData.calificacion;
                         const yaCapturado = calificacion !== null;
-                        const esAprobatoria = calificacion >= 6;
+                        const esAprobatoria = calificacion >= 7;
                         const puedeCapturar = calificacionData.puede_capturar && !tieneCalifEspecial && !reproboExtraordinario;
                         const siguienteEval = calificacionData.siguiente_evaluacion;
 
@@ -419,7 +459,7 @@
                                             </span>
                                             ${historialCompleto.length > 1 ? `
                                             <small class="text-muted mb-2" style="font-size: 0.7rem;">
-                                                📋 ${historialCompleto.length} evaluaciones
+                                                
                                             </small>
                                             ` : ''}
                                             <hr style="width: 100%; margin: 0.5rem 0; border-top: 1px dashed #ddd;">
@@ -453,11 +493,11 @@
                                             </small>
                                             ` : ''}
                                             ${esAprobatoria ? `
-                                                <small class="text-success mt-1" style="font-size: 0.8rem;">✅ Aprobado</small>
+                                                <small class="text-success mt-1" style="font-size: 0.8rem;"></small>
                                                 ` : (tipoEvaluacion === 'Extraordinario' ? `
-                                                <small class="text-danger mt-1" style="font-size: 0.8rem;">❌ Reprobado</small>
+                                                <small class="text-danger mt-1" style="font-size: 0.8rem;"></small>
                                                 ` : `
-                                                <small class="text-muted mt-1" style="font-size: 0.8rem;">Sin Oportunidades</small>
+                                                <small class="text-muted mt-1" style="font-size: 0.8rem;"></small>
                                                 `)}
                                         </div>
                                     </td>`;
@@ -493,7 +533,7 @@
                     } else {
                         const promedioGeneral = alumno.promedio_general;
                         if (promedioGeneral !== null && !isNaN(promedioGeneral)) {
-                            const esAprobado = promedioGeneral >= 6;
+                            const esAprobado = promedioGeneral >= 7;
                             html += `
                                 <td class="text-center p-2 bg-light" style="vertical-align: middle;">
                                     <span class="badge" style="font-size: 1.2rem; padding: 0.6rem; background: ${esAprobado ? '#36b9cc' : '#858796'};">
@@ -512,7 +552,7 @@
                     const tipoEvalEspecial = tiposEvaluacion['extraordinario_especial'] || { icon: '🎓', color: '#6f42c1', label: 'Extraordinario Especial' };
                     
                     if (tieneCalifEspecial) {
-                        const esAprob = alumno.calificacion_especial >= 6;
+                        const esAprob = alumno.calificacion_especial >= 7;
                         html += `
                             <td class="text-center p-2" style="vertical-align: middle; background: #fff3cd; border-left: 3px solid #6f42c1;">
                                 <div class="d-flex flex-column align-items-center">
@@ -523,11 +563,11 @@
                                         ${tipoEvalEspecial.icon} ${tipoEvalEspecial.label}
                                     </small>
                                     ${esAprob ? `
-                                        <small class="text-success mt-1"><i class="fas fa-check-circle"></i> Aprobado</small>
+                                        <small class="text-success mt-1"><i class="fas fa-check-circle"></i> </small>
                                         ` : `
-                                        <small class="text-danger mt-1"><i class="fas fa-times-circle"></i> Reprobado</small>
+                                        <small class="text-danger mt-1"><i class="fas fa-times-circle"></i> </small>
                                         `}
-                                    <small class="text-muted mt-1" style="font-size: 0.7rem;">📚 Calificación general</small>
+                                    <small class="text-muted mt-1" style="font-size: 0.7rem;"></small>
                                 </div>
                             </td>`;
                     } else if (reproboExtraordinario) {
@@ -561,7 +601,7 @@
                         datosMatriz.unidades.forEach(unidad => {
                             const key = `${alumno.id_alumno}_${unidad.id_unidad}`;
                             const califData = alumno.calificaciones[key];
-                            if (califData && califData.calificacion !== null && califData.calificacion < 6 && califData.tipo_evaluacion === 'Extraordinario') {
+                            if (califData && califData.calificacion !== null && califData.calificacion < 7 && califData.tipo_evaluacion === 'Extraordinario') {
                                 hayExtraordinarioReprobado = true;
                             }
                         });
@@ -672,6 +712,21 @@
                 datosMatriz = { alumnos: [], unidades: [] };
                 $('#btnGuardarCalificaciones').prop('disabled', true).html('<i class="fas fa-save mr-1"></i> Guardar Calificaciones');
             });
+        });
+    </script>
+     <script>
+        $(document).ready(function() {
+            // Espera un poco para asegurar que todos los modales existan
+            setTimeout(function() {
+                $('.modal').each(function() {
+                    // Inicializa el modal con las opciones deseadas
+                    $(this).modal({
+                        backdrop: 'static',
+                        keyboard: false,
+                        show: false // no mostrar al cargar
+                    });
+                });
+            }, 500);
         });
     </script>
 </body>

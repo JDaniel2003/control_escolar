@@ -114,9 +114,7 @@ class HistorialController extends Controller
 
             $asignacionesFormateadas = $asignaciones->map(function ($asignacion) {
                 $docenteNombre = trim(
-                    ($asignacion->docente?->datosDocentes?->nombres ?? '') . ' ' .
-                        ($asignacion->docente?->datosDocentes?->primer_apellido ?? '') . ' ' .
-                        ($asignacion->docente?->datosDocentes?->segundo_apellido ?? '')
+                    ($asignacion->docente?->datosDocentes?->nombre_con_abreviatura ?? '')
                 ) ?: ($asignacion->docente?->username ?? 'Sin docente');
 
                 return [
@@ -365,7 +363,8 @@ class HistorialController extends Controller
                         ($alumno->datosPersonales->nombres ?? '') . ' ' .
                             ($alumno->datosPersonales->primer_apellido ?? '') . ' ' .
                             ($alumno->datosPersonales->segundo_apellido ?? '')
-                    )
+                    ),
+                    'carrera' => $alumno->datosAcademicos?->carrera?->nombre ?? 'No asignada' // 👈 campo agregado
                 ]);
             } else {
                 return response()->json([

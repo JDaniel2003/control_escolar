@@ -32,21 +32,51 @@
 
         </div>
     </div>
+    <!-- Logout Modal -->
     <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
         aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">¿Seguro de cerrar sesión?</h5>
-                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span>
+                <div class="modal-header bg-danger">
+
+                    <div class="w-100 text-center">
+                        <h5 class="m-0 font-weight-bold" id="logoutModalLabel">
+                            <i class="fas fa-sign-out-alt mr-2"></i>
+                            Cerrar Sesión
+                        </h5>
+                    </div>
+                    <button class="close text-white" type="button" data-dismiss="modal" aria-label="Close"
+                        style="position: absolute; right: 1rem; top: 1rem; opacity: 0.9;">
+                        <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body">Seleccione "si" a continuación si está listo para finalizar su sesión actual.
+
+                <!-- Body -->
+                <div class="modal-body text-center">
+                    <div class="mb-3">
+                        <i class="fas fa-exclamation-circle text-warning" style="font-size: 4rem;"></i>
+                    </div>
+                    <h6 class="font-weight-bold mb-3">¿Desea cerrar su sesión?</h6>
+                    <p class="text-muted mb-0">
+                        Al cerrar sesión, será redirigido a la página de inicio de sesión.
+                    </p>
                 </div>
+
+                <!-- Footer -->
                 <div class="modal-footer">
-                    <button class="btn btn-secondary" type="button" data-dismiss="modal">No</button>
-                    <a class="btn btn-primary" href="{{ route('login') }}">Si</a>
+                    <button class="btn btn-secondary px-4" type="button" data-dismiss="modal">
+                        <i class="fas fa-times mr-2"></i>
+                        Cancelar
+                    </button>
+
+                    <!-- Formulario para cerrar sesión -->
+                    <form action="{{ route('logout') }}" method="POST" style="display: inline;">
+                        @csrf
+                        <button type="submit" class="btn btn-danger px-4">
+                            <i class="fas fa-sign-out-alt mr-2"></i>
+                            Cerrar Sesión
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>
@@ -270,6 +300,17 @@
                                         style="border-width: 3px; border-radius: 25px;">
                                         <div class="card-body d-flex justify-content-between align-items-center py-4">
                                             <h5 class="card-title font-weight-bold mb-0">ASIGNACIONES DOCENTES</h5>
+                                            <i class="fas fa-clipboard-check fa-2x text-success"></i>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div onclick="window.location.href='{{ route('administracion-carreras.index') }}'"
+                                    class="col-md-6 col-lg-4 mb-4">
+                                    <div class="logout-link card border-success h-100"
+                                        style="border-width: 3px; border-radius: 25px;">
+                                        <div class="card-body d-flex justify-content-between align-items-center py-4">
+                                            <h5 class="card-title font-weight-bold mb-0">ADMINISTRACIÓN DE CARRERAS</h5>
                                             <i class="fas fa-clipboard-check fa-2x text-success"></i>
                                         </div>
                                     </div>
