@@ -464,92 +464,154 @@
 
                     // Renderizar unidades
                     datosMatriz.unidades.forEach((unidad, indexUnidad) => {
-                        const key = `${alumno.id_alumno}_${unidad.id_unidad}`;
-                        const calificacionData = alumno.calificaciones[key];
-                        const tieneCalifEspecial = alumno.calificacion_especial !== null && alumno
-                            .calificacion_especial !== undefined;
+    const key = `${alumno.id_alumno}_${unidad.id_unidad}`;
+    const calificacionData = alumno.calificaciones[key];
+    const tieneCalifEspecial = alumno.calificacion_especial !== null && 
+        alumno.calificacion_especial !== undefined;
 
-                        // Verificar si reprobó algún Extraordinario
-                        let reproboExtraordinario = false;
-                        Object.values(alumno.calificaciones).forEach(calif => {
-                            if (calif?.tipo_evaluacion === 'Extraordinario' &&
-                                calif.calificacion !== null &&
-                                calif.calificacion < 7) {
-                                reproboExtraordinario = true;
-                            }
-                        });
+    // Contar unidades con calificación y verificar condiciones
+    let unidadesConCalificacion = 0;
+    let tieneExtraordinario = false;
+    const totalUnidades = datosMatriz.unidades.length;
+    
+    Object.entries(alumno.calificaciones).forEach(([k, calif]) => {
+        if (calif?.calificacion !== null) {
+            unidadesConCalificacion++;
+        }
+        if (calif?.tipo_evaluacion === 'Extraordinario') {
+            tieneExtraordinario = true;
+        }
+    });
 
-                        // Verificar si unidades anteriores están completadas y aprobadas
-                        let puedeCapturarEstaUnidad = false;
-                        let mensajeError = '';
+    // Verificar la ÚLTIMA unidad y su estado
+    const ultimaUnidad = datosMatriz.unidades[totalUnidades - 1];
+    const keyUltimaUnidad = `${alumno.id_alumno}_${ultimaUnidad.id_unidad}`;
+    const califUltimaUnidad = alumno.calificaciones[keyUltimaUnidad];
+    
+    let puedeHabilitarExtraordinario = false;
+    
+    // Todas las unidades deben tener calificación
+    const todasLasUnidadesCompletas = unidadesConCalificacion >= totalUnidades;
+    
+    if (todasLasUnidadesCompletas && califUltimaUnidad) {
+        const tipoUltimaUnidad = califUltimaUnidad.tipo_evaluacion;
+        const califUltimaAprobada = califUltimaUnidad.calificacion >= 7;
+        
+        // Casos en los que se habilita el Extraordinario:
+        // 1. La última unidad está en Extraordinario (ya llegó ahí)
+        if (tipoUltimaUnidad === 'Extraordinario') {
+            puedeHabilitarExtraordinario = true;
+        }
+        // 2. La última unidad está en Recuperación Y YA TIENE CALIFICACIÓN (aprobada o reprobada)
+        else if (tipoUltimaUnidad === 'Recuperación' && califUltimaUnidad.calificacion !== null) {
+            puedeHabilitarExtraordinario = true;
+        }
+        // 3. La última unidad está en Ordinario/Regularización Y está aprobada
+        else if ((tipoUltimaUnidad === 'Ordinario' || tipoUltimaUnidad === 'Regularización') && califUltimaAprobada) {
+            puedeHabilitarExtraordinario = true;
+        }
+    }
 
-                        if (indexUnidad === 0) {
-                            // Primera unidad: siempre habilitada si no está bloqueada
-                            puedeCapturarEstaUnidad = !tieneCalifEspecial && !reproboExtraordinario;
-                        } else {
-                            // Unidades posteriores: verificar unidad anterior
-                            const unidadAnterior = datosMatriz.unidades[indexUnidad - 1];
-                            const keyAnterior = `${alumno.id_alumno}_${unidadAnterior.id_unidad}`;
-                            const califAnterior = alumno.calificaciones[keyAnterior];
+    // Verificar si reprobó algún Extraordinario
+    let reproboExtraordinario = false;
+    Object.values(alumno.calificaciones).forEach(calif => {
+        if (calif?.tipo_evaluacion === 'Extraordinario' &&
+            calif.calificacion !== null &&
+            calif.calificacion < 7) {
+            reproboExtraordinario = true;
+        }
+    });
 
-                            if (!califAnterior || califAnterior.calificacion === null) {
-                                mensajeError = 'Captura la unidad anterior primero';
-                            } else if (califAnterior.calificacion < 7) {
-                                mensajeError = 'La unidad anterior debe estar aprobada';
-                            } else {
-                                puedeCapturarEstaUnidad = !tieneCalifEspecial && !
-                                    reproboExtraordinario;
-                            }
-                        }
+    // Verificar si unidades anteriores están completadas y aprobadas
+    let puedeCapturarEstaUnidad = false;
+    let mensajeError = '';
 
-                        // Forzar bloqueo si hay calificación especial o extraordinario reprobado
-                        if (tieneCalifEspecial || reproboExtraordinario) {
-                            puedeCapturarEstaUnidad = false;
-                            mensajeError = reproboExtraordinario ? '🔒 Bloqueado' :
-                                '🔒 Calificación especial asignada';
-                        }
+    if (indexUnidad === 0) {
+        // Primera unidad: siempre habilitada si no está bloqueada
+        puedeCapturarEstaUnidad = !tieneCalifEspecial && !reproboExtraordinario;
+    } else {
+        // Unidades posteriores: verificar unidad anterior
+        const unidadAnterior = datosMatriz.unidades[indexUnidad - 1];
+        const keyAnterior = `${alumno.id_alumno}_${unidadAnterior.id_unidad}`;
+        const califAnterior = alumno.calificaciones[keyAnterior];
 
-                        if (!calificacionData) {
-                            if (mensajeError) {
-                                html +=
-                                    `<td class="text-center p-2 text-muted" title="${mensajeError}">${mensajeError}</td>`;
-                            } else {
-                                html += `<td class="text-center p-2">-</td>`;
-                            }
-                            return;
-                        }
+        if (!califAnterior || califAnterior.calificacion === null) {
+            mensajeError = 'Captura la unidad anterior primero';
+        } else if (califAnterior.calificacion < 0) {
+            mensajeError = 'La unidad anterior debe estar aprobada';
+        } else {
+            puedeCapturarEstaUnidad = !tieneCalifEspecial && !reproboExtraordinario;
+        }
+    }
 
-                        const calificacion = calificacionData.calificacion;
-                        const yaCapturado = calificacion !== null;
-                        const esAprobatoria = calificacion >= 7;
-                        const siguienteEval = calificacionData.siguiente_evaluacion;
-                        const puedeCapturar = puedeCapturarEstaUnidad && calificacionData
-                            .puede_capturar;
+    // LÓGICA ESPECIAL: Si la unidad actual ES un Extraordinario
+    const esExtraordinarioActual = calificacionData?.tipo_evaluacion === 'Extraordinario';
+    
+    if (esExtraordinarioActual && !puedeHabilitarExtraordinario) {
+        // Bloquear el Extraordinario hasta que se cumplan las condiciones
+        puedeCapturarEstaUnidad = false;
+        if (!todasLasUnidadesCompletas) {
+            mensajeError = '🔒 Completa todas las unidades primero';
+        } else if (califUltimaUnidad?.tipo_evaluacion === 'Recuperación' && califUltimaUnidad.calificacion < 7) {
+            mensajeError = '🔒 Aprueba la Recuperación de la última unidad';
+        } else {
+            mensajeError = '🔒 Completa todos los requisitos';
+        }
+    }
 
-                        if (yaCapturado) {
-                            const tipoEvaluacion = calificacionData.tipo_evaluacion || 'Ordinario';
-                            const nombreEvaluacion = calificacionData.nombre_evaluacion ||
-                                'Evaluación';
-                            const historialCompleto = calificacionData.historial_completo || [];
-                            const tipoKey = tipoEvaluacion.toLowerCase().replace('ó', 'o').replace(
-                                'ú', 'u');
-                            const tipoEval = tiposEvaluacion[tipoKey] || tiposEvaluacion[
-                                'ordinario'];
+    // Forzar bloqueo si hay calificación especial o extraordinario reprobado
+    if (tieneCalifEspecial || reproboExtraordinario) {
+        puedeCapturarEstaUnidad = false;
+        mensajeError = reproboExtraordinario ? '🔒 Bloqueado' : '🔒 Calificación especial asignada';
+    }
 
-                            let tooltipHistorial = '';
-                            if (historialCompleto.length > 1) {
-                                tooltipHistorial = 'Historial:\n' +
-                                    historialCompleto.map((h, i) =>
-                                        `${i + 1}. ${h.tipo}: ${h.calificacion}`).join('\n');
-                            }
+    if (!calificacionData) {
+        if (mensajeError) {
+            html += `<td class="text-center p-2 text-muted" title="${mensajeError}">${mensajeError}</td>`;
+        } else {
+            html += `<td class="text-center p-2">-</td>`;
+        }
+        return;
+    }
 
-                            if (puedeCapturar && siguienteEval) {
-                                const siguienteTipoKey = siguienteEval.tipo.toLowerCase().replace(
-                                    'ó', 'o').replace('ú', 'u');
-                                const siguienteTipoInfo = tiposEvaluacion[siguienteTipoKey] ||
-                                    tiposEvaluacion['ordinario'];
+    const calificacion = calificacionData.calificacion;
+    const yaCapturado = calificacion !== null;
+    const esAprobatoria = calificacion >= 7;
+    const siguienteEval = calificacionData.siguiente_evaluacion;
+    
+    // Aplicar la lógica de bloqueo del Extraordinario
+    let puedeCapturar = puedeCapturarEstaUnidad && calificacionData.puede_capturar;
+    
+    // Si la siguiente evaluación es Extraordinario, verificar si puede habilitarse
+    if (siguienteEval?.tipo === 'Extraordinario' && !puedeHabilitarExtraordinario) {
+        puedeCapturar = false;
+        if (!todasLasUnidadesCompletas) {
+            mensajeError = 'Extraordinario Pendiante';
+        } else if (califUltimaUnidad?.tipo_evaluacion === 'Recuperación' && califUltimaUnidad.calificacion < 7) {
+            mensajeError = '🔒 Aprueba la Recuperación de la última unidad';
+        } else {
+            mensajeError = '🔒 Completa todos los requisitos';
+        }
+    }
 
-                                html += `
+    if (yaCapturado) {
+        const tipoEvaluacion = calificacionData.tipo_evaluacion || 'Ordinario';
+        const nombreEvaluacion = calificacionData.nombre_evaluacion || 'Evaluación';
+        const historialCompleto = calificacionData.historial_completo || [];
+        const tipoKey = tipoEvaluacion.toLowerCase().replace('ó', 'o').replace('ú', 'u');
+        const tipoEval = tiposEvaluacion[tipoKey] || tiposEvaluacion['ordinario'];
+
+        let tooltipHistorial = '';
+        if (historialCompleto.length > 1) {
+            tooltipHistorial = 'Historial:\n' +
+                historialCompleto.map((h, i) => `${i + 1}. ${h.tipo}: ${h.calificacion}`).join('\n');
+        }
+
+        if (puedeCapturar && siguienteEval) {
+            const siguienteTipoKey = siguienteEval.tipo.toLowerCase().replace('ó', 'o').replace('ú', 'u');
+            const siguienteTipoInfo = tiposEvaluacion[siguienteTipoKey] || tiposEvaluacion['ordinario'];
+
+            html += `
             <td class="text-center p-2" style="vertical-align: middle;">
                 <div class="d-flex flex-column align-items-center">
                     <span class="badge mb-2" 
@@ -558,10 +620,10 @@
                         Actual: ${calificacion} ${tipoEval.icon}
                     </span>
                     ${historialCompleto.length > 1 ? `
-                            <small class="text-muted mb-2" style="font-size: 0.7rem;">
-                                
-                            </small>
-                            ` : ''}
+                    <small class="text-muted mb-2" style="font-size: 0.7rem;">
+                        
+                    </small>
+                    ` : ''}
                     <hr style="width: 100%; margin: 0.5rem 0; border-top: 1px dashed #ddd;">
                     <input type="number" 
                            class="form-control calificacion-input-matriz text-center mt-2" 
@@ -579,8 +641,8 @@
                     </small>
                 </div>
             </td>`;
-                            } else {
-                                html += `
+        } else {
+            html += `
             <td class="text-center p-2" style="vertical-align: middle;">
                 <div class="d-flex flex-column align-items-center">
                     <span class="badge mb-1" 
@@ -591,26 +653,28 @@
                     <small style="color: ${tipoEval.color};">
                         ${tipoEval.icon} ${tipoEval.label}
                     </small>
-                    ${esAprobatoria ? `
-                            <small class="text-success mt-1" style="font-size: 0.8rem;">
-                                
-                            </small>
-                            ` : `
-                            <small class="text-muted mt-1" style="font-size: 0.8rem;">
-                                
-                            </small>
-                            `}
+                    ${mensajeError ? `
+                    <small class="text-warning mt-1" style="font-size: 0.75rem;">
+                        ${mensajeError}
+                    </small>
+                    ` : esAprobatoria ? `
+                    <small class="text-success mt-1" style="font-size: 0.8rem;">
+                        
+                    </small>
+                    ` : `
+                    <small class="text-muted mt-1" style="font-size: 0.8rem;">
+                        
+                    </small>
+                    `}
                 </div>
             </td>`;
-                            }
-                        } else {
-                            if (puedeCapturar && siguienteEval) {
-                                const tipoKey = siguienteEval.tipo.toLowerCase().replace('ó', 'o')
-                                    .replace('ú', 'u');
-                                const tipoInfo = tiposEvaluacion[tipoKey] || tiposEvaluacion[
-                                    'ordinario'];
+        }
+    } else {
+        if (puedeCapturar && siguienteEval) {
+            const tipoKey = siguienteEval.tipo.toLowerCase().replace('ó', 'o').replace('ú', 'u');
+            const tipoInfo = tiposEvaluacion[tipoKey] || tiposEvaluacion['ordinario'];
 
-                                html += `
+            html += `
             <td class="text-center p-2" style="vertical-align: middle;">
                 <input type="number" 
                        class="form-control calificacion-input-matriz text-center" 
@@ -627,12 +691,11 @@
                     ${tipoInfo.icon} ${siguienteEval.tipo}
                 </small>
             </td>`;
-                            } else {
-                                html +=
-                                    `<td class="text-center p-2 text-muted" title="${mensajeError || 'Completado'}">${mensajeError || 'Completado'}</td>`;
-                            }
-                        }
-                    });
+        } else {
+            html += `<td class="text-center p-2 text-muted" title="${mensajeError || 'Completado'}">${mensajeError || 'Completado'}</td>`;
+        }
+    }
+});
 
                     // Promedio
                     const tieneCalifEspecial = alumno.calificacion_especial !== null && alumno

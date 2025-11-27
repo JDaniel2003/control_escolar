@@ -117,7 +117,7 @@
                 </li>
                 <li class="nav-item"><a class="nav-link text-white px-3 mr-1"
                         href="{{ route('asignaciones.index') }}">Asignaciones Docentes</a></li>
-                <li class="nav-item"><a class="nav-link navbar-active-item px-3"
+                <li class="nav-item"><a class="nav-link text-white px-3 mr-1"
                         href="{{ route('historial.index') }}">Historial</a></li>
                 <li class="nav-item"><a class="nav-link text-white px-3 mr-1"
                         href="{{ route('calificaciones.index') }}">Calificaciones</a></li>

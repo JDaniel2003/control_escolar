@@ -26,4 +26,36 @@ class DatosAcademicos extends Model
 public function planEstudio() {
     return $this->belongsTo(PlanEstudio::class, 'id_plan_estudio');
 }
+public static function generarMatricula($idCarrera)
+{
+    $carrera = \App\Models\Carrera::find($idCarrera);
+
+    if (!$carrera || empty($carrera->codigo)) {
+        throw new \Exception("La carrera no tiene código asignado");
+    }
+
+    $prefijoUP = "UP";     // fijo
+    $codigoCarrera = strtoupper($carrera->codigo); // ejemplo: TF
+    $año = date('y');      // últimos dos dígitos, ejemplo 25
+    $letra = "S";          // fijo
+
+    // Último registro de esa carrera
+    $ultimo = self::where('id_carrera', $idCarrera)
+        ->whereNotNull('matricula')
+        ->orderBy('id_datos_academicos', 'desc')
+        ->first();
+
+    // Calcular consecutivo
+    $consecutivo = 1;
+    if ($ultimo && preg_match('/(\d{3})$/', $ultimo->matricula, $match)) {
+        $consecutivo = intval($match[1]) + 1;
+    }
+
+    // Formato final
+    $numero = str_pad($consecutivo, 3, '0', STR_PAD_LEFT);
+
+    return "{$prefijoUP}{$codigoCarrera}{$año}{$letra}{$numero}";
+}
+
+
 }

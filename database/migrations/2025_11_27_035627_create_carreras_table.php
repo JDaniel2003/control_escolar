@@ -15,6 +15,7 @@ return new class extends Migration
             $table->integer('id_carrera', true);
             $table->string('nombre', 100);
             $table->string('duracion', 10)->nullable();
+            $table->string('codigo', 5)->nullable();
             $table->json('datos')->nullable();
         });
     }

@@ -194,6 +194,16 @@ Route::middleware(['auth', 'role.level:4'])->group(function () {
     Route::resource('unidades', UnidadController::class);
 
     // Alumnos
+    Route::get('/generar-matricula/{idCarrera}', function ($idCarrera) {
+    if (!is_numeric($idCarrera)) {
+        return response()->json(['error' => 'Carrera inválida'], 400);
+    }
+
+    $matricula = \App\Models\DatosAcademicos::generarMatricula($idCarrera);
+
+    return response()->json(['matricula' => $matricula]);
+});
+
     Route::get('/alumnos', [AlumnoController::class, 'index'])->name('alumnos');
     Route::get('/alumnos/create', [AlumnoController::class, 'create'])->name('alumnos.create');
     Route::post('/alumnos', [AlumnoController::class, 'store'])->name('alumnos.store');
@@ -240,6 +250,8 @@ Route::middleware(['auth', 'role.level:4'])->group(function () {
 
     // Calificaciones (rutas adicionales para admin)
     Route::get('/calificaciones', [CalificacionController::class, 'index'])->name('calificaciones.index');
+    
+
     Route::middleware(['auth'])->prefix('calificaciones')->name('calificaciones.')->group(function () {
         Route::get('/materias', [CalificacionController::class, 'obtenerMaterias']);
         Route::get('/unidades/{idAsignacion}', [CalificacionController::class, 'obtenerUnidades']);
@@ -249,7 +261,7 @@ Route::middleware(['auth', 'role.level:4'])->group(function () {
         Route::post('/store-masivo', [CalificacionController::class, 'storeMasivoMatriz'])->name('store-masivo');
     });
     Route::post('/calificaciones/guardar-masivo', [CalificacionController::class, 'storeMasivo'])->name('calificaciones.storeMasivo');
-
+Route::resource('calificaciones', CalificacionController::class);
     // Docentes
     Route::resource('docentes', DocentesController::class);
     Route::get('/docentes', [DocentesController::class, 'index'])->name('docente.index');

@@ -317,246 +317,339 @@
     <!-- === MODALES FUERA DE LA TABLA === -->
     @foreach ($historial as $registro)
         <!-- Modal Ver -->
-        <div class="modal fade" id="verHistorialModal{{ $registro->id_historial }}" tabindex="-1" role="dialog">
-            <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-                <div class="modal-content">
-                    <div class="modal-header bg-info text-white">
-                        <h5 class="modal-title w-100 text-center font-weight-bold">
-                            <i class="fas fa-eye mr-2"></i>Detalles de Reinscripción
+        <div class="modal fade" id="verHistorialModal{{ $registro->id_historial }}" tabindex="-1" role="dialog"
+    aria-labelledby="verHistorialModalLabel{{ $registro->id_historial }}" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header modal-header-custom border-0">
+                <div class="w-100">
+                    <div class="text-center">
+                        <h5 class="m-0 font-weight-bold" id="verHistorialModalLabel{{ $registro->id_historial }}">
+                            Detalles de Reinscripción
                         </h5>
-                        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body p-3">
-                        {{-- Información del Alumno --}}
-                        <div class="row mb-3">
-                            <div class="col-md-8">
-                                <h6 class="font-weight-bold text-primary mb-1">
-                                    @if ($registro->alumno)
-                                        {{ $registro->alumno->datosPersonales->nombres ?? 'N/A' }}
-                                        {{ $registro->alumno->datosPersonales->primer_apellido ?? '' }}
-                                        {{ $registro->alumno->datosPersonales->segundo_apellido ?? '' }}
-                                    @else
-                                        <span class="text-muted">Alumno no disponible</span>
-                                    @endif
-                                </h6>
-                                <p class="text-muted mb-0 small">
-                                    <i class="fas fa-id-card mr-1"></i>Matrícula:
-                                    <strong>{{ $registro->alumno->datosAcademicos->matricula ?? 'N/A' }}</strong>
-                                    <span class="mx-2">|</span>
-                                    <i class="fas fa-graduation-cap mr-1"></i>Carrera:
-                                    <strong>{{ $registro->alumno->datosAcademicos->carrera->nombre ?? 'N/A' }}</strong>
-                                </p>
-                            </div>
-                            <div class="col-md-4 text-right">
-                                <span class="badge badge-lg badge-info">
-                                    <i class="fas fa-calendar-check mr-1"></i>
-                                    {{ $registro->fecha_inscripcion ? \Carbon\Carbon::parse($registro->fecha_inscripcion)->format('d/m/Y') : 'N/A' }}
-                                </span>
-                            </div>
-                        </div>
-
-                        {{-- Datos de Período y Grupo --}}
-                        <div class="card border mb-3">
-                            <div class="card-header bg-light py-2">
-                                <h6 class="mb-0 font-weight-bold">
-                                    <i class="fas fa-info-circle mr-2 text-info"></i>Información del Período
-                                </h6>
-                            </div>
-                            <div class="card-body p-3">
-                                <div class="row">
-                                    @php
-                                        // Obtener grupo y período desde la primera asignación
-                                        $primeraAsignacion = $registro->asignacion1;
-                                        $grupo = $primeraAsignacion->grupo ?? null;
-                                        $periodo = $primeraAsignacion->periodoEscolar ?? null;
-                                    @endphp
-                                    <div class="col-md-6 mb-2">
-                                        <strong><i class="fas fa-users mr-1 text-muted"></i>Grupo:</strong>
-                                        <span class="ml-2">{{ $grupo->nombre ?? 'N/A' }}</span>
-                                    </div>
-                                    <div class="col-md-6 mb-2">
-                                        <strong><i class="fas fa-calendar-alt mr-1 text-muted"></i>Período
-                                            Escolar:</strong>
-                                        <span class="ml-2">{{ $periodo->nombre ?? 'N/A' }}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {{-- Status --}}
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <div class="card border h-100">
-                                    <div class="card-header bg-success text-white py-2">
-                                        <h6 class="mb-0 font-weight-bold">
-                                            <i class="fas fa-play-circle mr-1"></i>Status Inicio
-                                        </h6>
-                                    </div>
-                                    <div class="card-body p-3 text-center">
-                                        <h5 class="mb-0 text-success">
-                                            {{ $registro->statusInicio->nombre ?? 'Sin definir' }}
-                                        </h5>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="card border h-100">
-                                    <div class="card-header bg-warning text-white py-2">
-                                        <h6 class="mb-0 font-weight-bold">
-                                            <i class="fas fa-flag-checkered mr-1"></i>Status Terminación
-                                        </h6>
-                                    </div>
-                                    <div class="card-body p-3 text-center">
-                                        <h5 class="mb-0 text-warning">
-                                            {{ $registro->statusTerminacion->nombre ?? 'Pendiente' }}
-                                        </h5>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {{-- Materias/Asignaciones --}}
-                        @php
-                            $asignaciones = [];
-                            for ($i = 1; $i <= 10; $i++) {
-                                $asignacion = $registro->{"asignacion$i"};
-                                if ($asignacion && $asignacion->materia) {
-                                    $asignaciones[] = $asignacion;
-                                }
-                            }
-                        @endphp
-
-                        @if (count($asignaciones) > 0)
-                            <div class="card border">
-                                <div class="card-header bg-primary text-white py-2">
-                                    <h6 class="mb-0 font-weight-bold">
-                                        <i class="fas fa-book-open mr-2"></i>
-                                        Materias Cursadas ({{ count($asignaciones) }})
-                                    </h6>
-                                </div>
-                                <div class="card-body p-0">
-                                    <div class="table-responsive">
-                                        <table class="table table-sm table-hover mb-0">
-                                            <thead class="thead-light">
-                                                <tr>
-                                                    <th width="50" class="text-center">#</th>
-                                                    <th>Materia</th>
-                                                    <th>Docente</th>
-                                                    <th class="text-center">Horas</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                @foreach ($asignaciones as $index => $asignacion)
-                                                    <tr>
-                                                        <td class="text-center">
-                                                            <span
-                                                                class="badge badge-secondary">{{ $index + 1 }}</span>
-                                                        </td>
-                                                        <td>
-                                                            <strong>{{ $asignacion->materia->nombre }}</strong>
-                                                            @if ($asignacion->materia->clave)
-                                                                <br>
-                                                                <small class="text-muted">
-                                                                    Clave: {{ $asignacion->materia->clave }}
-                                                                </small>
-                                                            @endif
-                                                        </td>
-                                                        <td>
-                                                            @if ($asignacion->docente)
-                                                                {{ $asignacion->docente->nombre_completo }}
-                                                            @else
-                                                                <span class="text-muted">Sin asignar</span>
-                                                            @endif
-                                                        </td>
-                                                        <td class="text-center">
-                                                            <span class="badge badge-info">
-                                                                {{ $asignacion->materia->horas ?? 0 }}h
-                                                            </span>
-                                                        </td>
-                                                    </tr>
-                                                @endforeach
-                                            </tbody>
-                                            <tfoot class="bg-light">
-                                                <tr>
-                                                    <td colspan="3" class="text-right"><strong>Total de
-                                                            horas:</strong></td>
-                                                    <td class="text-center">
-                                                        <strong class="text-primary">
-                                                            {{ collect($asignaciones)->sum(fn($a) => $a->materia->horas ?? 0) }}h
-                                                        </strong>
-                                                    </td>
-                                                </tr>
-                                            </tfoot>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-                        @else
-                            <div class="alert alert-warning text-center">
-                                <i class="fas fa-exclamation-triangle mr-2"></i>
-                                No hay materias asignadas en este registro
-                            </div>
-                        @endif
-                    </div>
-                    <div class="modal-footer bg-light border-top">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                            <i class="fas fa-times mr-1"></i>Cerrar
-                        </button>
-                        <button type="button" class="btn btn-primary" data-dismiss="modal" data-toggle="modal"
-                            data-target="#editarHistorialModal{{ $registro->id_historial }}">
-                            <i class="fas fa-edit mr-1"></i>Editar
-                        </button>
+                        <p class="m-0 mt-2 mb-0" style="font-size: 0.9rem; opacity: 0.95;">
+                            Información completa del historial académico
+                        </p>
                     </div>
                 </div>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Cerrar"
+                    style="position: absolute; right: 1.5rem; top: 1.5rem; font-size: 1.8rem; opacity: 0.9;">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
+
+            <div class="modal-body modal-body-custom p-4">
+                <div class="form-container p-4 bg-white rounded shadow-sm border">
+
+                    {{-- Información del Alumno --}}
+                    <div class="card shadow mb-4 border-0">
+                        <div class="card-header py-3 text-white card-header-custom">
+                            <h6 class="m-0 font-weight-bold text-danger">
+                                <i class="fas fa-user-graduate mr-2"></i>
+                                Información del Alumno
+                            </h6>
+                        </div>
+                        <div class="card-body1 p-4">
+                            <div class="row mb-3">
+                                <div class="col-md-8">
+                                    <h6 class="font-weight-bold text-primary mb-1">
+                                        @if ($registro->alumno)
+                                            {{ $registro->alumno->datosPersonales->nombres ?? 'N/A' }}
+                                            {{ $registro->alumno->datosPersonales->primer_apellido ?? '' }}
+                                            {{ $registro->alumno->datosPersonales->segundo_apellido ?? '' }}
+                                        @else
+                                            <span class="text-muted">Alumno no disponible</span>
+                                        @endif
+                                    </h6>
+                                    <p class="text-muted mb-0 small">
+                                        <i class="fas fa-id-card mr-1"></i>Matrícula:
+                                        <strong>{{ $registro->alumno->datosAcademicos->matricula ?? 'N/A' }}</strong>
+                                        <span class="mx-2">|</span>
+                                        <i class="fas fa-graduation-cap mr-1"></i>Carrera:
+                                        <strong>{{ $registro->alumno->datosAcademicos->carrera->nombre ?? 'N/A' }}</strong>
+                                    </p>
+                                </div>
+                                <div class="col-md-4 text-right">
+                                    <span class="badge badge-lg badge-info">
+                                        <i class="fas fa-calendar-check mr-1"></i>
+                                        {{ $registro->fecha_inscripcion ? \Carbon\Carbon::parse($registro->fecha_inscripcion)->format('d/m/Y') : 'N/A' }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Datos de Período y Grupo --}}
+                    <div class="card shadow mb-4 border-0">
+                        <div class="card-header py-3 text-white card-header-custom">
+                            <h6 class="m-0 font-weight-bold text-danger">
+                                <i class="fas fa-info-circle mr-2"></i>
+                                Información del Período
+                            </h6>
+                        </div>
+                        <div class="card-body1 p-4">
+                            <div class="row">
+                                @php
+                                    $primeraAsignacion = $registro->asignacion1;
+                                    $grupo = $primeraAsignacion->grupo ?? null;
+                                    $periodo = $primeraAsignacion->periodoEscolar ?? null;
+                                    $num = $primeraAsignacion->materia->numeroPeriodo->numero ?? null;
+                                    $tipo = $primeraAsignacion->materia->numeroPeriodo->tipoPeriodo->nombre ?? null;
+                                @endphp
+                                
+                                <!-- NÚMERO DE PERÍODO -->
+                                <div class="col-md-4 mb-3">
+                                    <label class="text-muted text-uppercase d-block">Número de Período:</label>
+                                    <div class="text-muted d-block font-weight-bold">
+                                        @if ($num)
+                                            {{ $num }}°
+                                            @if ($tipo)
+                                                {{ $tipo }}
+                                            @endif
+                                        @else
+                                            N/A
+                                        @endif
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-4 mb-3">
+                                    <label class="text-muted text-uppercase d-block">Grupo:</label>
+                                    <div class="text-muted d-block font-weight-bold">
+                                        {{ $grupo->nombre ?? 'N/A' }}
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="text-muted text-uppercase d-block">Período Escolar:</label>
+                                    <div class="text-muted d-block font-weight-bold">
+                                        {{ $periodo->nombre ?? 'N/A' }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Status --}}
+                    <div class="card shadow mb-4 border-0">
+                        <div class="card-header py-3 text-white card-header-custom">
+                            <h6 class="m-0 font-weight-bold text-danger">
+                                <i class="fas fa-check-circle mr-2"></i>
+                                Estado de la Inscripción
+                            </h6>
+                        </div>
+                        <div class="card-body1 p-4">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="text-muted text-uppercase d-block">
+                                        <i class="fas fa-play-circle mr-1"></i>Status Inicio:
+                                    </label>
+                                    <div class="text-success d-block font-weight-bold">
+                                        {{ $registro->statusInicio->nombre ?? 'Sin definir' }}
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="text-muted text-uppercase d-block">
+                                        <i class="fas fa-flag-checkered mr-1"></i>Status Terminación:
+                                    </label>
+                                    <div class="text-warning d-block font-weight-bold">
+                                        {{ $registro->statusTerminacion->nombre ?? 'Pendiente' }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Materias/Asignaciones --}}
+                    @php
+                        $asignaciones = [];
+                        for ($i = 1; $i <= 10; $i++) {
+                            $asignacion = $registro->{"asignacion$i"};
+                            if ($asignacion && $asignacion->materia) {
+                                $asignaciones[] = $asignacion;
+                            }
+                        }
+                    @endphp
+
+                    @if (count($asignaciones) > 0)
+                        <div class="card shadow border-0">
+                            <div class="card-header py-3 text-white card-header-custom">
+                                <h6 class="m-0 font-weight-bold text-danger">
+                                    <i class="fas fa-book-open mr-2"></i>
+                                    Materias Cursadas ({{ count($asignaciones) }})
+                                </h6>
+                            </div>
+                            <div class="card-body1 p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-hover mb-0">
+                                        <thead class="thead-light">
+                                            <tr>
+                                                <th width="50" class="text-center">#</th>
+                                                <th>Materia</th>
+                                                <th>Docente</th>
+                                                <th class="text-center">Horas</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach ($asignaciones as $index => $asignacion)
+                                                <tr>
+                                                    <td class="text-center">
+                                                        <span class="badge badge-secondary">{{ $index + 1 }}</span>
+                                                    </td>
+                                                    <td>
+                                                        <strong>{{ $asignacion->materia->nombre }}</strong>
+                                                        @if ($asignacion->materia->clave)
+                                                            <br>
+                                                            <small class="text-muted">
+                                                                Clave: {{ $asignacion->materia->clave }}
+                                                            </small>
+                                                        @endif
+                                                    </td>
+                                                    <td>
+                                                        @if ($asignacion->docente)
+                                                            {{ $asignacion->docente->nombre_completo }}
+                                                        @else
+                                                            <span class="text-muted">Sin asignar</span>
+                                                        @endif
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <span class="badge badge-info">
+                                                            {{ $asignacion->materia->horas ?? 0 }}h
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                        <tfoot class="bg-light">
+                                            <tr>
+                                                <td colspan="3" class="text-right"><strong>Total de horas:</strong></td>
+                                                <td class="text-center">
+                                                    <strong class="text-primary">
+                                                        {{ collect($asignaciones)->sum(fn($a) => $a->materia->horas ?? 0) }}h
+                                                    </strong>
+                                                </td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    @else
+                        <div class="alert alert-warning text-center">
+                            <i class="fas fa-exclamation-triangle mr-2"></i>
+                            No hay materias asignadas en este registro
+                        </div>
+                    @endif
+
+                </div>
+            </div>
+
+            <div class="modal-footer modal-footer-custom border-top">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                    <i class="fas fa-times mr-2"></i>Cerrar
+                </button>
+                <button type="button" class="btn btn-primary" data-dismiss="modal" data-toggle="modal"
+                    data-target="#editarHistorialModal{{ $registro->id_historial }}">
+                    <i class="fas fa-edit mr-2"></i>Editar
+                </button>
+            </div>
+
         </div>
+    </div>
+</div>
+
+
 
         <!-- Modal Editar -->
-        <div class="modal fade" id="editarHistorialModal{{ $registro->id_historial }}" tabindex="-1"
-            role="dialog" aria-labelledby="editarHistorialModalLabel{{ $registro->id_historial }}"
-            aria-hidden="true">
-            <div class="modal-dialog modal-lg modal-dialog-scrollable" role="document">
-                <div class="modal-content">
-                    <div class="modal-header bg-primary text-white">
-                        <h5 class="text-center w-100 mb-0">Editar Reinscripción</h5>
-                        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
+         <!-- Modal Editar -->
+    <div class="modal fade" id="editarHistorialModal{{ $registro->id_historial }}" tabindex="-1" role="dialog"
+        aria-labelledby="editarHistorialModalLabel{{ $registro->id_historial }}" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header modal-header-custom border-0">
+                    <div class="w-100">
+                        <div class="text-center">
+                            <h5 class="m-0 font-weight-bold" id="editarHistorialModalLabel{{ $registro->id_historial }}">
+                                Editar Reinscripción
+                            </h5>
+                            <p class="m-0 mt-2 mb-0" style="font-size: 0.9rem; opacity: 0.95;">
+                                Modifica la información del historial académico
+                            </p>
+                        </div>
                     </div>
-                    <div class="modal-body">
-                        <form action="{{ route('historial.update', $registro->id_historial) }}" method="POST">
-                            @csrf
-                            @method('PUT')
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Cerrar"
+                        style="position: absolute; right: 1.5rem; top: 1.5rem; font-size: 1.8rem; opacity: 0.9;">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
 
-                            <div class="card mb-3">
-                                <div class="card-header bg-light">
-                                    <b>Datos de Reinscripción</b>
+                <div class="modal-body modal-body-custom p-4">
+                    <form action="{{ route('historial.update', $registro->id_historial) }}" method="POST" id="formEditarHistorial{{ $registro->id_historial }}">
+                        @csrf
+                        @method('PUT')
+
+                        <div class="form-container p-4 bg-white rounded shadow-sm border">
+
+                            {{-- Información del Alumno --}}
+                            <div class="card shadow mb-4 border-0">
+                                <div class="card-header py-3 text-white card-header-custom">
+                                    <h6 class="m-0 font-weight-bold text-danger">
+                                        <i class="fas fa-user-graduate mr-2"></i>
+                                        Información del Alumno
+                                    </h6>
                                 </div>
-                                <div class="card-body">
+                                <div class="card-body1 p-4">
                                     <div class="row">
-                                        <!-- Alumno (solo lectura) -->
-                                        <!-- Alumno (solo lectura + campo oculto) -->
                                         <div class="col-12 mb-3">
-                                            <label><strong>Alumno:</strong></label>
+                                            <label class="text-muted text-uppercase d-block mb-2">
+                                                <strong>Alumno:</strong>
+                                            </label>
                                             <input type="text" class="form-control" readonly
-                                                value="{{ optional($registro->alumno->datosPersonales)->nombres ?? 'N/A' }} {{ optional($registro->alumno->datosPersonales)->primer_apellido ?? '' }} ({{ $registro->alumno->matricula ?? 'N/A' }})">
-                                            <input type="hidden" name="id_alumno"
-                                                value="{{ $registro->id_alumno }}">
+                                                value="{{ optional($registro->alumno->datosPersonales)->nombres ?? 'N/A' }} {{ optional($registro->alumno->datosPersonales)->primer_apellido ?? '' }} {{ optional($registro->alumno->datosPersonales)->segundo_apellido ?? '' }} ({{ $registro->alumno->datosAcademicos->matricula ?? 'N/A' }})">
+                                            <input type="hidden" name="id_alumno" value="{{ $registro->id_alumno }}">
                                         </div>
+                                    </div>
+                                </div>
+                            </div>
 
+                            {{-- Datos de Reinscripción --}}
+                            <div class="card shadow mb-4 border-0">
+                                <div class="card-header py-3 text-white card-header-custom">
+                                    <h6 class="m-0 font-weight-bold text-danger">
+                                        <i class="fas fa-calendar-alt mr-2"></i>
+                                        Datos de Reinscripción
+                                    </h6>
+                                </div>
+                                <div class="card-body1 p-4">
+                                    <div class="row">
                                         <!-- Fecha de Inscripción -->
-                                        <div class="col-md-6 mb-3">
-                                            <label>Fecha de Inscripción <span class="text-danger">*</span></label>
+                                        <div class="col-md-12 mb-3">
+                                            <label class="text-muted text-uppercase d-block mb-2">
+                                                <i class="fas fa-calendar-check mr-1"></i>
+                                                Fecha de Inscripción <span class="text-danger">*</span>
+                                            </label>
                                             <input type="date" name="fecha_inscripcion"
                                                 value="{{ $registro->fecha_inscripcion ? \Carbon\Carbon::parse($registro->fecha_inscripcion)->format('Y-m-d') : '' }}"
                                                 class="form-control" required>
                                         </div>
+                                    </div>
+                                </div>
+                            </div>
 
+                            {{-- Estado de la Inscripción --}}
+                            <div class="card shadow mb-4 border-0">
+                                <div class="card-header py-3 text-white card-header-custom">
+                                    <h6 class="m-0 font-weight-bold text-danger">
+                                        <i class="fas fa-check-circle mr-2"></i>
+                                        Estado de la Inscripción
+                                    </h6>
+                                </div>
+                                <div class="card-body1 p-4">
+                                    <div class="row">
                                         <!-- Status Inicio -->
                                         <div class="col-md-6 mb-3">
-                                            <label>Status Inicio <span class="text-danger">*</span></label>
+                                            <label class="text-muted text-uppercase d-block mb-2">
+                                                <i class="fas fa-play-circle mr-1"></i>
+                                                Status Inicio <span class="text-danger">*</span>
+                                            </label>
                                             <select name="id_status_inicio" class="form-control" required>
                                                 <option value="">Selecciona...</option>
                                                 @foreach ($statusAcademicos as $status)
@@ -570,7 +663,10 @@
 
                                         <!-- Status Terminación -->
                                         <div class="col-md-6 mb-3">
-                                            <label>Status Terminación</label>
+                                            <label class="text-muted text-uppercase d-block mb-2">
+                                                <i class="fas fa-flag-checkered mr-1"></i>
+                                                Status Terminación
+                                            </label>
                                             <select name="id_status_terminacion" class="form-control">
                                                 <option value="">Selecciona...</option>
                                                 @foreach ($historialStatus as $status)
@@ -580,46 +676,91 @@
                                                     </option>
                                                 @endforeach
                                             </select>
-                                            <small class="text-muted">Opcional</small>
-                                        </div>
-
-                                        <!-- Materias/Asignaciones -->
-                                        <div class="col-12 mb-3">
-                                            <label>Materias Asignadas <span class="text-danger">*</span></label>
-                                            <select name="materias[]"
-                                                class="form-control select-materias materias-editar-{{ $registro->id_historial }}"
-                                                multiple required>
-                                                <!-- Se llenarán las materias actuales del historial -->
-                                                @foreach ($registro->asignaciones as $asignacion)
-                                                    <option value="{{ $asignacion->id_asignacion }}" selected>
-                                                        {{ $asignacion->materia->nombre ?? 'N/A' }} -
-                                                        {{ optional($asignacion->docente->datosPersonales)->nombres ?? 'N/A' }}
-                                                        {{ optional($asignacion->docente->datosPersonales)->primer_apellido ?? '' }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
                                             <small class="text-muted">
-                                                <i class="fas fa-info-circle"></i> Máximo 10 materias.
-                                                Mantén presionado Ctrl (Cmd en Mac) para seleccionar múltiples
+                                                <i class="fas fa-info-circle"></i> Opcional
                                             </small>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="text-right mt-4">
-                                <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                                    <i class="fas fa-times"></i> Cancelar
-                                </button>
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-save"></i> Guardar Cambios
-                                </button>
+                            {{-- Materias Asignadas --}}
+                            <div class="card shadow border-0">
+                                <div class="card-header py-3 text-white card-header-custom">
+                                    <h6 class="m-0 font-weight-bold text-danger">
+                                        <i class="fas fa-book-open mr-2"></i>
+                                        Materias Asignadas
+                                    </h6>
+                                </div>
+                                <div class="card-body1 p-4">
+                                    <div class="row">
+                                        <div class="col-12 mb-3">
+                                            <label class="text-muted text-uppercase d-block mb-2">
+                                                <i class="fas fa-list mr-1"></i>
+                                                Selecciona las materias <span class="text-danger">*</span>
+                                            </label>
+                                            
+                                            {{-- Contenedor con scroll para los checkboxes --}}
+                                            <div class="border rounded p-3 bg-light" style="max-height: 300px; overflow-y: auto;">
+                                                @php
+                                                    // Obtener IDs de asignaciones actuales
+                                                    $asignacionesActuales = $registro->asignaciones->pluck('id_asignacion')->toArray();
+                                                @endphp
+                                                
+                                                @foreach ($registro->asignaciones as $asignacion)
+                                                    <div class="custom-control custom-checkbox mb-2">
+                                                        <input type="checkbox" 
+                                                            class="custom-control-input" 
+                                                            name="materias[]" 
+                                                            value="{{ $asignacion->id_asignacion }}"
+                                                            id="materia_{{ $registro->id_historial }}_{{ $asignacion->id_asignacion }}"
+                                                            {{ in_array($asignacion->id_asignacion, $asignacionesActuales) ? 'checked' : '' }}>
+                                                        <label class="custom-control-label" for="materia_{{ $registro->id_historial }}_{{ $asignacion->id_asignacion }}">
+                                                            <strong>{{ $asignacion->materia->nombre ?? 'N/A' }}</strong>
+                                                            <br>
+                                                            <small class="text-muted">
+                                                                <i class="fas fa-user mr-1"></i>
+                                                                {{ optional($asignacion->docente->datosPersonales)->nombres ?? 'N/A' }}
+                                                                {{ optional($asignacion->docente->datosPersonales)->primer_apellido ?? '' }}
+                                                                @if($asignacion->materia->clave)
+                                                                    | <i class="fas fa-key mr-1"></i>Clave: {{ $asignacion->materia->clave }}
+                                                                @endif
+                                                                @if($asignacion->materia->horas)
+                                                                    | <i class="fas fa-clock mr-1"></i>{{ $asignacion->materia->horas }}h
+                                                                @endif
+                                                            </small>
+                                                        </label>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                            
+                                            <small class="text-muted d-block mt-2">
+                                                <i class="fas fa-info-circle"></i> Máximo 10 materias. 
+                                                <span class="font-weight-bold" id="contador_{{ $registro->id_historial }}">
+                                                    {{ count($asignacionesActuales) }}
+                                                </span> seleccionada(s)
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                        </form>
-                    </div>
+
+                        </div>
+                    </form>
                 </div>
+
+                <div class="modal-footer modal-footer-custom border-top">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                        <i class="fas fa-times mr-2"></i>Cancelar
+                    </button>
+                    <button type="submit" form="formEditarHistorial{{ $registro->id_historial }}" class="btn btn-success">
+                        <i class="fas fa-save mr-2"></i>Guardar Cambios
+                    </button>
+                </div>
+
             </div>
         </div>
+    </div>
     @endforeach
     <!-- -------------------------------------------------------------- -->
 

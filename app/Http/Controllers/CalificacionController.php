@@ -21,11 +21,19 @@ class CalificacionController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Calificacion::with(['alumno', 'unidad', 'evaluacion', 'asignacionDocente']);
+        $query = Calificacion::with(['alumno', 'unidad', 'evaluacion', 'asignacionDocente'])
+        ->orderByDesc('id_calificacion');
 
-        // Filtros
-        if ($request->has('mostrar') && $request->mostrar != 'todo') {
-            $query->limit($request->mostrar);
+        // 🔹 Obtener valor de mostrar (SIEMPRE verificar si existe)
+        $mostrar = $request->has('mostrar') ? $request->get('mostrar') : '10';
+
+        // 🔹 Aplicar paginación o mostrar todo
+        if ($mostrar === "todo") {
+            $calificaciones = $query->get(); // sin paginar
+        } else {
+            // Asegurar que sea un número válido
+            $perPage = is_numeric($mostrar) ? (int)$mostrar : 10;
+            $calificaciones = $query->paginate($perPage)->appends($request->all());
         }
 
         $calificaciones = $query->get();
@@ -1107,4 +1115,74 @@ if (!$usuario || !$usuario->docente) {
             return redirect()->back()->with('error', 'Error al guardar: ' . $e->getMessage());
         }
     }
+
+    public function update(Request $request, $id)
+{
+    try {
+
+        // Validación básica
+        $request->validate([
+            'calificacion' => 'nullable|numeric|min:0|max:100',
+            'calificacion_especial' => 'nullable|numeric|min:0|max:100',
+            'id_unidad' => 'nullable|integer',
+            'id_evaluacion' => 'nullable|integer',
+        ]);
+
+        // Buscar la calificación
+        $calificacion = Calificacion::findOrFail($id);
+
+        date_default_timezone_set('America/Mexico_City');
+        $fechaActual = date('Y-m-d H:i:s');
+
+        // Construcción de los datos a actualizar
+        $data = [
+            'calificacion' => $request->calificacion,
+            'calificacion_especial' => $request->calificacion_especial,
+            'id_unidad' => $request->id_unidad,
+            'id_evaluacion' => $request->id_evaluacion,
+            'fecha' => $fechaActual
+        ];
+
+        // Evitar asignaciones a campos que no deben cambiar
+        // Si la calificación es especial, ponemos calificacion normal en null
+        if (!is_null($request->calificacion_especial)) {
+            $data['calificacion'] = null;
+        }
+
+        // Si la calificación es normal, ponemos cal_especial en null
+        if (!is_null($request->calificacion)) {
+            $data['calificacion_especial'] = null;
+        }
+
+        // Actualizar
+        $calificacion->update($data);
+
+        return redirect()->route('calificaciones.index')
+            ->with('success', 'Calificación actualizada correctamente.');
+
+    } catch (\Exception $e) {
+
+        Log::error('Error al actualizar calificación', [
+            'id_calificacion' => $id,
+            'error' => $e->getMessage()
+        ]);
+
+        return redirect()->back()
+            ->withErrors(['error' => 'Error al actualizar la calificación: ' . $e->getMessage()]);
+    }
+}
+
+    public function destroy($id)
+{
+    // Busca la calificación
+    $calificacion = Calificacion::findOrFail($id);
+
+    // Eliminar
+    $calificacion->delete();
+
+    // Redirigir con mensaje
+    return redirect()->route('calificaciones.index')
+        ->with('success', 'Calificación eliminada correctamente.');
+}
+
 }

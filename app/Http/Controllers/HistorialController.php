@@ -75,6 +75,7 @@ class HistorialController extends Controller
         $numerosPeriodo = \App\Models\NumeroPeriodo::with('tipoPeriodo')->get();
         $statusAcademicos = StatusAcademico::all();
         $historialStatus = HistorialStatus::all();
+         $numeroPeriodos = NumeroPeriodo::with('tipoPeriodo')->get();
 
         return view('historial.historial', compact(
             'alumnos',
@@ -85,7 +86,8 @@ class HistorialController extends Controller
             'gruposcerrado',
             'numerosPeriodo',
             'statusAcademicos',
-            'historialStatus'
+            'historialStatus',
+            'numeroPeriodos'
         ));
     }
 

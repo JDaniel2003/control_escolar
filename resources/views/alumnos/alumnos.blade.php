@@ -116,7 +116,7 @@
                 </li>
                 <li class="nav-item"><a class="nav-link text-white px-3 mr-1"
                         href="{{ route('asignaciones.index') }}">Asignaciones Docentes</a></li>
-                <li class="nav-item"><a class="nav-link navbar-active-item px-3"
+                <li class="nav-item"><a class="nav-link text-white px-3 mr-1"
                         href="{{ route('historial.index') }}">Historial</a></li>
                 <li class="nav-item"><a class="nav-link text-white px-3 mr-1"
                         href="{{ route('calificaciones.index') }}">Calificaciones</a></li>
@@ -1054,13 +1054,16 @@
                                                     style="{{ in_array($alumno->estatus, [1, 2, 3, 4, 5, 6, 8, 9]) ? 'display:block;' : 'display:none;' }}">
                                                     <div class="row mt-3">
                                                         <div class="col-md-4 mb-2">
-                                                            <label
-                                                                class="form-label-custom small mb-1">Matrícula</label>
-                                                            <input type="text" name="matricula"
-                                                                class="form-control form-control-sm"
-                                                                value="{{ old('matricula', $alumno->datosAcademicos?->matricula) }}"
-                                                                placeholder="Número de matrícula">
-                                                        </div>
+    <label class="form-label-custom small mb-1">Matrícula</label>
+    <input 
+        type="text" 
+        name="matricula" 
+        class="form-control form-control-sm"
+        value="{{ $alumno->datosAcademicos?->matricula }}"
+        readonly
+    >
+</div>
+
                                                         <div class="col-md-4 mb-2">
                                                             <label class="form-label-custom small mb-1">Carrera</label>
                                                             <select name="id_carrera"
@@ -2137,20 +2140,20 @@
                                                     </div>
                                                     <div class="col-md-4 mb-2">
                                                         <label class="form-label-custom small mb-1">Matrícula</label>
-                                                        <input type="text" name="matricula"
-                                                            class="form-control form-control-sm @error('matricula') @if (old('is_create_alumno')) is-invalid @endif @enderror"
-                                                            value="{{ old('matricula') }}"
-                                                            placeholder="Número de matrícula">
-                                                        @error('matricula')
-                                                            @if (old('is_create_alumno'))
-                                                                <div class="invalid-feedback d-block">
-                                                                    {{ $message }}</div>
-                                                            @endif
-                                                        @enderror
+                                                        <input 
+    type="text" 
+    id="matricula" 
+    name="matricula" 
+    class="form-control form-control-sm"
+    value="" 
+    readonly
+>
+
+
                                                     </div>
                                                     <div class="col-md-5 mb-2">
                                                         <label class="form-label-custom small mb-1">Carrera</label>
-                                                        <select name="id_carrera"
+                                                        <select name="id_carrera" id="id_carrera"
                                                             class="form-control form-control-sm @error('id_carrera') @if (old('is_create_alumno')) is-invalid @endif @enderror">
                                                             <option value="">-- Selecciona --</option>
                                                             @foreach ($carreras as $carrera)
@@ -2228,6 +2231,8 @@
                                 </button>
                             </div>
                         </form>
+                        
+
                     </div>
                 </div>
             </div>
@@ -2337,6 +2342,36 @@
 
         });
     </script>
+    <script>
+document.addEventListener("DOMContentLoaded", () => {
+    
+    const selectCarrera = document.getElementById('id_carrera');
+    const inputMatricula = document.getElementById('matricula');
+
+    // 🔥 Siempre limpiar al cargar el formulario
+    inputMatricula.value = "";
+
+    // Evento cuando se cambia la carrera
+    selectCarrera.addEventListener('change', function() {
+
+        let carrera = this.value;
+
+        if (carrera === "" || carrera === null) {
+            inputMatricula.value = "";
+            return;
+        }
+
+        fetch(`/generar-matricula/${carrera}`)
+            .then(res => res.json())
+            .then(data => {
+                inputMatricula.value = data.matricula;
+            })
+            .catch(err => console.log(err));
+    });
+
+});
+</script>
+
 </body>
 
 </html>
